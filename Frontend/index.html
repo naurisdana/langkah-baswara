@@ -1,65 +1,591 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Langkah Baswara - Web-GIS Wisata Bali</title>
-    
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
-    <style>
-        #map {
-            height: 80vh;
-            width: 100%;
-            border-radius: 8px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Langkah Baswara — Jelajahi Destinasi Pulau Dewata</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --navy: #111827;
+      --navy-soft: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --page: #f6f7f9;
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: Inter, system-ui, -apple-system, sans-serif;
+      background: var(--page);
+      color: var(--navy);
+    }
+
+    .navbar-lb {
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      padding: .85rem 0;
+    }
+    .brand-mark {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: .85rem;
+    }
+    .nav-pills-lb .nav-link {
+      color: var(--navy-soft);
+      border-radius: 999px;
+      padding: .45rem 1rem;
+      font-weight: 500;
+    }
+    .nav-pills-lb .nav-link.active {
+      background: var(--navy);
+      color: #fff;
+    }
+    .btn-navy {
+      background: var(--navy);
+      color: #fff;
+      border-radius: 999px;
+      border: none;
+      font-weight: 600;
+    }
+    .btn-navy:hover { background: var(--navy-soft); color: #fff; }
+    .btn-ghost {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--navy);
+      font-weight: 500;
+    }
+    .user-chip {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      color: var(--navy);
+    }
+
+    .page-wrap { padding: 1.5rem 0 2.5rem; }
+    .badge-map {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: .3rem .75rem;
+      font-size: .8rem;
+      font-weight: 500;
+      color: var(--navy-soft);
+    }
+    h1.page-title {
+      font-size: clamp(1.7rem, 3vw, 2.25rem);
+      font-weight: 800;
+      letter-spacing: -.03em;
+      margin: .7rem 0 .4rem;
+    }
+    .dot-live {
+      width: 8px; height: 8px;
+      background: #22c55e;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: .4rem;
+    }
+
+    .filter-card, .map-shell, .catalog-card, .banner-route, .footer-lb {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+    .filter-card { padding: 1rem 1.1rem; }
+    .search-wrap { position: relative; }
+    .search-wrap .bi-search {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #9ca3af;
+    }
+    .search-wrap .bi-x-lg {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: #9ca3af; cursor: pointer;
+    }
+    .search-wrap .form-control {
+      padding-left: 2.3rem;
+      padding-right: 2.2rem;
+      border-radius: 12px;
+      border-color: var(--line);
+      height: 46px;
+    }
+    .form-select.filter-select {
+      border-radius: 12px;
+      height: 46px;
+      border-color: var(--line);
+    }
+    .chips-row {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      overflow-x: auto;
+      padding-bottom: .15rem;
+      scrollbar-width: thin;
+    }
+    .chip {
+      white-space: nowrap;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 999px;
+      padding: .35rem .8rem;
+      font-size: .85rem;
+      color: var(--navy-soft);
+      text-decoration: none;
+    }
+    .chip.active {
+      background: var(--navy);
+      color: #fff;
+      border-color: var(--navy);
+    }
+
+    .map-shell { position: relative; overflow: hidden; }
+    #map {
+      min-height: 520px;
+      height: 58vh;
+      width: 100%;
+      border-radius: var(--radius);
+    }
+    .map-mode {
+      position: absolute;
+      top: 14px; right: 14px;
+      z-index: 1000;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px;
+      display: flex;
+      gap: 2px;
+      box-shadow: 0 8px 24px rgba(17,24,39,.08);
+    }
+    .map-mode button {
+      border: 0;
+      background: transparent;
+      border-radius: 999px;
+      padding: .35rem .85rem;
+      font-size: .82rem;
+      font-weight: 600;
+      color: var(--navy-soft);
+    }
+    .map-mode button.active {
+      background: var(--navy);
+      color: #fff;
+    }
+    .layer-widget {
+      position: absolute;
+      left: 14px; bottom: 18px;
+      z-index: 1000;
+      width: min(280px, calc(100% - 28px));
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: .85rem 1rem;
+      box-shadow: 0 10px 28px rgba(17,24,39,.1);
+    }
+    .layer-widget .badge-aktif {
+      background: #ecfdf5;
+      color: #047857;
+      font-size: .68rem;
+      font-weight: 700;
+      border-radius: 999px;
+      padding: .15rem .45rem;
+    }
+    .leaflet-popup-content-wrapper {
+      border-radius: 14px;
+      padding: 0;
+      overflow: hidden;
+    }
+    .popup-card { min-width: 210px; }
+    .popup-card h6 { font-weight: 700; margin: .15rem 0 .2rem; }
+    .popup-card .loc { font-size: .75rem; color: var(--muted); }
+
+    .dest-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      height: 100%;
+    }
+    .dest-thumb {
+      height: 110px;
+      background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+      border-radius: 14px 14px 0 0;
+      position: relative;
+    }
+    .pin-btn {
+      position: absolute;
+      top: 10px; right: 10px;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .carousel-dots { display: flex; justify-content: center; gap: .4rem; }
+    .carousel-dots span {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #d1d5db;
+    }
+    .carousel-dots span.active { background: var(--navy); }
+
+    .banner-route {
+      background: #f3f4f6;
+      padding: 1rem 1.15rem;
+    }
+    footer.site {
+      background: #fff;
+      border-top: 1px solid var(--line);
+      padding: 2.5rem 0 1rem;
+      margin-top: 1.5rem;
+    }
+    footer .muted { color: var(--muted); font-size: .9rem; }
+    footer a { color: var(--navy-soft); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
 </head>
 <body>
-    <!-- Header/Navbar -->
-    <nav class="navbar navbar-dark bg-dark">
-        <div class="container-fluid">
-            <span class="navbar-brand mb-0 h1">🌴 Langkah Baswara - Web-GIS Bali</span>
+  <nav class="navbar navbar-expand-lg navbar-lb">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2 mb-0" href="#">
+        <span class="brand-mark">B</span>
+        <strong>Logo</strong>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMain">
+        <ul class="navbar-nav nav-pills-lb mx-auto my-2 my-lg-0 gap-1">
+          <li class="nav-item"><a class="nav-link" href="#">Beranda</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Tentang</a></li>
+          <li class="nav-item"><a class="nav-link active" href="#">Jelajahi</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Profil</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-navy px-4 py-2">Masuk</button>
+          <span class="user-chip"><i class="bi bi-person"></i></span>
         </div>
-    </nav>
-
-    <!-- Main Container -->
-    <div class="container-fluid mt-3">
-        <div class="row">
-            <!-- Sidebar (Filter & Controls) -->
-            <div class="col-md-3 mb-3">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">Filter Wisata</h5>
-                        <p class="card-text text-muted small">Fitur filter akan hadir di Sprint 2 & 3.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Map Area -->
-            <div class="col-md-9">
-                <div id="map" class="shadow-sm"></div>
-            </div>
-        </div>
+      </div>
     </div>
+  </nav>
 
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
-    <!-- Inisialisasi Peta Bali -->
-    <script>
-        // Set koordinat tengah ke Bali (Lat: -8.4095, Lng: 115.1889)
-        const map = L.map('map').setView([-8.4095, 115.1889], 10);
+  <main class="page-wrap">
+    <div class="container">
+      <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+        <div>
+          <span class="badge-map">📍 Peta Interaktif Wisata Bali</span>
+          <h1 class="page-title">Jelajahi Destinasi Pulau Dewata</h1>
+          <p class="text-secondary mb-0" style="max-width: 640px;">
+            Eksplorasi koordinat pura budaya, tebing pantai eksotis, terasering alam, hingga ruang edukasi di seluruh kabupaten Bali.
+          </p>
+        </div>
+        <p class="small text-secondary mb-0">
+          <span class="dot-live"></span>Area AKTIF: Seluruh Bali (9 Kabupaten) • 147 Titik Destinasi
+        </p>
+      </div>
 
-        // Tile Layer (Base Map OpenStreetMap)
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap'
+      <div class="filter-card mb-3">
+        <div class="row g-2 align-items-center">
+          <div class="col-lg-6">
+            <div class="search-wrap">
+              <i class="bi bi-search"></i>
+              <input type="text" class="form-control" id="searchInput"
+                     placeholder="Cari pura, pantai, air terjun, museum, atau aktivitas...">
+              <i class="bi bi-x-lg" id="clearSearch" title="Hapus"></i>
+            </div>
+          </div>
+          <div class="col-lg-3">
+            <select class="form-select filter-select" id="kabupatenFilter">
+              <option selected>🏢 Semua Kabupaten / Kota</option>
+              <option>Badung</option>
+              <option>Bangli</option>
+              <option>Buleleng</option>
+              <option>Denpasar</option>
+              <option>Gianyar</option>
+              <option>Jembrana</option>
+              <option>Karangasem</option>
+              <option>Klungkung</option>
+              <option>Tabanan</option>
+            </select>
+          </div>
+          <div class="col-lg-3 d-flex gap-2">
+            <button class="btn btn-ghost flex-fill" type="button" id="btnLocate">🎯 Gunakan Lokasi Saya</button>
+            <button class="btn btn-navy px-3" type="button">Terapkan ➔</button>
+          </div>
+        </div>
+        <div class="chips-row mt-3">
+          <span class="small text-secondary me-1">🔍 Filter:</span>
+          <a href="#" class="chip active">Semua Kategori (742)</a>
+          <a href="#" class="chip">Budaya (138)</a>
+          <a href="#" class="chip">Alami (106)</a>
+          <a href="#" class="chip">Pantai (29)</a>
+          <a href="#" class="chip">Religi (10)</a>
+          <a href="#" class="chip">Kuliner (24)</a>
+          <a href="#" class="chip">Edukasi (9)</a>
+          <a href="#" class="chip">Air Terjun (18)</a>
+          <a href="#" class="chip">Museum (12)</a>
+        </div>
+      </div>
+
+      <div class="map-shell mb-4">
+        <div id="map"></div>
+        <div class="map-mode">
+          <button type="button" class="active" data-basemap="street">Jalan</button>
+          <button type="button" data-basemap="satellite">Satelit</button>
+          <button type="button" data-basemap="dark">Gelap</button>
+        </div>
+        <div class="layer-widget">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <strong class="small"><i class="bi bi-gear"></i> Kontrol Layer Peta</strong>
+            <span class="badge-aktif">AKTIF</span>
+          </div>
+          <div class="form-check small mb-1">
+            <input class="form-check-input" type="checkbox" id="lyrCat" checked>
+            <label class="form-check-label" for="lyrCat">Layer Filter Kategori</label>
+          </div>
+          <div class="form-check small mb-1">
+            <input class="form-check-input" type="checkbox" id="lyrBound">
+            <label class="form-check-label" for="lyrBound">Batas Kabupaten / Wilayah</label>
+          </div>
+          <div class="form-check small">
+            <input class="form-check-input" type="checkbox" id="lyrGps">
+            <label class="form-check-label" for="lyrGps">Lokasi Pengguna (GPS)</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="catalog-card p-3 p-md-4 mb-3">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-2 mb-3">
+          <div>
+            <div class="small fw-semibold text-secondary">📷 KATALOG LOKASI PILIHAN</div>
+            <h2 class="h5 fw-bold mb-1">Galeri Destinasi Unggulan di Sekitar Peta</h2>
+            <p class="small text-secondary mb-0">Daftar koordinat wisata favorit berdasarkan posisi viewport peta saat ini...</p>
+          </div>
+          <div class="small text-secondary d-flex align-items-center gap-2">
+            Menampilkan 1 – 4 dari 16
+            <button class="btn btn-sm btn-ghost py-0 px-2">‹</button>
+            <button class="btn btn-sm btn-ghost py-0 px-2">›</button>
+          </div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-3">
+            <article class="dest-card">
+              <div class="dest-thumb"><button class="pin-btn" type="button"><i class="bi bi-bookmark"></i></button></div>
+              <div class="p-3">
+                <div class="small text-secondary">Tabanan</div>
+                <div class="d-flex justify-content-between"><strong>Tanah Lot</strong><span>⭐ 4.7</span></div>
+                <p class="small text-secondary mt-2 mb-3">Pura di atas batu karang dengan sunset ikonik di pesisir Tabanan.</p>
+                <button class="btn btn-ghost w-100 btn-sm">Buka di Peta ↗</button>
+              </div>
+            </article>
+          </div>
+          <div class="col-md-3">
+            <article class="dest-card">
+              <div class="dest-thumb"><button class="pin-btn" type="button"><i class="bi bi-bookmark"></i></button></div>
+              <div class="p-3">
+                <div class="small text-secondary">Badung</div>
+                <div class="d-flex justify-content-between"><strong>Pura Uluwatu</strong><span>⭐ 4.8</span></div>
+                <p class="small text-secondary mt-2 mb-3">Pura luhur di tebing karang selatan dengan pemandangan Samudra Hindia.</p>
+                <button class="btn btn-ghost w-100 btn-sm">Buka di Peta ↗</button>
+              </div>
+            </article>
+          </div>
+          <div class="col-md-3">
+            <article class="dest-card">
+              <div class="dest-thumb"><button class="pin-btn" type="button"><i class="bi bi-bookmark"></i></button></div>
+              <div class="p-3">
+                <div class="small text-secondary">Gianyar</div>
+                <div class="d-flex justify-content-between"><strong>Terasering Tegalalang</strong><span>⭐ 4.5</span></div>
+                <p class="small text-secondary mt-2 mb-3">Lanskap sawah berundak klasik Ubud dengan jalur foto dan jalan setapak.</p>
+                <button class="btn btn-ghost w-100 btn-sm">Buka di Peta ↗</button>
+              </div>
+            </article>
+          </div>
+          <div class="col-md-3">
+            <article class="dest-card">
+              <div class="dest-thumb"><button class="pin-btn" type="button"><i class="bi bi-bookmark"></i></button></div>
+              <div class="p-3">
+                <div class="small text-secondary">Denpasar</div>
+                <div class="d-flex justify-content-between"><strong>Pantai Sanur</strong><span>⭐ 4.5</span></div>
+                <p class="small text-secondary mt-2 mb-3">Pantai timur yang tenang, cocok untuk sunrise, sepeda, dan keluarga.</p>
+                <button class="btn btn-ghost w-100 btn-sm">Buka di Peta ↗</button>
+              </div>
+            </article>
+          </div>
+        </div>
+        <div class="carousel-dots mt-3">
+          <span class="active"></span><span></span><span></span><span></span>
+        </div>
+      </div>
+
+      <div class="banner-route d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+        <p class="mb-0 small">
+          ⚠️ <strong>Ingin Menyesuaikan Rute Perjalanan?</strong>
+          Pilih beberapa titik destinasi di atas untuk langsung merintis rute perkiraan durasi dan rute otomatis.
+        </p>
+        <div class="d-flex gap-2 flex-shrink-0">
+          <button class="btn btn-ghost">Reset Filter</button>
+          <button class="btn btn-navy px-3">Rencanakan Rute</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site">
+    <div class="container">
+      <div class="row g-4 pb-4">
+        <div class="col-md-4">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <span class="brand-mark">B</span><strong>Logo</strong>
+          </div>
+          <p class="muted mb-0">Platform eksplorasi destinasi wisata Bali terpadu dengan panduan budaya, keindahan alam, dan peta interaktif untuk merencanakan perjalanan Anda.</p>
+        </div>
+        <div class="col-md-2">
+          <h6 class="fw-bold">Eksplorasi</h6>
+          <ul class="list-unstyled muted">
+            <li><a href="#">Peta Wisata</a></li>
+            <li><a href="#">Kategori</a></li>
+            <li><a href="#">Kabupaten</a></li>
+            <li><a href="#">Rute Perjalanan</a></li>
+          </ul>
+        </div>
+        <div class="col-md-3">
+          <h6 class="fw-bold">Informasi</h6>
+          <ul class="list-unstyled muted">
+            <li><a href="#">Tentang Platform</a></li>
+            <li><a href="#">Budaya & Etika</a></li>
+            <li><a href="#">Kebijakan Privasi</a></li>
+            <li><a href="#">Syarat Layanan</a></li>
+          </ul>
+        </div>
+        <div class="col-md-3">
+          <h6 class="fw-bold">Kontak & Bantuan</h6>
+          <ul class="list-unstyled muted">
+            <li><a href="#">Pusat Bantuan</a></li>
+            <li><a href="#">Lapor Destinasi</a></li>
+            <li><a href="#">hello@langkahbaswara.id</a></li>
+            <li><a href="#">Instagram</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-top pt-3 pb-2 small text-secondary">
+        © 2024 Bali Destination Platform. Seluruh hak cipta dilindungi undang-undang.
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const BALI = [-8.409518, 115.188919];
+    const ULUWATU = [-8.8291, 115.0849];
+
+    const layers = {
+      street: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap'
+      }),
+      satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+        attribution: 'Tiles &copy; Esri'
+      }),
+      dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OSM &copy; CARTO'
+      })
+    };
+
+    const map = L.map('map', {
+      center: BALI,
+      zoom: 10,
+      zoomControl: true,
+      layers: [layers.street]
+    });
+    L.control.zoom({ position: 'topright' }).remove();
+    map.zoomControl.setPosition('topright');
+
+    const popupHtml = `
+      <div class="popup-card p-2">
+        <div class="loc">Badung Selatan</div>
+        <h6>Pura Luhur Uluwatu</h6>
+        <div class="small mb-2">⭐ 4.8</div>
+        <button class="btn btn-navy btn-sm w-100">Lihat Detail Lengkap</button>
+      </div>`;
+
+    const markers = L.layerGroup().addTo(map);
+    L.marker(ULUWATU).addTo(markers).bindPopup(popupHtml).openPopup();
+
+    document.querySelectorAll('.map-mode button').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.map-mode button').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        Object.values(layers).forEach((lyr) => map.removeLayer(lyr));
+        layers[btn.dataset.basemap].addTo(map);
+      });
+    });
+
+    document.getElementById('lyrCat').addEventListener('change', (e) => {
+      if (e.target.checked) markers.addTo(map); else map.removeLayer(markers);
+    });
+
+    let boundsLayer = null;
+    document.getElementById('lyrBound').addEventListener('change', (e) => {
+      if (e.target.checked) {
+        boundsLayer = L.rectangle([[-8.85, 114.42], [-8.06, 115.72]], {
+          color: '#111827', weight: 1, fillOpacity: 0.04
         }).addTo(map);
-    </script>
+      } else if (boundsLayer) {
+        map.removeLayer(boundsLayer);
+        boundsLayer = null;
+      }
+    });
+
+    let userMarker = null;
+    function locateUser() {
+      map.locate({ setView: true, maxZoom: 13 });
+    }
+    document.getElementById('btnLocate').addEventListener('click', locateUser);
+    document.getElementById('lyrGps').addEventListener('change', (e) => {
+      if (e.target.checked) locateUser();
+      else if (userMarker) { map.removeLayer(userMarker); userMarker = null; }
+    });
+    map.on('locationfound', (e) => {
+      if (userMarker) map.removeLayer(userMarker);
+      userMarker = L.circleMarker(e.latlng, { radius: 8, color: '#111827', fillColor: '#22c55e', fillOpacity: 1 })
+        .addTo(map).bindPopup('Lokasi Anda');
+      document.getElementById('lyrGps').checked = true;
+    });
+    map.on('locationerror', () => alert('Lokasi tidak dapat diakses. Izinkan GPS di browser.'));
+
+    document.getElementById('clearSearch').addEventListener('click', () => {
+      document.getElementById('searchInput').value = '';
+    });
+    document.querySelectorAll('.chip').forEach((chip) => {
+      chip.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        document.querySelectorAll('.chip').forEach((c) => c.classList.remove('active'));
+        chip.classList.add('active');
+      });
+    });
+  </script>
 </body>
 </html>
