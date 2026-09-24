@@ -1,1228 +1,957 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Langkah Baswara — Jelajahi Destinasi Pulau Dewata</title>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Langkah Baswara — Jelajahi Destinasi Pulau Dewata</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css?v=3.2" />
+  </head>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-
-  <style>
-    :root {
-      /* Custom Brand Color Palette */
-      --dark-green: #458132;
-      --pastel-green: #9ad872;
-      --pastel-yellow: #ffef91;
-      --brand-orange: #ffa12f;
-
-      --primary: var(--dark-green);
-      --secondary: var(--pastel-green);
-      --highlight: var(--pastel-yellow);
-      --accent: var(--brand-orange);
-
-      --navy: #111827;
-      --navy-soft: #1f2937;
-      --muted: #6b7280;
-      --line: #e5e7eb;
-      --page: #f6f7f9;
-      --radius: 16px;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: Inter, system-ui, -apple-system, sans-serif;
-      background: var(--page);
-      color: var(--navy);
-    }
-
-    .navbar-lb {
-      background: #fff;
-      border-bottom: 1px solid var(--line);
-      padding: .85rem 0;
-    }
-
-    .brand-mark {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: var(--dark-green) !important;
-      color: #fff;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: .85rem;
-    }
-
-    .nav-pills-lb .nav-link {
-      color: var(--navy-soft);
-      border-radius: 999px;
-      padding: .45rem 1rem;
-      font-weight: 500;
-      transition: all 0.2s ease;
-    }
-
-    .nav-pills-lb .nav-link:hover {
-      color: var(--dark-green) !important;
-      background-color: #f0fdf4 !important;
-    }
-
-    .nav-pills-lb .nav-link.active {
-      background-color: var(--dark-green) !important;
-      color: #fff !important;
-    }
-
-    .btn-navy {
-      background-color: var(--dark-green) !important;
-      border-color: var(--dark-green) !important;
-      color: #fff !important;
-      border-radius: 999px;
-      border: 1px solid var(--dark-green) !important;
-      font-weight: 600;
-      transition: all 0.2s ease;
-    }
-
-    .btn-navy:hover,
-    .btn-navy:focus {
-      background-color: #376828 !important;
-      border-color: #376828 !important;
-      color: #fff !important;
-    }
-
-    .btn-ghost {
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      color: var(--navy);
-      font-weight: 500;
-      transition: all 0.2s ease;
-    }
-
-    .btn-ghost:hover {
-      background-color: #f8fdf6 !important;
-      border-color: var(--pastel-green) !important;
-      color: var(--dark-green) !important;
-    }
-
-    .user-chip {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      border: 1px solid var(--line);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: #fff;
-      color: var(--dark-green);
-      transition: all 0.2s ease;
-    }
-
-    .user-chip:hover {
-      background-color: var(--pastel-yellow);
-      border-color: var(--pastel-green);
-    }
-
-    .page-wrap {
-      padding: 1.5rem 0 2.5rem;
-    }
-
-    .badge-map {
-      display: inline-flex;
-      align-items: center;
-      gap: .35rem;
-      background-color: var(--pastel-yellow) !important;
-      border: 1px solid #ebd968 !important;
-      border-radius: 999px;
-      padding: .3rem .75rem;
-      font-size: .8rem;
-      font-weight: 600;
-      color: #554400 !important;
-    }
-
-    h1.page-title {
-      font-size: clamp(1.7rem, 3vw, 2.25rem);
-      font-weight: 800;
-      letter-spacing: -.03em;
-      margin: .7rem 0 .4rem;
-      color: var(--navy);
-    }
-
-    .dot-live {
-      width: 8px;
-      height: 8px;
-      background: var(--dark-green);
-      border-radius: 50%;
-      display: inline-block;
-      margin-right: .4rem;
-    }
-
-    .filter-card,
-    .map-shell,
-    .catalog-card,
-    .banner-route,
-    .footer-lb {
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-    }
-
-    .filter-card {
-      padding: 1rem 1.1rem;
-    }
-
-    .search-wrap {
-      position: relative;
-    }
-
-    .search-wrap .bi-search {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #9ca3af;
-    }
-
-    .search-wrap .bi-x-lg {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #9ca3af;
-      cursor: pointer;
-    }
-
-    .search-wrap .form-control {
-      padding-left: 2.3rem;
-      padding-right: 2.2rem;
-      border-radius: 12px;
-      border-color: var(--line);
-      height: 46px;
-    }
-
-    .search-wrap .form-control:focus,
-    .form-select.filter-select:focus {
-      border-color: var(--dark-green) !important;
-      box-shadow: 0 0 0 0.25rem rgba(69, 129, 50, 0.25) !important;
-    }
-
-    .form-select.filter-select {
-      border-radius: 12px;
-      height: 46px;
-      border-color: var(--line);
-    }
-
-    .chips-row {
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-      overflow-x: auto;
-      padding-bottom: .15rem;
-      scrollbar-width: thin;
-    }
-
-    .chip {
-      white-space: nowrap;
-      border: 1px solid var(--line);
-      background: #fff;
-      border-radius: 999px;
-      padding: .35rem .8rem;
-      font-size: .85rem;
-      color: var(--navy-soft);
-      text-decoration: none;
-      transition: all 0.2s ease;
-    }
-
-    .chip:hover {
-      border-color: var(--pastel-green) !important;
-      color: var(--dark-green) !important;
-      background-color: #fbfdf9;
-    }
-
-    .chip.active {
-      background-color: var(--dark-green) !important;
-      color: #fff !important;
-      border-color: var(--dark-green) !important;
-    }
-
-    .map-shell {
-      position: relative;
-      overflow: hidden;
-    }
-
-    #map {
-      min-height: 520px;
-      height: 58vh;
-      width: 100%;
-      border-radius: var(--radius);
-    }
-
-    .map-mode {
-      position: absolute;
-      top: 14px;
-      right: 14px;
-      z-index: 1000;
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 4px;
-      display: flex;
-      gap: 2px;
-      box-shadow: 0 8px 24px rgba(17, 24, 39, .08);
-    }
-
-    .map-mode button {
-      border: 0;
-      background: transparent;
-      border-radius: 999px;
-      padding: .35rem .85rem;
-      font-size: .82rem;
-      font-weight: 600;
-      color: var(--navy-soft);
-    }
-
-    .map-mode button.active {
-      background-color: var(--dark-green) !important;
-      color: #fff !important;
-    }
-
-    .layer-widget {
-      position: absolute;
-      left: 14px;
-      bottom: 18px;
-      z-index: 1000;
-      width: min(280px, calc(100% - 28px));
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: .85rem 1rem;
-      box-shadow: 0 10px 28px rgba(17, 24, 39, .1);
-    }
-
-    .layer-widget .badge-aktif {
-      background-color: var(--pastel-green) !important;
-      color: #1e3f0e !important;
-      font-size: .68rem;
-      font-weight: 700;
-      border-radius: 999px;
-      padding: .18rem .5rem;
-    }
-
-    .layer-widget .form-check-input:checked {
-      background-color: var(--dark-green) !important;
-      border-color: var(--dark-green) !important;
-    }
-
-    .leaflet-popup-content-wrapper {
-      border-radius: 14px;
-      padding: 0;
-      overflow: hidden;
-    }
-
-    .popup-card {
-      min-width: 210px;
-    }
-
-    .popup-card h6 {
-      font-weight: 700;
-      margin: .15rem 0 .2rem;
-    }
-
-    .popup-card .loc {
-      font-size: .75rem;
-      color: var(--dark-green);
-      font-weight: 600;
-    }
-
-    .popup-card .rating-val {
-      color: var(--brand-orange);
-      font-weight: 700;
-    }
-
-    .dest-card {
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: #fff;
-      height: 100%;
-      transition: all 0.2s ease;
-    }
-
-    .dest-card:hover {
-      border-color: var(--pastel-green);
-      box-shadow: 0 6px 20px rgba(69, 129, 50, 0.08);
-    }
-
-    .dest-thumb {
-      height: 110px;
-      background: linear-gradient(135deg, #e5e7eb, #d1d5db);
-      border-radius: 14px 14px 0 0;
-      position: relative;
-    }
-
-    .pin-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: 1px solid var(--line);
-      background: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-      color: var(--navy-soft);
-    }
-
-    .pin-btn:hover {
-      background-color: var(--pastel-yellow);
-      border-color: var(--brand-orange);
-      color: var(--brand-orange);
-    }
-
-    .rating-badge {
-      color: var(--brand-orange) !important;
-      font-weight: 700;
-    }
-
-    .carousel-dots {
-      display: flex;
-      justify-content: center;
-      gap: .4rem;
-    }
-
-    .carousel-dots span {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #d1d5db;
-    }
-
-    .carousel-dots span.active {
-      background-color: var(--dark-green) !important;
-    }
-
-    .banner-route {
-      background: linear-gradient(135deg, #f7fdf5 0%, #fffde8 100%) !important;
-      border: 1px solid var(--pastel-green) !important;
-      padding: 1rem 1.15rem;
-    }
-
-    .banner-route strong {
-      color: var(--dark-green);
-    }
-
-    footer.site {
-      background: #fff;
-      border-top: 1px solid var(--line);
-      padding: 2.5rem 0 1rem;
-      margin-top: 1.5rem;
-    }
-
-    footer .muted {
-      color: var(--muted);
-      font-size: .9rem;
-    }
-
-    footer a {
-      color: var(--navy-soft);
-      text-decoration: none;
-      transition: color 0.2s ease;
-    }
-
-    footer a:hover {
-      color: var(--dark-green) !important;
-      text-decoration: underline;
-    }
-  </style>
-</head>
-
-<body>
-  <nav class="navbar navbar-expand-lg navbar-lb">
-    <div class="container">
-      <a class="navbar-brand d-flex align-items-center gap-2 mb-0" href="#">
-        <img src="public/assets/logo_langkahbaswara.png" alt="Logo Langkah Baswara" height="38"
-          style="width: auto; max-height: 38px; object-fit: contain;">
-        <span class="fw-bold fs-5" style="color: var(--dark-green); letter-spacing: -0.02em;">Langkah Baswara</span>
-      </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navMain">
-        <div class="d-flex justify-content-center flex-grow-1">
-          <ul class="navbar-nav nav-pills-lb my-2 my-lg-0 gap-1">
-            <li class="nav-item"><a class="nav-link" href="#sec-beranda" data-section="sec-beranda">Beranda</a></li>
-            <li class="nav-item"><a class="nav-link" href="#sec-tentang" data-section="sec-tentang">Tentang</a></li>
-            <li class="nav-item"><a class="nav-link active" href="#sec-jelajahi"
-                data-section="sec-jelajahi">Jelajahi</a></li>
-            <li class="nav-item"><a class="nav-link" href="#sec-profil" data-section="sec-profil">Profil</a></li>
-          </ul>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-          <button class="btn btn-navy px-4 py-2" type="button"
-            onclick="document.querySelector('[data-section=\'sec-profil\']').click()">Masuk</button>
-          <span class="user-chip" role="button"
-            onclick="document.querySelector('[data-section=\'sec-profil\']').click()"><i
-              class="bi bi-person"></i></span>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-lb">
+      <div class="container">
+        <a class="navbar-brand d-flex align-items-center mb-0" href="#" data-section="sec-beranda">
+          <img
+            src="public/assets/logo_langkahbaswara.png"
+            alt="Logo Langkah Baswara"
+            class="navbar-brand-logo"
+            height="52"
+            style="height: 52px; width: auto; max-height: 54px; object-fit: contain"
+          />
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navMain"
+          aria-controls="navMain"
+          aria-expanded="false"
+          aria-label="Buka navigasi"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navMain">
+          <div class="navbar-nav-wrapper">
+            <ul class="navbar-nav nav-pills-lb my-2 my-lg-0">
+              <li class="nav-item">
+                <a
+                  class="nav-link active"
+                  href="#sec-beranda"
+                  data-section="sec-beranda"
+                  >Beranda</a
+                >
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link"
+                  href="#sec-tentang"
+                  data-section="sec-tentang"
+                  >Tentang</a
+                >
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link"
+                  href="#sec-jelajahi"
+                  data-section="sec-jelajahi"
+                  >Jelajahi</a
+                >
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link"
+                  href="#sec-profil"
+                  data-section="sec-profil"
+                  >Profil</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="navbar-actions">
+            <button
+              class="btn btn-masuk"
+              type="button"
+              data-section="sec-profil"
+            >
+              <i class="bi bi-door-closed-fill"></i>
+              <span>Masuk</span>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  </nav>
+    </nav>
 
-  <main class="page-wrap">
-    <div class="container">
-      <!-- SECTION BERANDA (Default: d-none) -->
-      <section id="sec-beranda" class="content-section d-none">
-        <div class="card p-4 p-md-5 border-0 shadow-sm rounded-4 text-center my-4 bg-white">
-          <span class="badge-map mx-auto mb-3">✨ Beranda Utama</span>
-          <h1 class="page-title mb-3" style="color: var(--dark-green);">Selamat Datang di Langkah Baswara</h1>
-          <p class="text-secondary mx-auto mb-4" style="max-width: 680px; font-size: 1.05rem; line-height: 1.6;">
-            Platform sistem informasi geografis dan panduan eksplorasi pariwisata Pulau Dewata. Temukan keindahan alam,
-            kekayaan budaya pura leluhur, pesona pesisir pantai, hingga spot rekreasi unggulan di seluruh 9 kabupaten
-            Bali dalam satu genggaman.
-          </p>
-          <div class="d-flex justify-content-center gap-3">
-            <button class="btn btn-navy px-4 py-2" type="button"
-              onclick="document.querySelector('[data-section=\'sec-jelajahi\']').click()">Mulai Eksplorasi Peta
-              ➔</button>
-            <button class="btn btn-ghost px-4 py-2" type="button"
-              onclick="document.querySelector('[data-section=\'sec-tentang\']').click()">Tentang Kami</button>
+    <main class="page-wrap">
+      <!-- SECTION BERANDA (Landing Page) -->
+      <section id="sec-beranda" class="content-section">
+        <div class="landing-wrap">
+          <!-- 1. HERO SECTION (FULL WIDTH) -->
+          <div class="hero-landing">
+            <div class="container hero-inner">
+              <div class="hero-content-left">
+                <h1 class="hero-title">
+                  Jelajahi Keindahan Bali,<br />
+                  <span class="hero-nowrap">Dalam Satu Genggaman.</span>
+                </h1>
+                <p class="hero-tagline">
+                  Temukan lebih dari 700 destinasi wisata impian dan susun rute perjalanan terbaikmu secara efisien bersama Langkah Baswara.
+                </p>
+                <button
+                  type="button"
+                  class="btn-hero-explore"
+                  onclick="switchSection('sec-jelajahi')"
+                >
+                  Jelajahi Sekarang
+                </button>
+              </div>
+
+              <!-- Search Bar di Bagian Bawah Hero -->
+              <div class="hero-search-wrapper">
+                <form
+                  class="hero-search-box"
+                  id="heroSearchForm"
+                  onsubmit="handleHeroSearch(event)"
+                >
+                  <input
+                    type="text"
+                    id="heroSearchInput"
+                    class="hero-search-input"
+                    placeholder="Masukkan kata kunci atau nama tempat..."
+                    autocomplete="off"
+                  />
+                  <button type="submit" class="hero-search-btn" aria-label="Cari Destinasi">
+                    <i class="bi bi-search"></i>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. ABOUT SECTION ("Apa itu Langkah Baswara?") -->
+          <div class="container">
+            <div class="about-landing-section">
+              <div class="row align-items-center g-4 g-lg-5">
+                <div class="col-lg-6">
+                  <div class="about-header-group mb-3">
+                    <h2 class="about-section-title">
+                      <span class="about-title-regular">Apa itu</span>
+                      <strong class="about-title-bold">Langkah Baswara?</strong>
+                    </h2>
+                  </div>
+                  <p class="about-description mb-4">
+                    Langkah Baswara adalah platform sistem informasi geospasial modern yang dirancang untuk memandu wisatawan menjelajahi keindahan alam, tradisi budaya luhur, dan lanskap pariwisata Pulau Dewata secara spasial, terpadu, dan terverifikasi. Dengan dukungan peta interaktif, Anda dapat dengan mudah menemukan berbagai destinasi wisata menarik mulai dari pura suci, pantai eksotis, air terjun tersembunyi, hingga wisata edukasi keluarga.
+                  </p>
+                  <button
+                    type="button"
+                    class="btn btn-green-pill"
+                    onclick="switchSection('sec-jelajahi')"
+                  >
+                    Jelajahi Sekarang
+                  </button>
+                </div>
+                <div class="col-lg-6 text-center">
+                  <img
+                    src="public/assets/landingpage2.png"
+                    alt="Ilustrasi Apa itu Langkah Baswara"
+                    class="img-fluid about-hero-img"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. STEPS SECTION ("Rencanakan Liburanmu dalam 3 Langkah") (FULL WIDTH) -->
+          <div class="steps-landing-section">
+            <div class="container">
+              <div class="steps-header text-center mb-5">
+                <h2 class="steps-title">
+                  Rencanakan <span class="highlight-oval-yellow">Liburanmu</span><br />dalam 3 Langkah
+                </h2>
+              </div>
+
+              <div class="steps-container position-relative">
+                <div class="steps-connector-line d-none d-md-block"></div>
+                <div class="row g-4 text-center justify-content-center">
+                  <!-- Step 1 -->
+                  <div class="col-md-4">
+                    <div class="step-item">
+                      <div class="step-circle-badge">1</div>
+                      <h3 class="step-item-title">Tentukan Destinasi</h3>
+                      <p class="step-item-desc">
+                        Pilih destinasi wisata impianmu dari berbagai kategori seperti budaya, alam, bahari, dan rekreasi yang tersedia di Bali.
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Step 2 -->
+                  <div class="col-md-4">
+                    <div class="step-item">
+                      <div class="step-circle-badge">2</div>
+                      <h3 class="step-item-title">Sesuaikan Filter & Rute</h3>
+                      <p class="step-item-desc">
+                        Manfaatkan fitur filter kabupaten dan kategori serta buat rute perjalanan terbaik agar liburanmu lebih terarah dan efisien.
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Step 3 -->
+                  <div class="col-md-4">
+                    <div class="step-item">
+                      <div class="step-circle-badge">3</div>
+                      <h3 class="step-item-title">Dapatkan Rute Terbaik</h3>
+                      <p class="step-item-desc">
+                        Lihat informasi lengkap lokasi, jam operasional, tiket masuk, hingga navigasi langsung ke lokasi tujuanmu.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. POPULAR DESTINATIONS SECTION ("Temukan Destinasi Populer di Bali.") -->
+          <div class="container">
+            <div class="popular-landing-section">
+              <div class="popular-header text-center mb-4">
+                <h2 class="popular-section-title mb-3">
+                  <span class="highlight-oval-yellow">Temukan</span> Destinasi<br />Populer di Bali.
+                </h2>
+                <!-- Filter Chips -->
+                <div class="landing-filter-chips d-flex justify-content-center align-items-center gap-2 flex-wrap">
+                  <button type="button" class="landing-chip active" data-filter="all">All</button>
+                  <button type="button" class="landing-chip" data-filter="budaya">Budaya</button>
+                  <button type="button" class="landing-chip" data-filter="alam">Alam</button>
+                  <button type="button" class="landing-chip" data-filter="olahraga">Olahraga</button>
+                  <button type="button" class="landing-chip" data-filter="edukasi">Edukasi</button>
+                </div>
+              </div>
+
+              <!-- 6 Destination Cards -->
+              <div class="row g-4" id="landingDestCards">
+                <!-- Card 1: Uluwatu -->
+                <div class="col-lg-4 col-md-6 landing-card-col" data-category="budaya">
+                  <div class="landing-card">
+                    <div class="landing-card-thumb">
+                      <img src="public/assets/uluwatu.jpg" alt="Uluwatu, Bali" loading="lazy" />
+                      <button
+                        type="button"
+                        class="landing-card-fav"
+                        title="Tambah ke Favorit"
+                        aria-label="Tambah ke Favorit"
+                        onclick="event.stopPropagation(); this.classList.toggle('active');"
+                      >
+                        <i class="bi bi-heart-fill"></i>
+                      </button>
+                    </div>
+                    <div class="landing-card-body">
+                      <h3 class="landing-card-title">Uluwatu, Bali</h3>
+                      <p class="landing-card-desc">
+                        Pura megah di tebing tinggi menghadap samudra dengan panorama matahari terbenam dan pertunjukan tari Kecak magis.
+                      </p>
+                      <div class="landing-card-rating">
+                        <span class="stars-icon">
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                        </span>
+                        <span class="rating-number">4.8</span>
+                      </div>
+                      <button
+                        type="button"
+                        class="btn-card-explore"
+                        onclick="navigateToDestination('Uluwatu')"
+                      >
+                        <i class="bi bi-geo-alt-fill me-1"></i> Buka di Peta
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card 2: Tanah Lot -->
+                <div class="col-lg-4 col-md-6 landing-card-col" data-category="budaya">
+                  <div class="landing-card">
+                    <div class="landing-card-thumb">
+                      <img src="public/assets/tanahlot.jpg" alt="Pura Tanah Lot, Tabanan" loading="lazy" />
+                      <button
+                        type="button"
+                        class="landing-card-fav"
+                        title="Tambah ke Favorit"
+                        aria-label="Tambah ke Favorit"
+                        onclick="event.stopPropagation(); this.classList.toggle('active');"
+                      >
+                        <i class="bi bi-heart-fill"></i>
+                      </button>
+                    </div>
+                    <div class="landing-card-body">
+                      <h3 class="landing-card-title">Pura Tanah Lot, Tabanan</h3>
+                      <p class="landing-card-desc">
+                        Ikon pura megah di atas bongkahan batu karang laut dengan panorama matahari terbenam yang memukau.
+                      </p>
+                      <div class="landing-card-rating">
+                        <span class="stars-icon">
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                        </span>
+                        <span class="rating-number">4.7</span>
+                      </div>
+                      <button
+                        type="button"
+                        class="btn-card-explore"
+                        onclick="navigateToDestination('Tanah Lot')"
+                      >
+                        <i class="bi bi-geo-alt-fill me-1"></i> Buka di Peta
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card 3: Tegallalang -->
+                <div class="col-lg-4 col-md-6 landing-card-col" data-category="alam">
+                  <div class="landing-card">
+                    <div class="landing-card-thumb">
+                      <img src="public/assets/tegallalang.jpg" alt="Tegallalang Rice Terrace" loading="lazy" />
+                      <button
+                        type="button"
+                        class="landing-card-fav"
+                        title="Tambah ke Favorit"
+                        aria-label="Tambah ke Favorit"
+                        onclick="event.stopPropagation(); this.classList.toggle('active');"
+                      >
+                        <i class="bi bi-heart-fill"></i>
+                      </button>
+                    </div>
+                    <div class="landing-card-body">
+                      <h3 class="landing-card-title">Tegallalang Rice Terrace</h3>
+                      <p class="landing-card-desc">
+                        Hamparan sawah berundak hijau asri dengan sistem pengairan Subak tradisional yang menyejukkan di kawasan Ubud.
+                      </p>
+                      <div class="landing-card-rating">
+                        <span class="stars-icon">
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                        </span>
+                        <span class="rating-number">4.6</span>
+                      </div>
+                      <button
+                        type="button"
+                        class="btn-card-explore"
+                        onclick="navigateToDestination('Tegalalang')"
+                      >
+                        <i class="bi bi-geo-alt-fill me-1"></i> Buka di Peta
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card 4: Kuta -->
+                <div class="col-lg-4 col-md-6 landing-card-col" data-category="olahraga">
+                  <div class="landing-card">
+                    <div class="landing-card-thumb">
+                      <img src="public/assets/kuta.jpg" alt="Pantai Kuta & Legian" loading="lazy" />
+                      <button
+                        type="button"
+                        class="landing-card-fav"
+                        title="Tambah ke Favorit"
+                        aria-label="Tambah ke Favorit"
+                        onclick="event.stopPropagation(); this.classList.toggle('active');"
+                      >
+                        <i class="bi bi-heart-fill"></i>
+                      </button>
+                    </div>
+                    <div class="landing-card-body">
+                      <h3 class="landing-card-title">Pantai Kuta & Legian</h3>
+                      <p class="landing-card-desc">
+                        Pantai pasir putih legendaris dengan ombak bersahabat untuk peselancar pemula dan pusat keramaian pulau Bali.
+                      </p>
+                      <div class="landing-card-rating">
+                        <span class="stars-icon">
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                        </span>
+                        <span class="rating-number">4.5</span>
+                      </div>
+                      <button
+                        type="button"
+                        class="btn-card-explore"
+                        onclick="navigateToDestination('Kuta')"
+                      >
+                        <i class="bi bi-geo-alt-fill me-1"></i> Buka di Peta
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card 5: Pura Ulun Danu Beratan -->
+                <div class="col-lg-4 col-md-6 landing-card-col" data-category="budaya">
+                  <div class="landing-card">
+                    <div class="landing-card-thumb">
+                      <img src="public/assets/puraulundanu.webp" alt="Pura Ulun Danu Beratan" loading="lazy" />
+                      <button
+                        type="button"
+                        class="landing-card-fav"
+                        title="Tambah ke Favorit"
+                        aria-label="Tambah ke Favorit"
+                        onclick="event.stopPropagation(); this.classList.toggle('active');"
+                      >
+                        <i class="bi bi-heart-fill"></i>
+                      </button>
+                    </div>
+                    <div class="landing-card-body">
+                      <h3 class="landing-card-title">Pura Ulun Danu Beratan</h3>
+                      <p class="landing-card-desc">
+                        Pura terapung anggun di tepi Danau Beratan dengan latar perbukitan Bedugul yang sejuk dan berkabut damai.
+                      </p>
+                      <div class="landing-card-rating">
+                        <span class="stars-icon">
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                        </span>
+                        <span class="rating-number">4.8</span>
+                      </div>
+                      <button
+                        type="button"
+                        class="btn-card-explore"
+                        onclick="navigateToDestination('Ulun Danu')"
+                      >
+                        <i class="bi bi-geo-alt-fill me-1"></i> Buka di Peta
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card 6: Pantai Pandawa -->
+                <div class="col-lg-4 col-md-6 landing-card-col" data-category="alam edukasi">
+                  <div class="landing-card">
+                    <div class="landing-card-thumb">
+                      <img src="public/assets/pantaipandawa.jpg" alt="Pantai Pandawa, Badung" loading="lazy" />
+                      <button
+                        type="button"
+                        class="landing-card-fav"
+                        title="Tambah ke Favorit"
+                        aria-label="Tambah ke Favorit"
+                        onclick="event.stopPropagation(); this.classList.toggle('active');"
+                      >
+                        <i class="bi bi-heart-fill"></i>
+                      </button>
+                    </div>
+                    <div class="landing-card-body">
+                      <h3 class="landing-card-title">Pantai Pandawa, Badung</h3>
+                      <p class="landing-card-desc">
+                        Pantai pasir putih tersembunyi di balik tebing kapur megah berhias pahatan patung lima ksatria Panca Pandawa.
+                      </p>
+                      <div class="landing-card-rating">
+                        <span class="stars-icon">
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                          <i class="bi bi-star-fill"></i>
+                        </span>
+                        <span class="rating-number">4.7</span>
+                      </div>
+                      <button
+                        type="button"
+                        class="btn-card-explore"
+                        onclick="navigateToDestination('Pandawa')"
+                      >
+                        <i class="bi bi-geo-alt-fill me-1"></i> Buka di Peta
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. FAQ SECTION ("Pertanyaan yang Sering Diajukan.") -->
+          <div class="container">
+            <div class="faq-landing-section">
+              <div class="faq-header text-center mb-4">
+                <h2 class="faq-section-title">
+                  <span class="highlight-oval-yellow">Pertanyaan</span> yang<br />Sering Diajukan.
+                </h2>
+              </div>
+
+              <div class="faq-accordion-custom mx-auto">
+                <!-- Item 1 (Active/Open by default) -->
+                <div class="faq-item-custom active">
+                  <div class="faq-item-header">
+                    <span class="faq-question">Apa itu sistem Langkah Baswara?</span>
+                    <button type="button" class="faq-toggle-btn" aria-label="Buka/Tutup Pertanyaan">
+                      <i class="bi bi-x-lg"></i>
+                    </button>
+                  </div>
+                  <div class="faq-item-body">
+                    <p class="mb-0">
+                      Langkah Baswara adalah aplikasi Sistem Informasi Geografis pariwisata di Pulau Bali yang membantu wisatawan menemukan berbagai destinasi wisata di Bali.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Item 2 (Collapsed) -->
+                <div class="faq-item-custom">
+                  <div class="faq-item-header">
+                    <span class="faq-question">Bagaimana cara kerja fitur rekomendasi rute perjalanan/itinerary?</span>
+                    <button type="button" class="faq-toggle-btn" aria-label="Buka/Tutup Pertanyaan">
+                      <i class="bi bi-plus-lg"></i>
+                    </button>
+                  </div>
+                  <div class="faq-item-body">
+                    <p class="mb-0">
+                      Sistem kami memadukan data titik koordinat geospasial dengan algoritma rute terpadu untuk memberikan estimasi durasi dan jalur perjalanan paling efisien antar destinasi pilihan Anda.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Item 3 (Collapsed) -->
+                <div class="faq-item-custom">
+                  <div class="faq-item-header">
+                    <span class="faq-question">Apakah saya bisa mem-filter tempat wisata berdasarkan kategori tertentu?</span>
+                    <button type="button" class="faq-toggle-btn" aria-label="Buka/Tutup Pertanyaan">
+                      <i class="bi bi-plus-lg"></i>
+                    </button>
+                  </div>
+                  <div class="faq-item-body">
+                    <p class="mb-0">
+                      Tentu! Anda dapat memfilter destinasi berdasarkan kategori Budaya, Alam, Rekreasi, serta memilih 9 Kabupaten/Kota di Bali langsung pada peta interaktif.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Item 4 (Collapsed) -->
+                <div class="faq-item-custom">
+                  <div class="faq-item-header">
+                    <span class="faq-question">Apakah aplikasi ini dapat digunakan secara gratis?</span>
+                    <button type="button" class="faq-toggle-btn" aria-label="Buka/Tutup Pertanyaan">
+                      <i class="bi bi-plus-lg"></i>
+                    </button>
+                  </div>
+                  <div class="faq-item-body">
+                    <p class="mb-0">
+                      Ya, seluruh fitur eksplorasi peta, pencarian destinasi, filter kategori, hingga panduan wisata di Langkah Baswara dapat diakses 100% gratis oleh seluruh wisatawan.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       <!-- SECTION TENTANG (Default: d-none) -->
       <section id="sec-tentang" class="content-section d-none">
-        <div class="card p-4 p-md-5 border-0 shadow-sm rounded-4 my-4 bg-white">
-          <span class="badge-map mb-2" style="width: fit-content;">ℹ️ Informasi Platform</span>
-          <h2 class="h3 fw-bold mb-3" style="color: var(--dark-green);">Tentang Langkah Baswara</h2>
-          <p class="text-secondary mb-3" style="line-height: 1.6;">
-            <strong>Langkah Baswara</strong> merupakan platform digital geospasial yang dirancang untuk mempermudah
-            wisatawan, peneliti, dan masyarakat dalam mengakses informasi lokasi wisata di Bali secara spasial, terpadu,
-            dan terverifikasi.
-          </p>
-          <p class="text-secondary mb-0" style="line-height: 1.6;">
-            Dilengkapi dengan 730 titik koordinat wisata dari 9 Kabupaten/Kota di Bali, platform ini mengintegrasikan
-            navigasi peta satelit, batas wilayah, dan kategori destinasi (Wisata Alam, Budaya, Rekreasi, dan Umum).
-          </p>
+        <div class="container">
+          <div
+            class="card p-4 p-md-5 border-0 shadow-sm rounded-4 my-4 bg-white"
+          >
+            <span class="badge-map mb-2" style="width: fit-content"
+              >ℹ️ Informasi Platform</span
+            >
+            <h2 class="h3 fw-bold mb-3" style="color: var(--dark-green)">
+              Tentang Langkah Baswara
+            </h2>
+            <p class="text-secondary mb-3" style="line-height: 1.6">
+              <strong>Langkah Baswara</strong> merupakan platform digital
+              geospasial yang dirancang untuk mempermudah wisatawan, peneliti,
+              dan masyarakat dalam mengakses informasi lokasi wisata di Bali
+              secara spasial, terpadu, dan terverifikasi.
+            </p>
+            <p class="text-secondary mb-0" style="line-height: 1.6">
+              Dilengkapi dengan 730 titik koordinat wisata dari 9 Kabupaten/Kota
+              di Bali, platform ini mengintegrasikan navigasi peta satelit,
+              batas wilayah, dan kategori destinasi (Wisata Alam, Budaya,
+              Rekreasi, dan Umum).
+            </p>
+          </div>
         </div>
       </section>
 
       <!-- SECTION JELAJAHI (Konten Peta Utama) -->
-      <section id="sec-jelajahi" class="content-section">
-        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
-          <div>
-            <span class="badge-map">📍 Peta Interaktif Wisata Bali</span>
-            <h1 class="page-title">Jelajahi Destinasi Pulau Dewata</h1>
-            <p class="text-secondary mb-0" style="max-width: 640px;">
-              Eksplorasi koordinat pura budaya, tebing pantai eksotis, terasering alam, hingga ruang edukasi di seluruh
-              kabupaten Bali.
+      <section id="sec-jelajahi" class="content-section d-none">
+        <div class="container">
+          <div
+            class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4"
+          >
+            <div>
+              <span class="badge-map">📍 Peta Interaktif Wisata Bali</span>
+              <h1 class="page-title">Jelajahi Destinasi Pulau Dewata</h1>
+              <p class="text-secondary mb-0" style="max-width: 640px">
+                Eksplorasi koordinat pura budaya, tebing pantai eksotis,
+                terasering alam, hingga ruang edukasi di seluruh kabupaten Bali.
+              </p>
+            </div>
+            <p class="small text-secondary mb-0">
+              <span class="dot-live"></span>Area AKTIF: Seluruh Bali (9
+              Kabupaten) • 147 Titik Destinasi
             </p>
           </div>
-          <p class="small text-secondary mb-0">
-            <span class="dot-live"></span>Area AKTIF: Seluruh Bali (9 Kabupaten) • 147 Titik Destinasi
-          </p>
-        </div>
 
-        <div class="filter-card mb-3">
-          <div class="row g-2 align-items-center">
-            <div class="col-lg-6">
-              <div class="search-wrap">
-                <i class="bi bi-search"></i>
-                <input type="text" class="form-control" id="searchInput"
-                  placeholder="Cari pura, pantai, air terjun, museum, atau aktivitas...">
-                <i class="bi bi-x-lg" id="clearSearch" title="Hapus"></i>
+          <div class="filter-card mb-3">
+            <div class="row g-2 align-items-center">
+              <div class="col-lg-6">
+                <div class="search-wrap">
+                  <i class="bi bi-search"></i>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="searchInput"
+                    placeholder="Cari pura, pantai, air terjun, museum, atau aktivitas..."
+                  />
+                  <i class="bi bi-x-lg" id="clearSearch" title="Hapus"></i>
+                </div>
+              </div>
+              <div class="col-lg-3">
+                <select class="form-select filter-select" id="kabupatenFilter">
+                  <option selected>🏢 Semua Kabupaten / Kota</option>
+                  <option>Badung</option>
+                  <option>Bangli</option>
+                  <option>Buleleng</option>
+                  <option>Denpasar</option>
+                  <option>Gianyar</option>
+                  <option>Jembrana</option>
+                  <option>Karangasem</option>
+                  <option>Klungkung</option>
+                  <option>Tabanan</option>
+                </select>
+              </div>
+              <div class="col-lg-3 d-flex gap-2">
+                <button
+                  class="btn btn-ghost flex-fill"
+                  type="button"
+                  id="btnLocate"
+                >
+                  🎯 Gunakan Lokasi Saya
+                </button>
+                <button class="btn btn-navy px-3" type="button">
+                  Terapkan ➔
+                </button>
               </div>
             </div>
-            <div class="col-lg-3">
-              <select class="form-select filter-select" id="kabupatenFilter">
-                <option selected>🏢 Semua Kabupaten / Kota</option>
-                <option>Badung</option>
-                <option>Bangli</option>
-                <option>Buleleng</option>
-                <option>Denpasar</option>
-                <option>Gianyar</option>
-                <option>Jembrana</option>
-                <option>Karangasem</option>
-                <option>Klungkung</option>
-                <option>Tabanan</option>
-              </select>
-            </div>
-            <div class="col-lg-3 d-flex gap-2">
-              <button class="btn btn-ghost flex-fill" type="button" id="btnLocate">🎯 Gunakan Lokasi Saya</button>
-              <button class="btn btn-navy px-3" type="button">Terapkan ➔</button>
+            <div class="chips-row mt-3">
+              <span class="small text-secondary me-1">🔍 Filter:</span>
+              <a href="#" class="chip active" data-category="all"
+                >Semua Kategori</a
+              >
+              <a href="#" class="chip" data-category="umum">Umum (260)</a>
+              <a href="#" class="chip" data-category="alam">Alam (223)</a>
+              <a href="#" class="chip" data-category="rekreasi"
+                >Rekreasi (128)</a
+              >
+              <a href="#" class="chip" data-category="budaya">Budaya (119)</a>
             </div>
           </div>
-          <div class="chips-row mt-3">
-            <span class="small text-secondary me-1">🔍 Filter:</span>
-            <a href="#" class="chip active" data-category="all">Semua Kategori</a>
-            <a href="#" class="chip" data-category="umum">Umum (260)</a>
-            <a href="#" class="chip" data-category="alam">Alam (223)</a>
-            <a href="#" class="chip" data-category="rekreasi">Rekreasi (128)</a>
-            <a href="#" class="chip" data-category="budaya">Budaya (119)</a>
-          </div>
-        </div>
 
-        <div class="map-shell mb-4">
-          <div id="map"></div>
-          <div class="map-mode">
-            <button type="button" class="active" data-basemap="street">Jalan</button>
-            <button type="button" data-basemap="satellite">Satelit</button>
-            <button type="button" data-basemap="dark">Gelap</button>
+          <div class="map-shell mb-4">
+            <div id="map"></div>
+            <div class="map-mode">
+              <button type="button" class="active" data-basemap="street">
+                Jalan
+              </button>
+              <button type="button" data-basemap="satellite">Satelit</button>
+              <button type="button" data-basemap="dark">Gelap</button>
+            </div>
+            <div class="layer-widget">
+              <div
+                class="d-flex justify-content-between align-items-center mb-2"
+              >
+                <strong class="small"
+                  ><i class="bi bi-gear"></i> Kontrol Layer Peta</strong
+                >
+                <span class="badge-aktif">AKTIF</span>
+              </div>
+              <div class="form-check small mb-1">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="lyrCat"
+                  checked
+                />
+                <label class="form-check-label" for="lyrCat"
+                  >Layer Filter Kategori</label
+                >
+              </div>
+              <div class="form-check small mb-1">
+                <input class="form-check-input" type="checkbox" id="lyrBound" />
+                <label class="form-check-label" for="lyrBound"
+                  >Batas Kabupaten / Wilayah</label
+                >
+              </div>
+              <div class="form-check small">
+                <input class="form-check-input" type="checkbox" id="lyrGps" />
+                <label class="form-check-label" for="lyrGps"
+                  >Lokasi Pengguna (GPS)</label
+                >
+              </div>
+            </div>
           </div>
-          <div class="layer-widget">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <strong class="small"><i class="bi bi-gear"></i> Kontrol Layer Peta</strong>
-              <span class="badge-aktif">AKTIF</span>
-            </div>
-            <div class="form-check small mb-1">
-              <input class="form-check-input" type="checkbox" id="lyrCat" checked>
-              <label class="form-check-label" for="lyrCat">Layer Filter Kategori</label>
-            </div>
-            <div class="form-check small mb-1">
-              <input class="form-check-input" type="checkbox" id="lyrBound">
-              <label class="form-check-label" for="lyrBound">Batas Kabupaten / Wilayah</label>
-            </div>
-            <div class="form-check small">
-              <input class="form-check-input" type="checkbox" id="lyrGps">
-              <label class="form-check-label" for="lyrGps">Lokasi Pengguna (GPS)</label>
-            </div>
-          </div>
-        </div>
 
-        <div class="catalog-card p-3 p-md-4 mb-3">
-          <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-2 mb-3">
-            <div>
-              <div class="small fw-semibold text-secondary">📷 KATALOG LOKASI PILIHAN</div>
-              <h2 class="h5 fw-bold mb-1">Galeri Destinasi Unggulan di Sekitar Peta</h2>
-              <p class="small text-secondary mb-0">Daftar koordinat wisata favorit berdasarkan posisi viewport peta saat
-                ini...</p>
+          <div class="catalog-card p-3 p-md-4 mb-3">
+            <div
+              class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-2 mb-3"
+            >
+              <div>
+                <div class="small fw-semibold text-secondary">
+                  📷 KATALOG LOKASI PILIHAN
+                </div>
+                <h2 class="h5 fw-bold mb-1">
+                  Galeri Destinasi Unggulan di Sekitar Peta
+                </h2>
+                <p class="small text-secondary mb-0">
+                  Daftar koordinat wisata favorit berdasarkan posisi viewport
+                  peta saat ini...
+                </p>
+              </div>
+              <div class="small text-secondary d-flex align-items-center gap-2">
+                Menampilkan 1 – 4 dari 16
+                <button class="btn btn-sm btn-ghost py-0 px-2">‹</button>
+                <button class="btn btn-sm btn-ghost py-0 px-2">›</button>
+              </div>
             </div>
-            <div class="small text-secondary d-flex align-items-center gap-2">
-              Menampilkan 1 – 4 dari 16
-              <button class="btn btn-sm btn-ghost py-0 px-2">‹</button>
-              <button class="btn btn-sm btn-ghost py-0 px-2">›</button>
-            </div>
-          </div>
-          <div class="row g-3">
-            <div class="col-md-3">
-              <article class="dest-card">
-                <div class="dest-thumb"><button class="pin-btn" type="button"><i class="bi bi-bookmark"></i></button>
-                </div>
-                <div class="p-3">
-                  <div class="small text-secondary">Tabanan</div>
-                  <div class="d-flex justify-content-between"><strong>Tanah Lot</strong><span class="rating-badge">⭐
-                      4.7</span></div>
-                  <p class="small text-secondary mt-2 mb-3">Pura di atas batu karang dengan sunset ikonik di pesisir
-                    Tabanan.</p>
-                  <button class="btn btn-ghost w-100 btn-sm">Buka di Peta ↗</button>
-                </div>
-              </article>
-            </div>
-            <div class="col-md-3">
-              <article class="dest-card">
-                <div class="dest-thumb"><button class="pin-btn" type="button"><i class="bi bi-bookmark"></i></button>
-                </div>
-                <div class="p-3">
-                  <div class="small text-secondary">Badung</div>
-                  <div class="d-flex justify-content-between"><strong>Pura Uluwatu</strong><span class="rating-badge">⭐
-                      4.8</span></div>
-                  <p class="small text-secondary mt-2 mb-3">Pura luhur di tebing karang selatan dengan pemandangan
-                    Samudra
-                    Hindia.</p>
-                  <button class="btn btn-ghost w-100 btn-sm">Buka di Peta ↗</button>
-                </div>
-              </article>
-            </div>
-            <div class="col-md-3">
-              <article class="dest-card">
-                <div class="dest-thumb"><button class="pin-btn" type="button"><i class="bi bi-bookmark"></i></button>
-                </div>
-                <div class="p-3">
-                  <div class="small text-secondary">Gianyar</div>
-                  <div class="d-flex justify-content-between"><strong>Terasering Tegalalang</strong><span
-                      class="rating-badge">⭐ 4.5</span>
+            <div class="row g-3">
+              <div class="col-md-3">
+                <article class="dest-card">
+                  <div class="dest-thumb">
+                    <button class="pin-btn" type="button">
+                      <i class="bi bi-bookmark"></i>
+                    </button>
                   </div>
-                  <p class="small text-secondary mt-2 mb-3">Lanskap sawah berundak klasik Ubud dengan jalur foto dan
-                    jalan
-                    setapak.</p>
-                  <button class="btn btn-ghost w-100 btn-sm">Buka di Peta ↗</button>
-                </div>
-              </article>
+                  <div class="p-3">
+                    <div class="small text-secondary">Tabanan</div>
+                    <div class="d-flex justify-content-between">
+                      <strong>Tanah Lot</strong
+                      ><span class="rating-badge">⭐ 4.7</span>
+                    </div>
+                    <p class="small text-secondary mt-2 mb-3">
+                      Pura di atas batu karang dengan sunset ikonik di pesisir
+                      Tabanan.
+                    </p>
+                    <button class="btn btn-ghost w-100 btn-sm">
+                      Buka di Peta ↗
+                    </button>
+                  </div>
+                </article>
+              </div>
+              <div class="col-md-3">
+                <article class="dest-card">
+                  <div class="dest-thumb">
+                    <button class="pin-btn" type="button">
+                      <i class="bi bi-bookmark"></i>
+                    </button>
+                  </div>
+                  <div class="p-3">
+                    <div class="small text-secondary">Badung</div>
+                    <div class="d-flex justify-content-between">
+                      <strong>Pura Uluwatu</strong
+                      ><span class="rating-badge">⭐ 4.8</span>
+                    </div>
+                    <p class="small text-secondary mt-2 mb-3">
+                      Pura luhur di tebing karang selatan dengan pemandangan
+                      Samudra Hindia.
+                    </p>
+                    <button class="btn btn-ghost w-100 btn-sm">
+                      Buka di Peta ↗
+                    </button>
+                  </div>
+                </article>
+              </div>
+              <div class="col-md-3">
+                <article class="dest-card">
+                  <div class="dest-thumb">
+                    <button class="pin-btn" type="button">
+                      <i class="bi bi-bookmark"></i>
+                    </button>
+                  </div>
+                  <div class="p-3">
+                    <div class="small text-secondary">Gianyar</div>
+                    <div class="d-flex justify-content-between">
+                      <strong>Terasering Tegalalang</strong
+                      ><span class="rating-badge">⭐ 4.5</span>
+                    </div>
+                    <p class="small text-secondary mt-2 mb-3">
+                      Lanskap sawah berundak klasik Ubud dengan jalur foto dan
+                      jalan setapak.
+                    </p>
+                    <button class="btn btn-ghost w-100 btn-sm">
+                      Buka di Peta ↗
+                    </button>
+                  </div>
+                </article>
+              </div>
+              <div class="col-md-3">
+                <article class="dest-card">
+                  <div class="dest-thumb">
+                    <button class="pin-btn" type="button">
+                      <i class="bi bi-bookmark"></i>
+                    </button>
+                  </div>
+                  <div class="p-3">
+                    <div class="small text-secondary">Denpasar</div>
+                    <div class="d-flex justify-content-between">
+                      <strong>Pantai Sanur</strong
+                      ><span class="rating-badge">⭐ 4.5</span>
+                    </div>
+                    <p class="small text-secondary mt-2 mb-3">
+                      Pantai timur yang tenang, cocok untuk sunrise, sepeda, dan
+                      keluarga.
+                    </p>
+                    <button class="btn btn-ghost w-100 btn-sm">
+                      Buka di Peta ↗
+                    </button>
+                  </div>
+                </article>
+              </div>
             </div>
-            <div class="col-md-3">
-              <article class="dest-card">
-                <div class="dest-thumb"><button class="pin-btn" type="button"><i class="bi bi-bookmark"></i></button>
-                </div>
-                <div class="p-3">
-                  <div class="small text-secondary">Denpasar</div>
-                  <div class="d-flex justify-content-between"><strong>Pantai Sanur</strong><span class="rating-badge">⭐
-                      4.5</span></div>
-                  <p class="small text-secondary mt-2 mb-3">Pantai timur yang tenang, cocok untuk sunrise, sepeda, dan
-                    keluarga.</p>
-                  <button class="btn btn-ghost w-100 btn-sm">Buka di Peta ↗</button>
-                </div>
-              </article>
+            <div class="carousel-dots mt-3">
+              <span class="active"></span><span></span><span></span
+              ><span></span>
             </div>
           </div>
-          <div class="carousel-dots mt-3">
-            <span class="active"></span><span></span><span></span><span></span>
-          </div>
-        </div>
 
-        <div class="banner-route d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-          <p class="mb-0 small">
-            ⚠️ <strong>Ingin Menyesuaikan Rute Perjalanan?</strong>
-            Pilih beberapa titik destinasi di atas untuk langsung merintis rute perkiraan durasi dan rute otomatis.
-          </p>
-          <div class="d-flex gap-2 flex-shrink-0">
-            <button class="btn btn-ghost">Reset Filter</button>
-            <button class="btn btn-navy px-3">Rencanakan Rute</button>
+          <div
+            class="banner-route d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3"
+          >
+            <p class="mb-0 small">
+              ⚠️ <strong>Ingin Menyesuaikan Rute Perjalanan?</strong>
+              Pilih beberapa titik destinasi di atas untuk langsung merintis
+              rute perkiraan durasi dan rute otomatis.
+            </p>
+            <div class="d-flex gap-2 flex-shrink-0">
+              <button class="btn btn-ghost">Reset Filter</button>
+              <button class="btn btn-navy px-3">Rencanakan Rute</button>
+            </div>
           </div>
         </div>
       </section>
 
       <!-- SECTION PROFIL (Default: d-none) -->
       <section id="sec-profil" class="content-section d-none">
-        <div class="card p-4 p-md-5 border-0 shadow-sm rounded-4 my-4 bg-white">
-          <div class="d-flex align-items-center gap-3 mb-4">
-            <span class="user-chip" style="width: 56px; height: 56px; font-size: 1.5rem;"><i
-                class="bi bi-person"></i></span>
-            <div>
-              <h2 class="h4 fw-bold mb-0">Profil Pengguna</h2>
-              <span class="text-secondary small">Tamu Wisatawan / Penjelajah Bali</span>
+        <div class="container">
+          <div
+            class="card p-4 p-md-5 border-0 shadow-sm rounded-4 my-4 bg-white"
+          >
+            <div class="d-flex align-items-center gap-3 mb-4">
+              <span
+                class="user-chip"
+                style="width: 56px; height: 56px; font-size: 1.5rem"
+                ><i class="bi bi-person"></i
+              ></span>
+              <div>
+                <h2 class="h4 fw-bold mb-0">Profil Pengguna</h2>
+                <span class="text-secondary small"
+                  >Tamu Wisatawan / Penjelajah Bali</span
+                >
+              </div>
             </div>
-          </div>
-          <p class="text-secondary mb-4" style="line-height: 1.6;">
-            Kelola preferensi akun, simpan destinasi favorit yang telah Anda tandai (pin) dari peta, dan susun rute
-            perjalanan wisata Anda untuk petualangan berikutnya di Pulau Dewata.
-          </p>
-          <div class="d-flex gap-2">
-            <button class="btn btn-navy px-4 py-2" type="button">Masuk Akun</button>
-            <button class="btn btn-ghost px-4 py-2" type="button">Daftar Akun Baru</button>
+            <p class="text-secondary mb-4" style="line-height: 1.6">
+              Kelola preferensi akun, simpan destinasi favorit yang telah Anda
+              tandai (pin) dari peta, dan susun rute perjalanan wisata Anda
+              untuk petualangan berikutnya di Pulau Dewata.
+            </p>
+            <div class="d-flex gap-2">
+              <button class="btn btn-navy px-4 py-2" type="button">
+                Masuk Akun
+              </button>
+              <button class="btn btn-ghost px-4 py-2" type="button">
+                Daftar Akun Baru
+              </button>
+            </div>
           </div>
         </div>
       </section>
-    </div>
-  </main>
+    </main>
 
-  <footer class="site">
-    <div class="container">
-      <div class="row g-4 pb-4">
-        <div class="col-md-4">
-          <div class="d-flex align-items-center gap-2 mb-2">
-            <img src="public/assets/logo_langkahbaswara.png" alt="Logo Langkah Baswara" height="32"
-              style="width: auto; max-height: 32px; object-fit: contain;">
-            <strong style="color: var(--dark-green); font-size: 1.1rem;">Langkah Baswara</strong>
+    <footer class="site">
+      <div class="container">
+        <div class="row g-4 pb-4">
+          <div class="col-md-4">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <img
+                src="public/assets/logo_langkahbaswara.png"
+                alt="Logo Langkah Baswara"
+                height="32"
+                style="width: auto; max-height: 32px; object-fit: contain"
+              />
+              <strong style="color: var(--dark-green); font-size: 1.1rem"
+                >Langkah Baswara</strong
+              >
+            </div>
+            <p class="muted mb-0">
+              Platform eksplorasi destinasi wisata Bali terpadu dengan panduan
+              budaya, keindahan alam, dan peta interaktif untuk merencanakan
+              perjalanan Anda.
+            </p>
           </div>
-          <p class="muted mb-0">Platform eksplorasi destinasi wisata Bali terpadu dengan panduan budaya, keindahan alam,
-            dan peta interaktif untuk merencanakan perjalanan Anda.</p>
+          <div class="col-md-2">
+            <h6 class="fw-bold">Eksplorasi</h6>
+            <ul class="list-unstyled muted">
+              <li><a href="#">Peta Wisata</a></li>
+              <li><a href="#">Kategori</a></li>
+              <li><a href="#">Kabupaten</a></li>
+              <li><a href="#">Rute Perjalanan</a></li>
+            </ul>
+          </div>
+          <div class="col-md-3">
+            <h6 class="fw-bold">Informasi</h6>
+            <ul class="list-unstyled muted">
+              <li><a href="#">Tentang Platform</a></li>
+              <li><a href="#">Budaya & Etika</a></li>
+              <li><a href="#">Kebijakan Privasi</a></li>
+              <li><a href="#">Syarat Layanan</a></li>
+            </ul>
+          </div>
+          <div class="col-md-3">
+            <h6 class="fw-bold">Kontak & Bantuan</h6>
+            <ul class="list-unstyled muted">
+              <li><a href="#">Pusat Bantuan</a></li>
+              <li><a href="#">Lapor Destinasi</a></li>
+              <li><a href="#">hello@langkahbaswara.id</a></li>
+              <li><a href="#">Instagram</a></li>
+            </ul>
+          </div>
         </div>
-        <div class="col-md-2">
-          <h6 class="fw-bold">Eksplorasi</h6>
-          <ul class="list-unstyled muted">
-            <li><a href="#">Peta Wisata</a></li>
-            <li><a href="#">Kategori</a></li>
-            <li><a href="#">Kabupaten</a></li>
-            <li><a href="#">Rute Perjalanan</a></li>
-          </ul>
-        </div>
-        <div class="col-md-3">
-          <h6 class="fw-bold">Informasi</h6>
-          <ul class="list-unstyled muted">
-            <li><a href="#">Tentang Platform</a></li>
-            <li><a href="#">Budaya & Etika</a></li>
-            <li><a href="#">Kebijakan Privasi</a></li>
-            <li><a href="#">Syarat Layanan</a></li>
-          </ul>
-        </div>
-        <div class="col-md-3">
-          <h6 class="fw-bold">Kontak & Bantuan</h6>
-          <ul class="list-unstyled muted">
-            <li><a href="#">Pusat Bantuan</a></li>
-            <li><a href="#">Lapor Destinasi</a></li>
-            <li><a href="#">hello@langkahbaswara.id</a></li>
-            <li><a href="#">Instagram</a></li>
-          </ul>
+        <div class="border-top pt-3 pb-2 small text-secondary">
+          © 2024 Bali Destination Platform. Seluruh hak cipta dilindungi
+          undang-undang.
         </div>
       </div>
-      <div class="border-top pt-3 pb-2 small text-secondary">
-        © 2024 Bali Destination Platform. Seluruh hak cipta dilindungi undang-undang.
-      </div>
-    </div>
-  </footer>
+    </footer>
 
-  <!-- Dependencies CDN: Leaflet JS & Bootstrap 5 Bundle JS (jalur /js/ yang valid) -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    (function () {
-      'use strict';
-
-      // Koordinat default
-      const BALI = [-8.409518, 115.188919];
-      const ULUWATU = [-8.8291, 115.0849];
-
-      // Variabel state & layer
-      let map = null;
-      let markers = null;
-      let boundsLayer = null;
-      let userMarker = null;
-      let allFeatures = [];
-
-      let currentSearch = '';
-      let currentKabupaten = 'all';
-      let currentCategory = 'all';
-
-      // Konfigurasi Basemap Tile Layers
-      const layers = {
-        street: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19,
-          attribution: '&copy; OpenStreetMap contributors'
-        }),
-        satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-          maxZoom: 19,
-          attribution: 'Tiles &copy; Esri'
-        }),
-        dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-          maxZoom: 19,
-          attribution: '&copy; OSM &copy; CARTO'
-        })
-      };
-
-      // 1. Inisialisasi Peta Leaflet yang aman dari konflik "Map container is already initialized"
-      function initMap() {
-        const container = document.getElementById('map');
-        if (!container) return;
-
-        // Bersihkan instance lama jika sudah terpasang
-        if (window._leafletMap && typeof window._leafletMap.remove === 'function') {
-          window._leafletMap.remove();
-          window._leafletMap = null;
-        } else if (container._leaflet_id) {
-          container._leaflet_id = null;
-        }
-
-        map = L.map('map', {
-          center: BALI,
-          zoom: 10,
-          zoomControl: false,
-          layers: [layers.street]
-        });
-
-        // Simpan referensi global agar bisa di-remove dengan aman saat re-render
-        window._leafletMap = map;
-
-        // Kontrol zoom di kanan atas
-        L.control.zoom({ position: 'topright' }).addTo(map);
-
-        // Group layer untuk titik wisata
-        markers = L.layerGroup().addTo(map);
-      }
-
-      // Template popup info destinasi
-      function createPopupContent(props) {
-        const loc = props.kabupaten_kota || 'Bali';
-        const nama = props.nama || 'Destinasi Wisata';
-        const rating = props.rating ? `⭐ ${props.rating}` : '⭐ 4.5';
-        const kategori = props.kategori ? ` • ${props.kategori}` : '';
-        const mapAction = props.link
-          ? `<a href="${props.link}" target="_blank" rel="noopener noreferrer" class="btn btn-navy btn-sm w-100 text-white text-decoration-none text-center d-block mt-2">Buka di Peta ↗</a>`
-          : `<button class="btn btn-navy btn-sm w-100 mt-2" type="button">Lihat Detail Lengkap</button>`;
-
-        return `
-          <div class="popup-card p-2">
-            <div class="loc">${loc}</div>
-            <h6 class="fw-bold mb-1">${nama}</h6>
-            <div class="small mb-1"><span class="rating-val">${rating}</span>${kategori}</div>
-            ${mapAction}
-          </div>`;
-      }
-
-      // Render daftar marker ke peta
-      function renderMarkers(features) {
-        if (!markers || !map) return;
-        markers.clearLayers();
-
-        let firstMarker = null;
-
-        features.forEach((feature) => {
-          if (feature.geometry && Array.isArray(feature.geometry.coordinates)) {
-            const [lng, lat] = feature.geometry.coordinates;
-            if (typeof lat === 'number' && typeof lng === 'number' && !isNaN(lat) && !isNaN(lng)) {
-              const m = L.marker([lat, lng]);
-              m.bindPopup(createPopupContent(feature.properties || {}));
-              m.addTo(markers);
-              if (!firstMarker) firstMarker = m;
-            }
-          }
-        });
-
-        // Buka popup pertama jika layer aktif
-        if (firstMarker && map.hasLayer(markers)) {
-          firstMarker.openPopup();
-        }
-      }
-
-      // Fallback jika fetch GeoJSON terkendala (misalnya file:// protocol)
-      function loadFallbackMarker() {
-        if (!markers || !map) return;
-        markers.clearLayers();
-        const fallbackProps = {
-          kabupaten_kota: 'Badung Selatan',
-          nama: 'Pura Luhur Uluwatu',
-          rating: 4.8,
-          kategori: 'Budaya',
-          link: 'https://maps.google.com/?q=-8.8291,115.0849'
-        };
-        const uluwatuMarker = L.marker(ULUWATU).bindPopup(createPopupContent(fallbackProps)).addTo(markers);
-        if (map.hasLayer(markers)) {
-          uluwatuMarker.openPopup();
-        }
-      }
-
-      // 2. Pemanggilan GeoJSON via fetch menggunakan async/await & try-catch bersih
-      async function fetchWisataGeoJson() {
-        try {
-          const response = await fetch('public/data/wisata-bali.geojson');
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status} - ${response.statusText}`);
-          }
-          const geoData = await response.json();
-          if (geoData && Array.isArray(geoData.features) && geoData.features.length > 0) {
-            allFeatures = geoData.features;
-            renderMarkers(allFeatures);
-          } else {
-            throw new Error('Data GeoJSON kosong atau format tidak sesuai');
-          }
-        } catch (err) {
-          console.warn('GeoJSON fetch error (fallback aktif):', err.message);
-          loadFallbackMarker();
-        }
-      }
-
-      // 2. Fungsi Pengelompokan Kategori (Category Mapper)
-      function getCategoryGroup(feature) {
-        if (!feature || !feature.properties || feature.properties.kategori == null) {
-          return 'umum';
-        }
-
-        const raw = feature.properties.kategori.toString().trim().toLowerCase();
-
-        // "alam": jika properti kategori mengandung 'alam', 'alami', 'pantai', 'air terjun', 'danau', 'gunung'
-        const alamKeywords = ['alam', 'alami', 'pantai', 'air terjun', 'danau', 'gunung'];
-        if (alamKeywords.some((k) => raw.includes(k))) {
-          return 'alam';
-        }
-
-        // "budaya": jika properti kategori mengandung 'budaya', 'religi', 'museum', 'pura', 'candi', 'sejarah'
-        const budayaKeywords = ['budaya', 'religi', 'museum', 'pura', 'candi', 'sejarah'];
-        if (budayaKeywords.some((k) => raw.includes(k))) {
-          return 'budaya';
-        }
-
-        // "rekreasi": jika properti kategori mengandung 'rekreasi', 'kuliner', 'edukasi', 'taman', 'hiburan'
-        const rekreasiKeywords = ['rekreasi', 'kuliner', 'edukasi', 'taman', 'hiburan'];
-        if (rekreasiKeywords.some((k) => raw.includes(k))) {
-          return 'rekreasi';
-        }
-
-        // "umum": untuk sisa lokasi lainnya
-        return 'umum';
-      }
-
-      // 3. Logika Filter Kategori GeoJSON
-      function isCategoryMatch(feature, selectedCategory) {
-        if (!selectedCategory) return true;
-        const selCat = selectedCategory.toString().trim().toLowerCase();
-
-        // Jika filter bernilai 'all' atau 'semua', tampilkan seluruh data
-        if (selCat === 'all' || selCat === 'semua' || selCat.startsWith('semua')) {
-          return true;
-        }
-
-        return getCategoryGroup(feature) === selCat;
-      }
-
-      // Filter destinasi berdasarkan input pencarian, dropdown kabupaten, dan chips kategori
-      function applyFilter() {
-        if (!allFeatures || allFeatures.length === 0) return;
-
-        const filtered = allFeatures.filter((feature) => {
-          const props = feature.properties || {};
-          const matchSearch = !currentSearch || (props.nama && props.nama.toLowerCase().includes(currentSearch));
-          const matchKab = currentKabupaten === 'all' || currentKabupaten === 'semua' ||
-            (props.kabupaten_kota && props.kabupaten_kota.toLowerCase().includes(currentKabupaten));
-          const matchCat = isCategoryMatch(feature, currentCategory);
-
-          return matchSearch && matchKab && matchCat;
-        });
-
-        renderMarkers(filtered);
-      }
-
-      // Inisialisasi Event Listener
-      function setupEventListeners() {
-        // 4. Logika Interaksi Navigasi Section (Single Page Application Switcher)
-        function setupSectionNavigation() {
-          const navLinks = document.querySelectorAll('.nav-pills-lb .nav-link');
-          const sections = document.querySelectorAll('.content-section');
-
-          navLinks.forEach((link) => {
-            link.addEventListener('click', (e) => {
-              e.preventDefault();
-              const targetId = link.dataset.section;
-              if (!targetId) return;
-
-              // a. Ubah status class active pada menu
-              navLinks.forEach((l) => l.classList.remove('active'));
-              link.classList.add('active');
-
-              // b. Tampilkan section yang sesuai dan sembunyikan section lainnya (d-none)
-              sections.forEach((sec) => {
-                if (sec.id === targetId) {
-                  sec.classList.remove('d-none');
-                } else {
-                  sec.classList.add('d-none');
-                }
-              });
-
-              // Tutup menu collapse mobile jika sedang terbuka
-              const navCollapse = document.getElementById('navMain');
-              if (navCollapse && navCollapse.classList.contains('show') && window.bootstrap) {
-                const bsCollapse = bootstrap.Collapse.getInstance(navCollapse);
-                if (bsCollapse) bsCollapse.hide();
-              }
-
-              // c. KONTRAK KHUSUS LEAFLET: jika kembali ke tab "Jelajahi", jalankan map.invalidateSize()
-              if (targetId === 'sec-jelajahi' && map) {
-                map.invalidateSize();
-                setTimeout(() => {
-                  if (map) map.invalidateSize();
-                }, 100);
-              }
-            });
-          });
-        }
-
-        setupSectionNavigation();
-
-        // Mode basemap
-        document.querySelectorAll('.map-mode button').forEach((btn) => {
-          btn.addEventListener('click', () => {
-            document.querySelectorAll('.map-mode button').forEach((b) => b.classList.remove('active'));
-            btn.classList.add('active');
-            const basemapKey = btn.dataset.basemap;
-            if (layers[basemapKey] && map) {
-              Object.values(layers).forEach((lyr) => {
-                if (map.hasLayer(lyr)) map.removeLayer(lyr);
-              });
-              layers[basemapKey].addTo(map);
-            }
-          });
-        });
-
-        // Kontrol Layer Marker
-        const lyrCat = document.getElementById('lyrCat');
-        if (lyrCat) {
-          lyrCat.addEventListener('change', (e) => {
-            if (!map || !markers) return;
-            if (e.target.checked) {
-              if (!map.hasLayer(markers)) markers.addTo(map);
-            } else {
-              if (map.hasLayer(markers)) map.removeLayer(markers);
-            }
-          });
-        }
-
-        // Kontrol Layer Batas Wilayah
-        const lyrBound = document.getElementById('lyrBound');
-        if (lyrBound) {
-          lyrBound.addEventListener('change', (e) => {
-            if (!map) return;
-            if (e.target.checked) {
-              if (boundsLayer && map.hasLayer(boundsLayer)) map.removeLayer(boundsLayer);
-              boundsLayer = L.rectangle([[-8.85, 114.42], [-8.06, 115.72]], {
-                color: '#111827',
-                weight: 1,
-                fillOpacity: 0.04
-              }).addTo(map);
-            } else if (boundsLayer && map.hasLayer(boundsLayer)) {
-              map.removeLayer(boundsLayer);
-              boundsLayer = null;
-            }
-          });
-        }
-
-        // Kontrol GPS & Lokasi
-        function locateUser() {
-          if (map) map.locate({ setView: true, maxZoom: 13 });
-        }
-
-        const btnLocate = document.getElementById('btnLocate');
-        if (btnLocate) {
-          btnLocate.addEventListener('click', locateUser);
-        }
-
-        const lyrGps = document.getElementById('lyrGps');
-        if (lyrGps) {
-          lyrGps.addEventListener('change', (e) => {
-            if (e.target.checked) {
-              locateUser();
-            } else if (userMarker && map) {
-              if (map.hasLayer(userMarker)) map.removeLayer(userMarker);
-              userMarker = null;
-            }
-          });
-        }
-
-        if (map) {
-          map.on('locationfound', (e) => {
-            if (userMarker && map.hasLayer(userMarker)) map.removeLayer(userMarker);
-            userMarker = L.circleMarker(e.latlng, {
-              radius: 8,
-              color: '#458132',
-              fillColor: '#9ad872',
-              fillOpacity: 1,
-              weight: 2
-            }).addTo(map).bindPopup('Lokasi Anda');
-            const gpsCheck = document.getElementById('lyrGps');
-            if (gpsCheck) gpsCheck.checked = true;
-          });
-
-          map.on('locationerror', (err) => {
-            console.warn('Geolokasi tidak dapat diakses:', err.message);
-            alert('Lokasi tidak dapat diakses. Izinkan GPS di browser.');
-            const gpsCheck = document.getElementById('lyrGps');
-            if (gpsCheck) gpsCheck.checked = false;
-          });
-        }
-
-        // Tombol Terapkan Filter
-        const btnApply = document.querySelector('.filter-card .btn-navy');
-        if (btnApply) {
-          btnApply.addEventListener('click', applyFilter);
-        }
-
-        // Pencarian input & tombol clear
-        const searchInput = document.getElementById('searchInput');
-        const clearSearch = document.getElementById('clearSearch');
-
-        if (searchInput) {
-          searchInput.addEventListener('input', (e) => {
-            currentSearch = e.target.value.trim().toLowerCase();
-            applyFilter();
-          });
-        }
-
-        if (clearSearch && searchInput) {
-          clearSearch.addEventListener('click', () => {
-            searchInput.value = '';
-            currentSearch = '';
-            applyFilter();
-          });
-        }
-
-        // Dropdown Filter Kabupaten
-        const kabupatenFilter = document.getElementById('kabupatenFilter');
-        if (kabupatenFilter) {
-          kabupatenFilter.addEventListener('change', (e) => {
-            const val = e.target.value;
-            currentKabupaten = val.includes('Semua Kabupaten') ? 'all' : val.trim().toLowerCase();
-            applyFilter();
-          });
-        }
-
-        // Filter Kategori Chips
-        document.querySelectorAll('.chip').forEach((chip) => {
-          chip.addEventListener('click', (ev) => {
-            ev.preventDefault();
-            document.querySelectorAll('.chip').forEach((c) => c.classList.remove('active'));
-            chip.classList.add('active');
-
-            // Ambil dari data-category atau fallback parsing teks
-            const catAttr = chip.dataset.category;
-            if (catAttr) {
-              currentCategory = catAttr.toLowerCase();
-            } else {
-              const text = chip.textContent.trim().toLowerCase();
-              if (text.includes('semua')) {
-                currentCategory = 'all';
-              } else {
-                currentCategory = text.split('(')[0].trim().toLowerCase();
-              }
-            }
-            applyFilter();
-          });
-        });
-
-        // Interaktivitas kartu galeri (Buka di Peta)
-        const galleryLocations = {
-          'Tanah Lot': [-8.6212, 115.0868],
-          'Pura Uluwatu': [-8.8291, 115.0849],
-          'Terasering Tegalalang': [-8.4348, 115.2789],
-          'Pantai Sanur': [-8.6833, 115.2625]
-        };
-
-        document.querySelectorAll('.dest-card').forEach((card) => {
-          const titleEl = card.querySelector('strong');
-          const btn = card.querySelector('button.btn-ghost');
-          if (titleEl && btn) {
-            const name = titleEl.textContent.trim();
-            if (galleryLocations[name]) {
-              btn.addEventListener('click', () => {
-                if (!map) return;
-                map.flyTo(galleryLocations[name], 14, { duration: 1.2 });
-                const mapEl = document.getElementById('map');
-                if (mapEl) {
-                  window.scrollTo({ top: mapEl.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
-                }
-              });
-            }
-          }
-        });
-
-        // Tombol Reset Filter di Banner
-        const resetBtn = document.querySelector('.banner-route .btn-ghost');
-        if (resetBtn) {
-          resetBtn.addEventListener('click', () => {
-            if (searchInput) searchInput.value = '';
-            currentSearch = '';
-            if (kabupatenFilter) kabupatenFilter.selectedIndex = 0;
-            currentKabupaten = 'all';
-            document.querySelectorAll('.chip').forEach((c, idx) => {
-              c.classList.toggle('active', idx === 0);
-            });
-            currentCategory = 'all';
-            applyFilter();
-            if (map) map.flyTo(BALI, 10);
-          });
-        }
-      }
-
-      // Eksekusi saat DOM siap
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-          initMap();
-          setupEventListeners();
-          fetchWisataGeoJson();
-        });
-      } else {
-        initMap();
-        setupEventListeners();
-        fetchWisataGeoJson();
-      }
-    })();
-  </script>
-</body>
-
+    <!-- Dependencies CDN: Leaflet JS & Bootstrap 5 Bundle JS (jalur /js/ yang valid) -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="main.js"></script>
+  </body>
 </html>
