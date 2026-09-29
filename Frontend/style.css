@@ -31,6 +31,15 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  overflow-x: hidden;
+}
+
+img {
+  max-width: 100%;
+}
+
 body {
   font-family:
     "Satoshi",
@@ -73,13 +82,22 @@ select {
   width: 100%;
   z-index: 1100;
   padding: 1.25rem 0;
-  background: rgba(255, 255, 255, 0.15) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   border: none !important;
   border-bottom: none !important;
   box-shadow: none !important;
   transition: all 0.3s ease;
+}
+
+/* Saat halaman di-scroll, navbar diberi latar blur supaya menu tetap terbaca */
+.navbar-lb.scrolled {
+  background: rgba(248, 250, 252, 0.25) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  box-shadow: none !important;
+  padding: 0.75rem 0;
 }
 
 .navbar-lb .container,
@@ -147,14 +165,17 @@ select {
   }
 }
 
-/* Kapsul Menu Tengah Solid (#ffef91) & Lebar */
+/* Kapsul Menu Tengah Solid (#ffef91) & Lebar
+   Padding luar tipis dan seragam (6px) supaya pill hijau menu aktif
+   hampir memenuhi tinggi kapsul kuning (atas, bawah, kiri sama tipis). */
 .nav-pills-lb {
   background-color: var(--pastel-yellow) !important; /* #ffef91 solid murni */
   border-radius: 999px;
-  padding: 8px 28px;
+  padding: 0; /* tanpa padding: pill hijau menyentuh atas, bawah & sisi kapsul kuning */
+  overflow: hidden;
   display: inline-flex;
-  align-items: center;
-  gap: 1.75rem;
+  align-items: stretch;
+  gap: 0.5rem;
   list-style: none;
   margin: 0;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
@@ -172,7 +193,8 @@ select {
   font-weight: 600;
   color: #1a2216;
   border-radius: 999px;
-  padding: 0.65rem 2.2rem; /* Jarak lebar kesamping antartulisan */
+  padding-top: 1rem;
+  padding-bottom: 1rem;
   text-decoration: none;
   transition: all 0.25s ease;
   display: inline-flex;
@@ -185,6 +207,23 @@ select {
 .nav-pills-lb .nav-link:hover:not(.active) {
   color: var(--dark-green);
   background-color: rgba(255, 255, 255, 0.45);
+}
+
+/* Padding kanan-kiri menu.
+   Selector dibuat lebih spesifik karena Bootstrap (.navbar-expand-lg .navbar-nav .nav-link)
+   sebelumnya menimpa padding horizontal, jadi kapsul tidak melebar. */
+@media (min-width: 992px) {
+  .navbar-lb .nav-pills-lb .nav-link {
+    padding-left: 2.2rem;
+    padding-right: 2.2rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .navbar-lb .nav-pills-lb .nav-link {
+    padding-left: 3.4rem;
+    padding-right: 3.4rem;
+  }
 }
 
 /* Menu Aktif (Beranda): Dark Green pill */
@@ -646,21 +685,22 @@ footer a:hover {
   display: inline-block;
 }
 
-/* 1. HERO SECTION (FULL WIDTH) */
+/* 1. HERO SECTION (FULL WIDTH)
+   Rasio tinggi section dikunci sesuai rasio gambar (aspect-ratio),
+   jadi gambar TIDAK terpotong. Isi diposisikan pakai satuan vw. */
 .hero-landing {
   position: relative;
-  min-height: 720px;
   width: 100%;
+  aspect-ratio: 1.55 / 1;
+  min-height: 560px;
   border-radius: 0 !important;
   background-image: url("public/assets/landingpage1.png");
   background-size: cover;
-  background-position: center top;
+  background-position: center bottom;
   background-repeat: no-repeat;
   overflow: hidden;
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 9.5rem 0 3.5rem;
+  padding: 0;
   box-shadow: none !important;
   margin: 0;
 }
@@ -669,16 +709,17 @@ footer a:hover {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 500px;
   width: 100%;
-  flex-grow: 1;
+  min-height: 0;
+  padding-top: clamp(9rem, 19vw, 24rem);
+  padding-bottom: clamp(1.25rem, 2.6vw, 3.5rem);
 }
 
 .hero-content-left {
   max-width: 680px;
   position: relative;
   z-index: 2;
-  margin-top: 1rem;
+  margin-top: 0;
 }
 
 .hero-title {
@@ -730,60 +771,87 @@ footer a:hover {
   position: relative;
   z-index: 5;
   width: 100%;
-  max-width: 580px;
+  max-width: 740px;
   margin: 2rem auto 0;
 }
 
+/* Kapsul dasar HIJAU */
 .hero-search-box {
-  background: #ffffff;
-  border: 2.5px solid var(--dark-green);
+  background: var(--dark-green);
+  border: none;
   border-radius: 999px;
-  padding: 5px 6px 5px 22px;
+  padding: 7px 8px 7px 7px;
   display: flex;
   align-items: center;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  gap: 0.5rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.16);
   transition: all 0.2s ease;
 }
 
 .hero-search-box:focus-within {
-  box-shadow: 0 16px 36px rgba(69, 129, 50, 0.25);
-  border-color: #376828;
+  box-shadow: 0 16px 36px rgba(69, 129, 50, 0.35);
+  background: #3d722c;
 }
 
+/* Kapsul PUTIH tempat mengetik (di dalam kapsul hijau) */
 .hero-search-input {
   border: none;
   outline: none;
   flex: 1;
+  min-width: 0;
+  height: 52px;
+  padding: 0 1.6rem;
+  border-radius: 999px;
+  background: #ffffff;
   font-family: 'Satoshi', sans-serif;
-  font-size: 0.96rem;
+  font-size: 0.98rem;
   color: var(--navy);
-  background: transparent;
 }
 
 .hero-search-input::placeholder {
   color: #9ca3af;
-  font-size: 0.92rem;
+  font-size: 0.95rem;
 }
 
+/* Tombol cari berada di area hijau, ikon putih */
 .hero-search-btn {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background: var(--dark-green);
+  background: transparent;
   color: #ffffff;
-  border: none;
+  border: 2px solid rgba(255, 255, 255, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
 }
 
 .hero-search-btn:hover {
-  background: var(--dark-green-hover);
+  background: #ffffff;
+  color: var(--dark-green);
   transform: scale(1.05);
+}
+
+/* Fade halus di bawah hero supaya menyatu dengan section berikutnya */
+.hero-landing::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 14%;
+  background: linear-gradient(
+    to bottom,
+    rgba(248, 250, 252, 0) 0%,
+    rgba(248, 250, 252, 0.6) 60%,
+    var(--page) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* 2. ABOUT SECTION */
@@ -853,16 +921,19 @@ footer a:hover {
   filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.08));
 }
 
-/* 3. STEPS SECTION (FULL WIDTH) */
+/* 3. STEPS SECTION (FULL WIDTH)
+   Sama seperti hero: rasio dikunci mengikuti rasio gambar supaya utuh. */
 .steps-landing-section {
+  --step-size: clamp(76px, 8.5vw, 128px);
   position: relative;
   width: 100%;
+  aspect-ratio: 1.44 / 1;
   border-radius: 0 !important;
   background-image: url("public/assets/landingpage3.png");
   background-size: cover;
-  background-position: center top;
+  background-position: center bottom;
   background-repeat: no-repeat;
-  padding: 7rem 0 7.5rem;
+  padding: clamp(4rem, 12vw, 15rem) 0 3rem;
   box-shadow: none !important;
   overflow: hidden;
   margin: 0;
@@ -870,7 +941,7 @@ footer a:hover {
 
 .steps-title {
   font-family: 'Satoshi', sans-serif;
-  font-size: 2.2rem;
+  font-size: clamp(1.6rem, 3vw, 2.6rem);
   font-weight: 800;
   color: #1f2937;
   line-height: 1.3;
@@ -878,7 +949,7 @@ footer a:hover {
 
 .steps-connector-line {
   position: absolute;
-  top: 48px;
+  top: calc(var(--step-size) / 2);
   left: 17%;
   right: 17%;
   border-top: 2.5px dashed rgba(255, 255, 255, 0.85);
@@ -892,12 +963,12 @@ footer a:hover {
 }
 
 .step-circle-badge {
-  width: 92px;
-  height: 92px;
+  width: var(--step-size);
+  height: var(--step-size);
   border-radius: 50%;
   background: #ffffff;
   color: var(--dark-green);
-  font-size: 2.6rem;
+  font-size: calc(var(--step-size) * 0.45);
   font-weight: 800;
   display: flex;
   align-items: center;
@@ -926,6 +997,48 @@ footer a:hover {
   line-height: 1.6;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
   margin-bottom: 0;
+}
+
+/* Fade atas & bawah section steps: gambar luruh ke warna halaman, tidak ada tepi keras */
+.steps-landing-section::before,
+.steps-landing-section::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.steps-landing-section::before {
+  top: 0;
+  height: 22%;
+  background: linear-gradient(
+    to bottom,
+    var(--page) 0%,
+    rgba(248, 250, 252, 0.85) 25%,
+    rgba(248, 250, 252, 0.5) 55%,
+    rgba(248, 250, 252, 0.15) 82%,
+    rgba(248, 250, 252, 0) 100%
+  );
+}
+
+.steps-landing-section::after {
+  bottom: 0;
+  height: 20%;
+  background: linear-gradient(
+    to top,
+    var(--page) 0%,
+    rgba(248, 250, 252, 0.85) 25%,
+    rgba(248, 250, 252, 0.5) 55%,
+    rgba(248, 250, 252, 0.15) 82%,
+    rgba(248, 250, 252, 0) 100%
+  );
+}
+
+.steps-landing-section > .container {
+  position: relative;
+  z-index: 2;
 }
 
 /* 4. POPULAR DESTINATIONS SECTION */
@@ -1243,7 +1356,9 @@ footer a:hover {
   margin-top: 0.85rem;
 }
 
-/* Responsive adjustments */
+/* ========================================================
+   RESPONSIVE
+   ======================================================== */
 @media (max-width: 991px) {
   .navbar-lb {
     padding: 1rem 0;
@@ -1255,6 +1370,9 @@ footer a:hover {
     padding: 0.45rem 0.75rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
+  .navbar-lb .navbar-toggler:focus {
+    box-shadow: 0 0 0 0.2rem rgba(69, 129, 50, 0.3);
+  }
   .navbar-lb .navbar-collapse {
     background-color: #ffffff;
     border-radius: 20px;
@@ -1265,8 +1383,9 @@ footer a:hover {
   .nav-pills-lb {
     flex-direction: column;
     width: 100%;
-    border-radius: 16px;
+    border-radius: 22px;
     padding: 6px;
+    gap: 0.25rem;
   }
   .nav-pills-lb .nav-item {
     width: 100%;
@@ -1274,7 +1393,7 @@ footer a:hover {
   .nav-pills-lb .nav-link {
     width: 100%;
     text-align: center;
-    padding: 0.6rem 1rem;
+    padding: 0.7rem 1rem;
   }
   .navbar-lb .navbar-actions {
     margin-top: 0.75rem;
@@ -1283,20 +1402,52 @@ footer a:hover {
     width: 100%;
     justify-content: center;
   }
-  .hero-landing {
-    min-height: 520px;
-    padding: 7.5rem 0 2.5rem;
-    border-radius: 0 !important;
-  }
-  .hero-inner {
-    min-height: 380px;
-  }
-  .steps-landing-section {
-    padding: 4.5rem 0;
-    border-radius: 0 !important;
-  }
   .about-hero-img {
     margin-top: 1.5rem;
+  }
+  #map {
+    min-height: 420px;
+  }
+}
+
+/* Tablet & HP: rasio gambar dilepas, tinggi mengikuti isi,
+   gambar tetap utuh di sisi yang penting (kanan/bawah) */
+@media (max-width: 991px) {
+  .hero-landing {
+    aspect-ratio: auto;
+    min-height: 640px;
+    background-size: cover;
+    background-position: 68% bottom;
+  }
+  .hero-inner {
+    padding-top: 8rem;
+    padding-bottom: 1.75rem;
+  }
+  .hero-content-left {
+    max-width: 560px;
+  }
+
+  .steps-landing-section {
+    aspect-ratio: auto;
+    padding: 4.5rem 0 5rem;
+    background-size: cover;
+    background-position: center bottom;
+    background-image:
+      linear-gradient(to bottom, rgba(30, 55, 15, 0) 0%, rgba(30, 55, 15, 0.45) 40%, rgba(30, 55, 15, 0.8) 100%),
+      url("public/assets/landingpage3.png");
+  }
+  .steps-title {
+    margin-bottom: 0;
+  }
+  .steps-container .row {
+    row-gap: 2.5rem !important;
+  }
+  .step-circle-badge {
+    margin-bottom: 1rem;
+  }
+  .step-item {
+    max-width: 420px;
+    margin: 0 auto;
   }
 }
 
@@ -1304,20 +1455,8 @@ footer a:hover {
   .landing-wrap {
     gap: 3rem;
   }
-  .hero-landing {
-    min-height: 480px;
-    padding: 6.5rem 0 2rem;
-    border-radius: 0 !important;
-  }
-  .hero-inner {
-    min-height: 340px;
-  }
   .hero-tagline {
     font-size: 1rem;
-  }
-  .steps-landing-section {
-    padding: 3.5rem 0;
-    border-radius: 0 !important;
   }
   .steps-title,
   .popular-section-title,
@@ -1330,5 +1469,73 @@ footer a:hover {
   }
   .faq-question {
     font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 575px) {
+  .hero-landing {
+    min-height: 600px;
+    background-position: 74% bottom;
+  }
+  .hero-inner {
+    padding-top: 7rem;
+  }
+  .hero-title {
+    font-size: 1.85rem;
+  }
+  .hero-nowrap {
+    white-space: normal !important;
+  }
+  .hero-search-wrapper {
+    margin-top: 1.5rem;
+  }
+  .hero-search-box {
+    padding: 5px 6px 5px 5px;
+  }
+  .hero-search-input {
+    font-size: 0.88rem;
+    height: 46px;
+    padding: 0 1.1rem;
+  }
+  .hero-search-btn {
+    width: 42px;
+    height: 42px;
+    font-size: 1.05rem;
+  }
+  .steps-title br,
+  .popular-section-title br,
+  .faq-section-title br {
+    display: none;
+  }
+  .landing-card-thumb {
+    height: 190px;
+  }
+  .landing-chip {
+    padding: 0.35rem 1.05rem;
+    font-size: 0.85rem;
+  }
+  .faq-item-custom,
+  .faq-item-custom.active {
+    border-radius: 24px;
+  }
+  .map-mode {
+    top: 10px;
+    right: 10px;
+  }
+  .map-mode button {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.76rem;
+  }
+  .layer-widget {
+    position: static;
+    width: 100%;
+    border-radius: 0 0 14px 14px;
+    box-shadow: none;
+    border: 0;
+    border-top: 1px solid var(--line);
+  }
+  #map {
+    min-height: 360px;
+    height: 50vh;
   }
 }

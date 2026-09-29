@@ -582,7 +582,17 @@
         setupEventListeners();
         setupBerandaFilters();
         setupFaqAccordion();
+        setupNavbarScroll();
         fetchWisataGeoJson();
+      }
+
+      // Navbar: beri latar blur saat halaman di-scroll
+      function setupNavbarScroll() {
+        const nav = document.querySelector('.navbar-lb');
+        if (!nav) return;
+        const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 40);
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
       }
 
       // Eksekusi saat DOM siap
