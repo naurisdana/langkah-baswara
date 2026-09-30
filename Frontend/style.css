@@ -933,10 +933,18 @@ footer a:hover {
   background-size: cover;
   background-position: center bottom;
   background-repeat: no-repeat;
-  padding: clamp(4rem, 12vw, 15rem) 0 3rem;
+  /* Isi (judul + langkah) diletakkan tepat di tengah section secara vertikal */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(2rem, 4vw, 5rem) 0;
   box-shadow: none !important;
   overflow: hidden;
   margin: 0;
+}
+
+.steps-landing-section > .container {
+  width: 100%;
 }
 
 .steps-title {
@@ -1429,7 +1437,7 @@ footer a:hover {
 
   .steps-landing-section {
     aspect-ratio: auto;
-    padding: 4.5rem 0 5rem;
+    padding: 5rem 0;
     background-size: cover;
     background-position: center bottom;
     background-image:
