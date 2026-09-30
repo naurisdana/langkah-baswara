@@ -602,3 +602,207 @@
         startApp();
       }
     })();
+
+// ==========================================
+// HALAMAN TENTANG: scroll reveal + wheel fitur
+// ==========================================
+(function () {
+  'use strict';
+
+  document.documentElement.classList.add('about-js');
+
+  // ---- Reveal halus saat section masuk layar ----
+  const revealEls = document.querySelectorAll('#sec-tentang .about-reveal');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            io.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -6% 0px' }
+    );
+    revealEls.forEach((el) => io.observe(el));
+  } else {
+    revealEls.forEach((el) => el.classList.add('is-visible'));
+  }
+
+  // ---- Wheel fitur (bisa digeser / drag) ----
+  const track = document.getElementById('aboutWheelTrack');
+  const dotsWrap = document.getElementById('aboutWheelDots');
+  if (!track || !dotsWrap) return;
+
+  const originals = Array.from(track.querySelectorAll('.about-feature-card'));
+  const N = originals.length;
+  if (!N) return;
+
+  // ---- Loop tanpa ujung: gandakan kartu 2 set di kiri & 2 set di kanan ----
+  const COPIES = 2;
+  const makeClones = () =>
+    originals.map((c) => {
+      const k = c.cloneNode(true);
+      k.setAttribute('aria-hidden', 'true');
+      k.classList.remove('is-active');
+      return k;
+    });
+  for (let i = 0; i < COPIES; i++) {
+    makeClones().forEach((c) => track.insertBefore(c, originals[0]));
+    makeClones().forEach((c) => track.appendChild(c));
+  }
+
+  const cards = Array.from(track.querySelectorAll('.about-feature-card'));
+  const HOME = COPIES * N; // indeks kartu pertama di set asli
+  const START_INDEX = HOME + Math.min(2, N - 1); // kartu ke-3 di tengah
+  let activeIndex = -1;
+  let initialized = false;
+  let ticking = false;
+  let dragging = false;
+  let idleTimer = null;
+
+  const mod = (i) => ((i % N) + N) % N;
+
+  const dots = originals.map((_, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.setAttribute('aria-label', 'Tampilkan fitur ' + (i + 1));
+    b.addEventListener('click', () => {
+      const cur = nearestIndex();
+      let diff = mod(i - cur);
+      if (diff > N / 2) diff -= N;
+      scrollToCard(cur + diff, true);
+    });
+    dotsWrap.appendChild(b);
+    return b;
+  });
+
+  const cardCenter = (card) => card.offsetLeft + card.offsetWidth / 2;
+
+  function scrollToCard(i, smooth) {
+    const card = cards[i];
+    if (!card) return;
+    track.scrollTo({
+      left: cardCenter(card) - track.clientWidth / 2,
+      behavior: smooth ? 'smooth' : 'auto',
+    });
+  }
+
+  function nearestIndex() {
+    const mid = track.scrollLeft + track.clientWidth / 2;
+    let best = 0;
+    let bestDist = Infinity;
+    cards.forEach((c, i) => {
+      const d = Math.abs(cardCenter(c) - mid);
+      if (d < bestDist) {
+        bestDist = d;
+        best = i;
+      }
+    });
+    return best;
+  }
+
+  // Jika sudah masuk set kloning, lompat diam-diam ke kartu yang sama di set asli
+  function recenter() {
+    if (dragging || track.clientWidth === 0) return;
+    const idx = nearestIndex();
+    if (idx >= HOME && idx < HOME + N) return;
+    const target = HOME + mod(idx);
+    const delta = cardCenter(cards[target]) - cardCenter(cards[idx]);
+    track.style.scrollSnapType = 'none';
+    track.scrollLeft += delta;
+    requestAnimationFrame(() => {
+      track.style.scrollSnapType = '';
+      update();
+    });
+  }
+
+  // Skala & opacity mengikuti jarak ke tengah -> efek wheel
+  function update() {
+    ticking = false;
+    const mid = track.scrollLeft + track.clientWidth / 2;
+    const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+    cards.forEach((c) => {
+      const dist = Math.abs(cardCenter(c) - mid);
+      const t = Math.min(dist / (c.offsetWidth + gap), 1);
+      c.style.transform = 'scale(' + (1.06 - t * 0.18).toFixed(3) + ')';
+      c.style.opacity = (1 - t * 0.25).toFixed(2);
+    });
+    const best = nearestIndex();
+    if (best !== activeIndex) {
+      activeIndex = best;
+      cards.forEach((c, i) => c.classList.toggle('is-active', i === best));
+      dots.forEach((d, i) => d.classList.toggle('active', i === mod(best)));
+    }
+  }
+
+  function requestUpdate() {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(update);
+    }
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(recenter, 140);
+  }
+
+  track.addEventListener('scroll', requestUpdate, { passive: true });
+
+  // Section awalnya d-none (lebar 0): posisikan saat pertama kali tampil
+  if ('ResizeObserver' in window) {
+    new ResizeObserver(() => {
+      if (track.clientWidth === 0) return;
+      const idx = initialized && activeIndex >= 0 ? HOME + mod(activeIndex) : START_INDEX;
+      initialized = true;
+      scrollToCard(idx, false);
+      update();
+    }).observe(track);
+  } else {
+    window.addEventListener('resize', () => {
+      scrollToCard(activeIndex >= 0 ? HOME + mod(activeIndex) : START_INDEX, false);
+      update();
+    });
+  }
+
+  // Drag dengan mouse (sentuhan memakai scroll bawaan browser)
+  let startX = 0;
+  let startScroll = 0;
+
+  track.addEventListener('pointerdown', (e) => {
+    if (e.pointerType !== 'mouse' || e.button !== 0) return;
+    dragging = true;
+    startX = e.clientX;
+    startScroll = track.scrollLeft;
+    track.classList.add('is-dragging');
+    track.setPointerCapture(e.pointerId);
+  });
+
+  track.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    track.scrollLeft = startScroll - (e.clientX - startX);
+  });
+
+  function endDrag(e) {
+    if (!dragging) return;
+    dragging = false;
+    track.classList.remove('is-dragging');
+    if (e && e.pointerId !== undefined && track.hasPointerCapture(e.pointerId)) {
+      track.releasePointerCapture(e.pointerId);
+    }
+    scrollToCard(nearestIndex(), true);
+  }
+
+  track.addEventListener('pointerup', endDrag);
+  track.addEventListener('pointercancel', endDrag);
+
+  // Keyboard: panah kiri/kanan
+  track.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      scrollToCard(activeIndex + 1, true);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      scrollToCard(activeIndex - 1, true);
+    }
+  });
+})();

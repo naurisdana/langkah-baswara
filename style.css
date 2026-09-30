@@ -1547,3 +1547,667 @@ footer a:hover {
     height: 50vh;
   }
 }
+
+/* ========================================================
+   ABOUT PAGE STYLES (#sec-tentang)
+   Font & warna memakai variabel yang sudah ada (Satoshi, --dark-green, dst.)
+   ======================================================== */
+
+/* Hero full-width menempel ke atas (di bawah navbar transparan) */
+#sec-tentang {
+  padding-top: 0 !important;
+}
+
+/* Transisi halus saat berpindah ke halaman Tentang */
+#sec-tentang:not(.d-none) {
+  animation: aboutFadeIn 0.7s ease both;
+}
+
+@keyframes aboutFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.about-wrap {
+  overflow-x: clip;
+  display: flex;
+  flex-direction: column;
+  gap: 4.5rem;
+  padding: 0 0 3.5rem;
+}
+
+/* ---------- Scroll reveal (aktif hanya jika JS jalan) ---------- */
+.about-js .about-reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition:
+    opacity 0.9s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 0.9s cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0s);
+}
+
+.about-js .about-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- Judul section (dipakai bersama) ---------- */
+.about-heading {
+  font-family: 'Satoshi', sans-serif;
+  font-size: clamp(2rem, 3.6vw, 2.9rem);
+  font-weight: 400;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: #1a2216;
+  margin: 0;
+}
+
+.about-heading strong {
+  font-weight: 800;
+  color: #111827;
+}
+
+.about-heading .highlight-oval-yellow {
+  font-weight: 400;
+}
+
+.about-subheading {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: #374151;
+  max-width: 660px;
+  margin: 0.9rem auto 0;
+}
+
+/* ---------- 1. HERO ---------- */
+.about-hero {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1.55 / 1;
+  min-height: 440px;
+  background-image: url("public/assets/aboutpage1.png");
+  background-size: cover;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.about-hero-inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: 0 5% 9% 8.4%;
+}
+
+/* Glow krem lembut di belakang teks supaya terbaca di atas ilustrasi */
+.about-hero-inner::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 2%;
+  top: -22%;
+  width: 46%;
+  height: 120%;
+  background: radial-gradient(
+    closest-side,
+    rgba(255, 250, 236, 0.92) 0%,
+    rgba(255, 250, 236, 0.8) 55%,
+    rgba(255, 250, 236, 0) 100%
+  );
+  pointer-events: none;
+}
+
+.about-hero-title {
+  font-family: 'Satoshi', sans-serif;
+  font-size: clamp(2rem, 3.4vw, 3.4rem);
+  font-weight: 400;
+  color: #1a2216;
+  letter-spacing: -0.02em;
+  margin: 0;
+  text-shadow: 0 1px 10px rgba(255, 250, 236, 0.9);
+  animation: aboutRise 1s cubic-bezier(0.22, 0.61, 0.36, 1) 0.15s both;
+}
+
+.about-hero-title strong {
+  font-weight: 800;
+}
+
+.about-hero-tagline {
+  font-family: 'Satoshi', sans-serif;
+  font-size: clamp(0.95rem, 1.3vw, 1.2rem);
+  line-height: 1.5;
+  color: #1a2216;
+  font-weight: 500;
+  max-width: 28em;
+  margin: 0.9rem 0 0;
+  text-shadow: 0 1px 8px rgba(255, 250, 236, 0.9);
+  animation: aboutRise 1s cubic-bezier(0.22, 0.61, 0.36, 1) 0.35s both;
+}
+
+.about-hero-tagline strong {
+  font-weight: 800;
+}
+
+@keyframes aboutRise {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Fade bawah hero supaya menyatu dengan halaman */
+.about-hero::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 16%;
+  background: linear-gradient(
+    to bottom,
+    rgba(248, 250, 252, 0) 0%,
+    rgba(248, 250, 252, 0.6) 60%,
+    var(--page) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ---------- 2. MENGENAL LANGKAH BASWARA ---------- */
+.about-intro {
+  position: relative;
+  padding: 1rem 0;
+}
+
+/* Judul di atas splash hijau */
+.about-intro .about-heading {
+  position: relative;
+  z-index: 2;
+}
+
+.about-intro-stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.9fr) minmax(0, 1fr);
+  aspect-ratio: 2.5 / 1;
+  margin-top: 1rem;
+}
+
+/* Splash di belakang gambar (aboutpage2) */
+.about-intro-stage::before,
+.about-intro-stage::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Kanan atas: hijau (ukuran sama dengan splash krem, berada di bawah judul) */
+.about-intro-stage::before {
+  width: 40%;
+  height: 70%;
+  left: 54%;
+  top: -26%;
+  background: radial-gradient(closest-side, #8EEB71 0%, #B3EDA1 45%, #FFFFFF00 100%);
+}
+
+/* Kiri bawah: krem */
+.about-intro-stage::after {
+  width: 40%;
+  height: 70%;
+  left: 2%;
+  top: 48%;
+  background: radial-gradient(closest-side, #FADFAC 0%, #F9EDD3 45%, #FFFFFF00 100%);
+}
+
+.about-intro-art {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 73%;
+  height: 100%;
+  transform: translate(-50%, -50%);
+  background: url("public/assets/aboutpage2.png") center / contain no-repeat;
+  z-index: 1;
+}
+
+/* .about-reveal memakai transform; khusus art dijaga tetap di tengah */
+.about-js .about-intro-art.about-reveal {
+  transform: translate(-50%, calc(-50% + 32px));
+}
+
+.about-js .about-intro-art.about-reveal.is-visible {
+  transform: translate(-50%, -50%);
+}
+
+.about-intro-text {
+  position: relative;
+  z-index: 2;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #1a2216;
+  text-align: justify;
+  hyphens: auto;
+  margin: 0;
+}
+
+.about-intro-text strong {
+  font-weight: 800;
+  color: #111827;
+}
+
+.about-intro-left {
+  grid-column: 1;
+  align-self: start;
+  margin-top: 6%;
+}
+
+.about-intro-right {
+  grid-column: 3;
+  align-self: end;
+  margin-bottom: 6%;
+}
+
+/* ---------- 3. FITUR UNGGULAN (WHEEL) ---------- */
+.about-feature-section {
+  width: 100%;
+  overflow: hidden;
+}
+
+.about-wheel {
+  --afc-w: clamp(235px, 23vw, 310px);
+  --afc-gap: clamp(14px, 2vw, 28px);
+  margin-top: 1.5rem;
+}
+
+.about-wheel-track {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--afc-gap);
+  padding: 2.75rem 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
+}
+
+.about-wheel-track::-webkit-scrollbar {
+  display: none;
+}
+
+.about-wheel-track.is-dragging {
+  cursor: grabbing;
+  scroll-snap-type: none;
+}
+
+/* Spacer agar kartu pertama & terakhir bisa berada tepat di tengah */
+.about-wheel-track::before,
+.about-wheel-track::after {
+  content: '';
+  flex: 0 0 max(0px, calc(50% - var(--afc-w) / 2 - var(--afc-gap)));
+}
+
+.about-feature-card {
+  flex: 0 0 var(--afc-w);
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  padding: 1.1rem 1.1rem 1.6rem;
+  border-radius: 26px;
+  text-align: center;
+  background:
+    url("public/assets/fiturabout.png") center / cover no-repeat,
+    linear-gradient(to top, #FFE286 0%, #FEE8B6 100%);
+  box-shadow: 0 10px 26px rgba(69, 129, 50, 0.12);
+  transform: scale(0.88);
+  transition: box-shadow 0.35s ease;
+  will-change: transform;
+}
+
+.about-feature-card.is-active {
+  box-shadow: 0 20px 44px rgba(69, 129, 50, 0.24);
+}
+
+.afc-visual {
+  margin: 0.25rem 0 1rem;
+}
+
+.afc-visual img {
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.08));
+}
+
+.afc-title {
+  font-family: 'Satoshi', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #1a2216;
+  margin-bottom: 0.45rem;
+}
+
+.afc-desc {
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: #1a2216;
+  margin: 0;
+}
+
+.about-wheel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.about-wheel-dots button {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: #d1d5db;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.about-wheel-dots button.active {
+  width: 26px;
+  background: var(--dark-green);
+}
+
+/* ---------- 4. AJAKAN (CTA) ---------- */
+.about-cta {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1.6 / 1;
+  min-height: 460px;
+  background-image: url("public/assets/aboutpage3.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+}
+
+/* Fade atas & bawah: gambar luruh ke warna halaman */
+.about-cta::before,
+.about-cta::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.about-cta::before {
+  top: 0;
+  height: 22%;
+  background: linear-gradient(
+    to bottom,
+    var(--page) 0%,
+    rgba(248, 250, 252, 0.85) 25%,
+    rgba(248, 250, 252, 0.5) 55%,
+    rgba(248, 250, 252, 0.15) 82%,
+    rgba(248, 250, 252, 0) 100%
+  );
+}
+
+.about-cta::after {
+  bottom: 0;
+  height: 20%;
+  background: linear-gradient(
+    to top,
+    var(--page) 0%,
+    rgba(248, 250, 252, 0.85) 25%,
+    rgba(248, 250, 252, 0.5) 55%,
+    rgba(248, 250, 252, 0.15) 82%,
+    rgba(248, 250, 252, 0) 100%
+  );
+}
+
+.about-cta-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 880px;
+  padding: 0 1.25rem;
+}
+
+.about-cta-title {
+  font-family: 'Satoshi', sans-serif;
+  font-size: clamp(2rem, 4.2vw, 4rem);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: #1a2216;
+  margin-bottom: 1rem;
+  text-shadow: 0 1px 14px rgba(255, 255, 255, 0.35);
+}
+
+.about-cta-title strong {
+  font-weight: 800;
+  color: #111827;
+}
+
+/* Highlight kuning bisa membungkus dua baris */
+.about-cta-title .highlight-oval-yellow {
+  display: inline;
+  padding: 0.02em 0.45em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  text-shadow: none;
+}
+
+.about-cta-desc {
+  font-size: clamp(1rem, 1.6vw, 1.45rem);
+  font-weight: 500;
+  line-height: 1.4;
+  color: #1a2216;
+  max-width: 720px;
+  margin: 0 auto 1.5rem;
+  text-shadow: 0 1px 12px rgba(255, 255, 255, 0.45);
+}
+
+/* ---------- 5. ULASAN ---------- */
+.about-review-section {
+  padding: 1rem 0;
+}
+
+.about-review-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 1.4rem 1.4rem;
+  border-radius: 22px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.about-review-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 14px 30px rgba(69, 129, 50, 0.14);
+}
+
+/* Baris 1: kuning (turunan --pastel-yellow) */
+.about-review-yellow {
+  background-color: rgba(255, 239, 145, 0.45);
+  border: 1px solid rgba(235, 217, 104, 0.55);
+}
+
+.about-review-yellow .arc-stars {
+  color: var(--orange);
+}
+
+/* Baris 2: hijau (turunan --pastel-green) */
+.about-review-green {
+  background-color: rgba(154, 216, 114, 0.35);
+  border: 1px solid rgba(154, 216, 114, 0.6);
+}
+
+.about-review-green .arc-stars {
+  color: var(--dark-green);
+}
+
+.arc-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+.arc-stars {
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  white-space: nowrap;
+}
+
+.arc-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--dark-green);
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 999px;
+  padding: 0.22rem 0.7rem;
+  text-align: right;
+}
+
+.arc-quote {
+  flex-grow: 1;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #1a2216;
+  margin-bottom: 1.25rem;
+}
+
+.arc-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.arc-avatar {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #ffffff;
+  color: var(--dark-green);
+  font-size: 0.9rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.arc-name {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.25;
+}
+
+.arc-role {
+  font-size: 0.8rem;
+  color: #6b7a66;
+}
+
+/* ---------- RESPONSIVE (ABOUT) ---------- */
+@media (max-width: 991px) {
+  .about-hero {
+    aspect-ratio: auto;
+    min-height: 480px;
+    background-position: 66% bottom;
+  }
+
+  .about-intro-stage {
+    display: flex;
+    flex-direction: column;
+    aspect-ratio: auto;
+    gap: 1.25rem;
+  }
+
+  .about-intro-stage::before {
+    width: 70%;
+    height: 45%;
+    left: 30%;
+    top: -6%;
+  }
+
+  .about-intro-art {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1.84 / 1;
+    transform: none;
+  }
+
+  .about-js .about-intro-art.about-reveal,
+  .about-js .about-intro-art.about-reveal.is-visible {
+    transform: translateY(32px);
+  }
+
+  .about-js .about-intro-art.about-reveal.is-visible {
+    transform: none;
+  }
+
+  .about-intro-text {
+    text-align: left;
+    hyphens: manual;
+    margin: 0 !important;
+  }
+
+  .about-wheel {
+    --afc-w: clamp(235px, 66vw, 300px);
+  }
+
+  .about-cta {
+    aspect-ratio: auto;
+    min-height: 0;
+    padding: 6rem 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .about-wrap {
+    gap: 3rem;
+  }
+
+  .about-heading {
+    font-size: 1.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-js .about-reveal,
+  .about-js .about-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .about-js .about-intro-art.about-reveal,
+  .about-js .about-intro-art.about-reveal.is-visible {
+    transform: translate(-50%, -50%);
+  }
+
+  #sec-tentang:not(.d-none),
+  .about-hero-title {
+    animation: none;
+  }
+}
