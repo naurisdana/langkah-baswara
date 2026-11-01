@@ -23,19 +23,231 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=4.0" />
+    <link rel="stylesheet" href="style.css?v=4.7" />
+    <noscript>
+      <style>
+        .lb-screen { display: none !important; }
+        body.lb-lock { overflow: auto !important; }
+      </style>
+    </noscript>
   </head>
 
-  <body>
+  <body class="lb-lock">
+    <!-- ============ LOADER (tampil saat halaman memuat) ============ -->
+    <div class="lb-screen lb-loader is-active" id="lbLoader" role="status" aria-live="polite" aria-label="Memuat halaman">
+      <div class="lb-deco lb-deco-tl" aria-hidden="true"></div>
+      <div class="lb-deco lb-deco-br" aria-hidden="true"></div>
+
+      <div class="lb-loader-box">
+        <p class="lb-loader-text">Loading<span class="lb-dots" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span></p>
+
+        <div class="lb-bar" id="lbBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <span class="lb-bush" aria-hidden="true"></span>
+          <div class="lb-fill">
+            <span class="lb-fill-shine" aria-hidden="true"></span>
+
+            <!-- Bunga kamboja di awal bar -->
+            <svg class="lb-flower" viewBox="-30 -30 60 60" aria-hidden="true">
+              <defs>
+                <radialGradient id="lbPetalG" cx="50%" cy="85%" r="90%">
+                  <stop offset="0" stop-color="#ffe08a" />
+                  <stop offset="0.45" stop-color="#fff6dc" />
+                  <stop offset="1" stop-color="#ffffff" />
+                </radialGradient>
+              </defs>
+              <g fill="url(#lbPetalG)" stroke="#f6d98a" stroke-width="0.8">
+                <ellipse cx="0" cy="-13" rx="9" ry="15" transform="rotate(0)" />
+                <ellipse cx="0" cy="-13" rx="9" ry="15" transform="rotate(72)" />
+                <ellipse cx="0" cy="-13" rx="9" ry="15" transform="rotate(144)" />
+                <ellipse cx="0" cy="-13" rx="9" ry="15" transform="rotate(216)" />
+                <ellipse cx="0" cy="-13" rx="9" ry="15" transform="rotate(288)" />
+              </g>
+              <circle r="4.2" fill="#ffc83d" />
+              <circle r="2" fill="#ff9d2e" />
+            </svg>
+
+            <!-- Daun di ujung bar -->
+            <svg class="lb-leaves" viewBox="0 0 54 52" aria-hidden="true">
+              <defs>
+                <linearGradient id="lbLeafG" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#7ea334" />
+                  <stop offset="1" stop-color="#4a7a24" />
+                </linearGradient>
+              </defs>
+              <g fill="url(#lbLeafG)">
+                <path d="M20 1 C8 9 6 29 14 48 C26 37 30 15 20 1Z" />
+                <path d="M34 3 C48 9 52 27 44 46 C32 38 26 17 34 3Z" />
+              </g>
+              <g fill="none" stroke="rgba(25,55,12,.55)" stroke-width="1" stroke-linecap="round">
+                <path d="M20 3 C15 17 14 31 14 46" />
+                <path d="M17 14 L21 17 M15 24 L20 26 M14 34 L19 35" />
+                <path d="M34 5 C41 18 44 32 44 44" />
+                <path d="M38 14 L34 17 M42 24 L37 26 M43 34 L38 35" />
+              </g>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ HALAMAN GAGAL MEMUAT / TIDAK TERSEDIA ============ -->
+    <div class="lb-screen lb-error" id="lbError" role="alert" aria-live="assertive">
+      <div class="lb-deco lb-deco-tl" aria-hidden="true"></div>
+      <div class="lb-deco lb-deco-br" aria-hidden="true"></div>
+
+      <div class="lb-error-box">
+        <img
+          class="lb-error-img"
+          src="public/assets/errorpage.png"
+          alt="Ilustrasi wisatawan membaca peta di depan pura Bali"
+          draggable="false"
+        />
+        <h2 class="lb-error-title">Oops! Halaman ini tidak tersedia!</h2>
+        <p class="lb-error-desc">Halaman yang Anda cari tidak ada.</p>
+        <button type="button" class="lb-error-btn" id="lbReload">Muat Ulang</button>
+      </div>
+    </div>
+
+    <!-- ============ AUTH: MASUK / DAFTAR / VERIFIKASI (auth.js) ============ -->
+    <div class="au-screen" id="authScreen" data-view="login" role="dialog" aria-modal="true" aria-label="Masuk atau daftar akun">
+      <div class="au-photo">
+        <img src="public/assets/authenticationpage.png" alt="Ilustrasi wisatawan menatap gapura Bali saat matahari terbit" draggable="false" />
+      </div>
+
+      <div class="au-right">
+        <div class="au-bg" aria-hidden="true">
+          <div class="lb-deco lb-deco-tl"></div>
+          <div class="lb-deco lb-deco-br"></div>
+        </div>
+
+        <div class="au-main">
+        <div class="au-box">
+          <a class="au-logo" href="#" data-auth-close aria-label="Kembali ke beranda">
+            <img src="public/assets/logofix.png" alt="Logo Langkah Baswara" />
+          </a>
+
+          <!-- ===== MASUK ===== -->
+          <section class="au-view is-current" data-view="login">
+            <h1 class="au-title">Masuk ke Akun Anda</h1>
+            <p class="au-sub">Halo! Senang melihatmu kembali.<br />Silakan masuk ke akun Anda.</p>
+
+            <form id="auLoginForm" class="au-form" novalidate>
+              <label class="au-field">
+                <i class="bi bi-envelope-fill" aria-hidden="true"></i>
+                <input type="email" id="auLoginEmail" placeholder="Email" autocomplete="email" aria-label="Email" />
+              </label>
+              <label class="au-field">
+                <i class="bi bi-lock-fill" aria-hidden="true"></i>
+                <input type="password" id="auLoginPass" placeholder="Password" autocomplete="current-password" aria-label="Password" />
+                <button type="button" class="au-eye" data-eye="auLoginPass" aria-label="Tampilkan kata sandi"><i class="bi bi-eye-slash"></i></button>
+              </label>
+              <div class="au-forgot-row"><button type="button" class="au-forgot" id="auForgot">Lupa password?</button></div>
+              <p class="au-msg" data-msg="login" role="alert" hidden></p>
+              <button type="submit" class="au-btn au-btn-primary">Masuk</button>
+            </form>
+
+            <div class="au-or"><span>atau</span></div>
+            <button type="button" class="au-btn au-btn-google" data-google aria-label="Masuk dengan Google" title="Masuk dengan Google"><svg viewBox="0 0 48 48" width="22" height="22" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg></button>
+            <p class="au-switch">Belum punya akun? <button type="button" class="au-link" data-auth-open="register">Daftar</button></p>
+          </section>
+
+          <!-- ===== DAFTAR ===== -->
+          <section class="au-view" data-view="register">
+            <h1 class="au-title">Daftar Akun</h1>
+            <p class="au-sub">Halo! Senang melihatmu kembali.<br />Silakan buat akun Anda.</p>
+
+            <form id="auRegisterForm" class="au-form" novalidate>
+              <label class="au-field">
+                <i class="bi bi-person-fill" aria-hidden="true"></i>
+                <input type="text" id="auRegName" placeholder="Nama" autocomplete="name" aria-label="Nama" />
+              </label>
+              <label class="au-field">
+                <i class="bi bi-envelope-fill" aria-hidden="true"></i>
+                <input type="email" id="auRegEmail" placeholder="Email" autocomplete="email" aria-label="Email" />
+              </label>
+              <label class="au-field">
+                <i class="bi bi-lock-fill" aria-hidden="true"></i>
+                <input type="password" id="auRegPass" placeholder="Password" autocomplete="new-password" aria-label="Password" />
+                <button type="button" class="au-eye" data-eye="auRegPass" aria-label="Tampilkan kata sandi"><i class="bi bi-eye-slash"></i></button>
+              </label>
+              <p class="au-msg" data-msg="register" role="alert" hidden></p>
+              <button type="submit" class="au-btn au-btn-primary au-btn-gap">Daftar</button>
+            </form>
+
+            <div class="au-or"><span>atau</span></div>
+            <button type="button" class="au-btn au-btn-google" data-google aria-label="Daftar dengan Google" title="Daftar dengan Google"><svg viewBox="0 0 48 48" width="22" height="22" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg></button>
+            <p class="au-switch">Sudah punya akun? <button type="button" class="au-link" data-auth-open="login">Masuk</button></p>
+          </section>
+
+          <!-- ===== VERIFIKASI ===== -->
+          <section class="au-view" data-view="verify">
+            <h1 class="au-title">Masukkan Kode Verifikasi</h1>
+            <p class="au-sub">Kami telah mengirimkan kode<br />verifikasi ke email anda.</p>
+            <p class="au-mail" id="auVerifyMail"></p>
+
+            <div class="au-otp" role="group" aria-label="Kode verifikasi"></div>
+
+            <p class="au-msg" data-msg="verify" role="alert" hidden></p>
+
+            <p class="au-resend-row">Tidak menerima kode? <button type="button" class="au-resend" id="auResend">Kirim ulang</button></p>
+            <button type="button" class="au-btn au-btn-primary" id="auVerifyBtn">Verifikasi</button>
+            <p class="au-switch"><button type="button" class="au-link" id="auVerifyBack" data-auth-open="register">Salah email? Kembali</button></p>
+          </section>
+
+          <!-- ===== LUPA PASSWORD ===== -->
+          <section class="au-view" data-view="forgot">
+            <h1 class="au-title">Lupa Kata Sandi?</h1>
+            <p class="au-sub">Masukkan email akun Anda.<br />Kami akan mengirimkan kode verifikasi untuk mengatur ulang kata sandi.</p>
+
+            <form id="auForgotForm" class="au-form" novalidate>
+              <label class="au-field">
+                <i class="bi bi-envelope-fill" aria-hidden="true"></i>
+                <input type="email" id="auForgotEmail" placeholder="Email" autocomplete="email" aria-label="Email" />
+              </label>
+              <p class="au-msg" data-msg="forgot" role="alert" hidden></p>
+              <button type="submit" class="au-btn au-btn-primary au-btn-gap">Kirim Kode</button>
+            </form>
+
+            <p class="au-switch"><button type="button" class="au-link" data-auth-open="login"><i class="bi bi-arrow-left" aria-hidden="true"></i> Kembali ke Masuk</button></p>
+          </section>
+
+          <!-- ===== ATUR ULANG PASSWORD ===== -->
+          <section class="au-view" data-view="reset">
+            <h1 class="au-title">Atur Ulang Kata Sandi</h1>
+            <p class="au-sub">Buat kata sandi baru untuk akun Anda.<br />Minimal 8 karakter.</p>
+
+            <form id="auResetForm" class="au-form" novalidate>
+              <label class="au-field">
+                <i class="bi bi-lock-fill" aria-hidden="true"></i>
+                <input type="password" id="auResetPass" placeholder="Kata sandi baru" autocomplete="new-password" aria-label="Kata sandi baru" />
+                <button type="button" class="au-eye" data-eye="auResetPass" aria-label="Tampilkan kata sandi"><i class="bi bi-eye-slash"></i></button>
+              </label>
+              <label class="au-field">
+                <i class="bi bi-shield-lock-fill" aria-hidden="true"></i>
+                <input type="password" id="auResetPass2" placeholder="Ulangi kata sandi baru" autocomplete="new-password" aria-label="Ulangi kata sandi baru" />
+                <button type="button" class="au-eye" data-eye="auResetPass2" aria-label="Tampilkan kata sandi"><i class="bi bi-eye-slash"></i></button>
+              </label>
+              <p class="au-msg" data-msg="reset" role="alert" hidden></p>
+              <button type="submit" class="au-btn au-btn-primary au-btn-gap">Simpan Kata Sandi</button>
+            </form>
+
+            <p class="au-switch"><button type="button" class="au-link" data-auth-open="login">Batal, kembali ke Masuk</button></p>
+          </section>
+        </div>
+        </div>
+      </div>
+
+      <div class="au-toast" id="auToast" role="status" aria-live="polite"></div>
+    </div>
+
     <nav class="navbar navbar-expand-lg navbar-lb">
       <div class="container">
         <a class="navbar-brand d-flex align-items-center mb-0" href="#" data-section="sec-beranda">
           <img
-            src="public/assets/logo_langkahbaswara.png"
+            src="public/assets/logofix.png"
             alt="Logo Langkah Baswara"
             class="navbar-brand-logo"
-            height="52"
-            style="height: 52px; width: auto; max-height: 54px; object-fit: contain"
+            height="76"
           />
         </a>
         <button
@@ -90,7 +302,7 @@
             <button
               class="btn btn-masuk"
               type="button"
-              data-section="sec-profil"
+              id="navAuthBtn"
             >
               <i class="bi bi-door-closed-fill"></i>
               <span>Masuk</span>
@@ -779,350 +991,389 @@
 
       <!-- SECTION JELAJAHI (Konten Peta Utama) -->
       <section id="sec-jelajahi" class="content-section d-none">
-        <div class="container">
-          <div
-            class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4"
-          >
-            <div>
-              <span class="badge-map">📍 Peta Interaktif Wisata Bali</span>
-              <h1 class="page-title">Jelajahi Destinasi Pulau Dewata</h1>
-              <p class="text-secondary mb-0" style="max-width: 640px">
-                Eksplorasi koordinat pura budaya, tebing pantai eksotis,
-                terasering alam, hingga ruang edukasi di seluruh kabupaten Bali.
-              </p>
-            </div>
-            <p class="small text-secondary mb-0">
-              <span class="dot-live"></span>Area AKTIF: Seluruh Bali (9
-              Kabupaten) • 147 Titik Destinasi
-            </p>
-          </div>
+        <div class="explore-wrap">
+          <div class="explore-shell" id="exploreShell">
+            <!-- Peta + kontrol -->
+            <div class="ex-mapbox">
+              <div id="map"></div>
 
-          <div class="filter-card mb-3">
-            <div class="row g-2 align-items-center">
-              <div class="col-lg-6">
-                <div class="search-wrap">
-                  <i class="bi bi-search"></i>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="searchInput"
-                    placeholder="Cari pura, pantai, air terjun, museum, atau aktivitas..."
-                  />
-                  <i class="bi bi-x-lg" id="clearSearch" title="Hapus"></i>
+              <div class="ex-zoom" role="group" aria-label="Kontrol peta">
+                <button type="button" id="exZoomIn" aria-label="Perbesar"><i class="bi bi-plus-lg"></i></button>
+                <button type="button" id="exZoomOut" aria-label="Perkecil"><i class="bi bi-dash-lg"></i></button>
+                <button type="button" id="exLocate" aria-label="Lokasi saya"><i class="bi bi-compass"></i></button>
+                <button type="button" id="exFullscreen" class="ex-fs-btn" aria-label="Layar penuh"><i class="bi bi-fullscreen"></i></button>
+              </div>
+
+              <div class="map-mode">
+                <button type="button" class="active" data-basemap="street">Jalan</button>
+                <button type="button" data-basemap="satellite">Satelit</button>
+                <button type="button" data-basemap="dark">Gelap</button>
+              </div>
+
+              <div class="ex-status">
+                <span class="ex-status-dot"></span>
+                <span><b id="exCount">0</b> Titik Wisata Terverifikasi</span>
+                <span class="ex-status-sep">•</span>
+                <span><i class="bi bi-broadcast"></i> Buffer: <b id="exBuffer">Nonaktif</b></span>
+              </div>
+
+              <div class="ex-route" id="exRoute" hidden>
+                <button type="button" class="ex-icon-btn ex-route-close" id="exRouteClose" aria-label="Tutup rute"><i class="bi bi-x-lg"></i></button>
+                <div class="ex-route-body">
+                  <div class="ex-eyebrow">:: Rute Pilihan</div>
+                  <h3 class="ex-route-title" id="exRouteTitle">Jalur Terdekat</h3>
+                  <p class="ex-route-meta" id="exRouteMeta"></p>
+                  <ol class="ex-route-list" id="exRouteList"></ol>
+                  <a class="ex-route-link" id="exRouteLink" href="#" target="_blank" rel="noopener noreferrer">Buka Rute Terperinci <i class="bi bi-arrow-right"></i></a>
+                </div>
+                <div class="ex-route-photo" id="exRoutePhoto"></div>
+              </div>
+            </div>
+
+            <!-- Panel kiri: rencanakan petualangan -->
+            <aside class="ex-panel" id="exPanel">
+              <div class="ex-card ex-card-head">
+                <h1 class="ex-title">Rencanakan<br />Petualanganmu</h1>
+                <p class="ex-sub">Navigasi geospasial pintar destinasi hijau Bali</p>
+
+                <div class="ex-bar">
+                  <div class="ex-search">
+                    <i class="bi bi-search ex-search-icon"></i>
+                    <input type="text" id="searchInput" placeholder="Cari: pura, pantai, air terjun..." autocomplete="off" />
+                    <button type="button" id="clearSearch" class="ex-clear" aria-label="Hapus pencarian"><i class="bi bi-x-lg"></i></button>
+                  </div>
+                  <div class="ex-active" id="exActiveFilters"></div>
+                </div>
+
+                <div class="ex-filter-row">
+                  <select class="form-select ex-select" id="kabupatenFilter" aria-label="Filter kabupaten">
+                    <option value="all" selected>Kabupaten</option>
+                    <option>Badung</option>
+                    <option>Bangli</option>
+                    <option>Buleleng</option>
+                    <option>Denpasar</option>
+                    <option>Gianyar</option>
+                    <option>Jembrana</option>
+                    <option>Karangasem</option>
+                    <option>Klungkung</option>
+                    <option>Tabanan</option>
+                  </select>
+                  <select class="form-select ex-select" id="ratingFilter" aria-label="Filter rating">
+                    <option value="0" selected>Rating</option>
+                    <option value="4">Rating: 4.0+</option>
+                    <option value="4.5">Rating: 4.5+</option>
+                  </select>
+                  <button type="button" class="ex-more" id="exMore" aria-label="Filter lainnya (kategori & radius)"><i class="bi bi-three-dots"></i></button>
                 </div>
               </div>
-              <div class="col-lg-3">
-                <select class="form-select filter-select" id="kabupatenFilter">
-                  <option selected>🏢 Semua Kabupaten / Kota</option>
-                  <option>Badung</option>
-                  <option>Bangli</option>
-                  <option>Buleleng</option>
-                  <option>Denpasar</option>
-                  <option>Gianyar</option>
-                  <option>Jembrana</option>
-                  <option>Karangasem</option>
-                  <option>Klungkung</option>
-                  <option>Tabanan</option>
-                </select>
-              </div>
-              <div class="col-lg-3 d-flex gap-2">
-                <button
-                  class="btn btn-ghost flex-fill"
-                  type="button"
-                  id="btnLocate"
-                >
-                  🎯 Gunakan Lokasi Saya
-                </button>
-                <button class="btn btn-navy px-3" type="button">
-                  Terapkan ➔
-                </button>
-              </div>
-            </div>
-            <div class="chips-row mt-3">
-              <span class="small text-secondary me-1">🔍 Filter:</span>
-              <a href="#" class="chip active" data-category="all"
-                >Semua Kategori</a
-              >
-              <a href="#" class="chip" data-category="umum">Umum (260)</a>
-              <a href="#" class="chip" data-category="alam">Alam (223)</a>
-              <a href="#" class="chip" data-category="rekreasi"
-                >Rekreasi (128)</a
-              >
-              <a href="#" class="chip" data-category="budaya">Budaya (119)</a>
-            </div>
-          </div>
 
-          <div class="map-shell mb-4">
-            <div id="map"></div>
-            <div class="map-mode">
-              <button type="button" class="active" data-basemap="street">
-                Jalan
+              <div class="ex-card ex-card-filters">
+                <div class="ex-label"><span>:: Kategori Wisata</span><span id="exTotal" class="ex-label-link"></span></div>
+                <div class="ex-chips">
+                  <a href="#" class="chip chip-all active" data-category="all"><i class="bi bi-grid-fill"></i> Semua <em data-cnt="all"></em></a>
+                  <a href="#" class="chip chip-alam" data-category="alam"><i class="bi bi-tree-fill"></i> Alam <em data-cnt="alam"></em></a>
+                  <a href="#" class="chip chip-budaya" data-category="budaya"><i class="bi bi-bank2"></i> Budaya <em data-cnt="budaya"></em></a>
+                  <a href="#" class="chip chip-rekreasi" data-category="rekreasi"><i class="bi bi-camera-fill"></i> Rekreasi <em data-cnt="rekreasi"></em></a>
+                  <a href="#" class="chip chip-umum" data-category="umum"><i class="bi bi-geo-alt-fill"></i> Umum <em data-cnt="umum"></em></a>
+                </div>
+
+                <div class="ex-label ex-label-spaced"><span>:: Analisis Radius &amp; Buffer GIS</span></div>
+                <input type="range" class="ex-range" id="radiusRange" min="0" max="50" step="1" value="0" aria-label="Radius buffer (km)" />
+                <div class="ex-range-scale"><span>Nonaktif</span><span>50 km</span></div>
+
+                <div class="ex-stats">
+                  <div class="ex-stat">
+                    <div class="ex-stat-label"><i class="bi bi-bullseye"></i> Radius</div>
+                    <div class="ex-stat-value" id="exRadiusVal">Nonaktif</div>
+                    <div class="ex-stat-note" id="exRadiusNote">Geser untuk mengaktifkan</div>
+                  </div>
+                  <div class="ex-stat">
+                    <div class="ex-stat-label"><i class="bi bi-clock"></i> Estimasi</div>
+                    <div class="ex-stat-value" id="exShown">-</div>
+                    <div class="ex-stat-note">Jelajah lengkap</div>
+                  </div>
+                </div>
+
+                <button type="button" class="ex-ghost-btn" id="btnLocate"><i class="bi bi-crosshair"></i> Gunakan Lokasi Saya</button>
+              </div>
+
+              <button type="button" class="ex-cta" id="btnRoute">
+                <span>Mulai Jelajahi Rute</span>
+                <span class="ex-cta-arrow"><i class="bi bi-arrow-right"></i></span>
               </button>
-              <button type="button" data-basemap="satellite">Satelit</button>
-              <button type="button" data-basemap="dark">Gelap</button>
-            </div>
-            <div class="layer-widget">
-              <div
-                class="d-flex justify-content-between align-items-center mb-2"
-              >
-                <strong class="small"
-                  ><i class="bi bi-gear"></i> Kontrol Layer Peta</strong
-                >
-                <span class="badge-aktif">AKTIF</span>
-              </div>
-              <div class="form-check small mb-1">
-                <input
-                  class="form-check-input"
-                  type="checkbox"
-                  id="lyrCat"
-                  checked
-                />
-                <label class="form-check-label" for="lyrCat"
-                  >Layer Filter Kategori</label
-                >
-              </div>
-              <div class="form-check small mb-1">
-                <input class="form-check-input" type="checkbox" id="lyrBound" />
-                <label class="form-check-label" for="lyrBound"
-                  >Batas Kabupaten / Wilayah</label
-                >
-              </div>
-              <div class="form-check small">
-                <input class="form-check-input" type="checkbox" id="lyrGps" />
-                <label class="form-check-label" for="lyrGps"
-                  >Lokasi Pengguna (GPS)</label
-                >
-              </div>
-            </div>
-          </div>
+            </aside>
 
-          <div class="catalog-card p-3 p-md-4 mb-3">
-            <div
-              class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-2 mb-3"
-            >
-              <div>
-                <div class="small fw-semibold text-secondary">
-                  📷 KATALOG LOKASI PILIHAN
+            <!-- Kartu detail destinasi (kanan) -->
+            <aside class="ex-detail" id="exDetail" hidden>
+              <div class="ex-detail-head">
+                <div class="ex-detail-titles">
+                  <div class="ex-eyebrow" id="dEyebrow">Destinasi Wisata</div>
+                  <h2 class="ex-detail-name" id="dName">-</h2>
                 </div>
-                <h2 class="h5 fw-bold mb-1">
-                  Galeri Destinasi Unggulan di Sekitar Peta
-                </h2>
-                <p class="small text-secondary mb-0">
-                  Daftar koordinat wisata favorit berdasarkan posisi viewport
-                  peta saat ini...
-                </p>
+                <div class="ex-detail-actions">
+                  <button type="button" class="ex-pill-btn" id="dShare"><i class="bi bi-share"></i> <span>Bagikan</span></button>
+                  <button type="button" class="ex-icon-btn" id="dSave" aria-label="Simpan ke wishlist"><i class="bi bi-bookmark"></i></button>
+                  <button type="button" class="ex-icon-btn" id="dClose" aria-label="Tutup detail"><i class="bi bi-x-lg"></i></button>
+                </div>
               </div>
-              <div class="small text-secondary d-flex align-items-center gap-2">
-                Menampilkan 1 – 4 dari 16
-                <button class="btn btn-sm btn-ghost py-0 px-2">‹</button>
-                <button class="btn btn-sm btn-ghost py-0 px-2">›</button>
-              </div>
-            </div>
-            <div class="row g-3">
-              <div class="col-sm-6 col-lg-3">
-                <article class="dest-card">
-                  <div class="dest-thumb">
-                    <button class="pin-btn" type="button">
-                      <i class="bi bi-bookmark"></i>
-                    </button>
-                  </div>
-                  <div class="p-3">
-                    <div class="small text-secondary">Tabanan</div>
-                    <div class="d-flex justify-content-between">
-                      <strong>Tanah Lot</strong
-                      ><span class="rating-badge">⭐ 4.7</span>
-                    </div>
-                    <p class="small text-secondary mt-2 mb-3">
-                      Pura di atas batu karang dengan sunset ikonik di pesisir
-                      Tabanan.
-                    </p>
-                    <button class="btn btn-ghost w-100 btn-sm">
-                      Buka di Peta ↗
-                    </button>
-                  </div>
-                </article>
-              </div>
-              <div class="col-sm-6 col-lg-3">
-                <article class="dest-card">
-                  <div class="dest-thumb">
-                    <button class="pin-btn" type="button">
-                      <i class="bi bi-bookmark"></i>
-                    </button>
-                  </div>
-                  <div class="p-3">
-                    <div class="small text-secondary">Badung</div>
-                    <div class="d-flex justify-content-between">
-                      <strong>Pura Uluwatu</strong
-                      ><span class="rating-badge">⭐ 4.8</span>
-                    </div>
-                    <p class="small text-secondary mt-2 mb-3">
-                      Pura luhur di tebing karang selatan dengan pemandangan
-                      Samudra Hindia.
-                    </p>
-                    <button class="btn btn-ghost w-100 btn-sm">
-                      Buka di Peta ↗
-                    </button>
-                  </div>
-                </article>
-              </div>
-              <div class="col-sm-6 col-lg-3">
-                <article class="dest-card">
-                  <div class="dest-thumb">
-                    <button class="pin-btn" type="button">
-                      <i class="bi bi-bookmark"></i>
-                    </button>
-                  </div>
-                  <div class="p-3">
-                    <div class="small text-secondary">Gianyar</div>
-                    <div class="d-flex justify-content-between">
-                      <strong>Terasering Tegalalang</strong
-                      ><span class="rating-badge">⭐ 4.5</span>
-                    </div>
-                    <p class="small text-secondary mt-2 mb-3">
-                      Lanskap sawah berundak klasik Ubud dengan jalur foto dan
-                      jalan setapak.
-                    </p>
-                    <button class="btn btn-ghost w-100 btn-sm">
-                      Buka di Peta ↗
-                    </button>
-                  </div>
-                </article>
-              </div>
-              <div class="col-sm-6 col-lg-3">
-                <article class="dest-card">
-                  <div class="dest-thumb">
-                    <button class="pin-btn" type="button">
-                      <i class="bi bi-bookmark"></i>
-                    </button>
-                  </div>
-                  <div class="p-3">
-                    <div class="small text-secondary">Denpasar</div>
-                    <div class="d-flex justify-content-between">
-                      <strong>Pantai Sanur</strong
-                      ><span class="rating-badge">⭐ 4.5</span>
-                    </div>
-                    <p class="small text-secondary mt-2 mb-3">
-                      Pantai timur yang tenang, cocok untuk sunrise, sepeda, dan
-                      keluarga.
-                    </p>
-                    <button class="btn btn-ghost w-100 btn-sm">
-                      Buka di Peta ↗
-                    </button>
-                  </div>
-                </article>
-              </div>
-            </div>
-            <div class="carousel-dots mt-3">
-              <span class="active"></span><span></span><span></span
-              ><span></span>
-            </div>
-          </div>
 
-          <div
-            class="banner-route d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3"
-          >
-            <p class="mb-0 small">
-              ⚠️ <strong>Ingin Menyesuaikan Rute Perjalanan?</strong>
-              Pilih beberapa titik destinasi di atas untuk langsung merintis
-              rute perkiraan durasi dan rute otomatis.
-            </p>
-            <div class="d-flex gap-2 flex-shrink-0">
-              <button class="btn btn-ghost">Reset Filter</button>
-              <button class="btn btn-navy px-3">Rencanakan Rute</button>
-            </div>
+              <div class="ex-detail-card">
+                <div class="ex-photo" id="dPhoto"></div>
+                <div class="ex-detail-info">
+                  <h3 class="ex-place" id="dPlace">-</h3>
+                  <div class="ex-addr"><i class="bi bi-geo-alt"></i> <span id="dAddr">-</span></div>
+                  <div class="ex-tags" id="dTags"></div>
+                  <p class="ex-desc" id="dDesc"></p>
+                  <div class="ex-foot">
+                    <div>
+                      <div class="ex-foot-label" id="dFootLabel">Kategori</div>
+                      <div class="ex-foot-value" id="dFootValue">-</div>
+                    </div>
+                    <a class="ex-open-btn" id="dMapLink" href="#" target="_blank" rel="noopener noreferrer">Buka di Peta <i class="bi bi-box-arrow-up-right"></i></a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="ex-nearby-head">
+                <span>Destinasi Terdekat Lainnya</span>
+                <span class="ex-label-link" id="dNearHint"></span>
+              </div>
+              <div class="ex-nearby" id="dNearby"></div>
+            </aside>
           </div>
         </div>
       </section>
 
       <!-- SECTION PROFIL (Default: d-none) -->
       <section id="sec-profil" class="content-section d-none">
-        <div class="container">
-          <div
-            class="card p-4 p-md-5 border-0 shadow-sm rounded-4 my-4 bg-white"
-          >
-            <div class="d-flex align-items-center gap-3 mb-4">
-              <span
-                class="user-chip"
-                style="width: 56px; height: 56px; font-size: 1.5rem"
-                ><i class="bi bi-person"></i
-              ></span>
-              <div>
-                <h2 class="h4 fw-bold mb-0">Profil Pengguna</h2>
-                <span class="text-secondary small"
-                  >Tamu Wisatawan / Penjelajah Bali</span
-                >
+        <div class="pf-wrap">
+          <!-- Kiri: profil saya -->
+          <aside class="pf-card pf-account">
+            <div class="pf-account-head">
+              <h2 class="pf-h2">Profil Saya</h2>
+              <span class="pf-badge-verified">Terverifikasi</span>
+            </div>
+
+            <div class="pf-user">
+              <div class="pf-avatar-wrap">
+                <div class="pf-avatar" id="pfAvatar"><span id="pfInitials">SN</span></div>
+                <button type="button" class="pf-avatar-cam" id="pfAvatarBtn" aria-label="Ubah foto profil"><i class="bi bi-camera"></i></button>
+                <input type="file" id="pfAvatarFile" accept="image/*" hidden />
+              </div>
+              <div class="pf-user-info">
+                <div class="pf-user-name"><span id="pfDisplayName">Siti Nayla</span> <i class="bi bi-patch-check-fill pf-verified-ic" title="Akun terverifikasi"></i></div>
+                <div class="pf-user-mail" id="pfDisplayMail">wisatawan@bali.id</div>
               </div>
             </div>
-            <p class="text-secondary mb-4" style="line-height: 1.6">
-              Kelola preferensi akun, simpan destinasi favorit yang telah Anda
-              tandai (pin) dari peta, dan susun rute perjalanan wisata Anda
-              untuk petualangan berikutnya di Pulau Dewata.
-            </p>
-            <div class="d-flex gap-2">
-              <button class="btn btn-navy px-4 py-2" type="button">
-                Masuk Akun
-              </button>
-              <button class="btn btn-ghost px-4 py-2" type="button">
-                Daftar Akun Baru
-              </button>
+
+            <div class="pf-form">
+              <div class="pf-row-2">
+                <div class="pf-field">
+                  <label for="pfFirst">Nama Depan</label>
+                  <input type="text" id="pfFirst" value="Siti" autocomplete="given-name" />
+                </div>
+                <div class="pf-field">
+                  <label for="pfLast">Nama Belakang</label>
+                  <input type="text" id="pfLast" value="Nayla" autocomplete="family-name" />
+                </div>
+              </div>
+
+              <div class="pf-field">
+                <label for="pfEmail">Email</label>
+                <div class="pf-input-icon">
+                  <input type="email" id="pfEmail" value="wisatawan@bali.id" autocomplete="email" />
+                  <i class="bi bi-check-circle-fill pf-ic-ok"></i>
+                </div>
+              </div>
+
+              <div class="pf-field">
+                <div class="pf-label-row">
+                  <label for="pfPass">Password</label>
+                  <button type="button" class="pf-link" id="pfChangePass">Ubah kata sandi</button>
+                </div>
+                <div class="pf-input-icon">
+                  <input type="password" id="pfPass" value="secretpassword123" autocomplete="current-password" class="pf-pass" />
+                  <button type="button" class="pf-eye" id="pfEye" aria-label="Tampilkan kata sandi"><i class="bi bi-eye"></i></button>
+                </div>
+              </div>
+
+              <div class="pf-pref">
+                <div class="pf-pref-label">Preferensi Peta &amp; Penjelajahan</div>
+                <div class="pf-pref-chips">
+                  <button type="button" class="pf-chip is-on" aria-pressed="true"><i class="bi bi-person-walking"></i> Mode Pejalan Kaki</button>
+                  <button type="button" class="pf-chip is-on" aria-pressed="true"><i class="bi bi-recycle"></i> Rendah Emisi</button>
+                </div>
+              </div>
+
+              <div class="pf-actions">
+                <button type="button" class="pf-btn pf-btn-danger" id="pfLogout"><i class="bi bi-box-arrow-right"></i> Keluar dari Akun</button>
+                <button type="button" class="pf-btn pf-btn-primary" id="pfSave"><i class="bi bi-check-lg"></i> Simpan Perubahan</button>
+              </div>
+            </div>
+          </aside>
+
+          <!-- Kanan: wishlist -->
+          <div class="pf-main">
+            <div class="pf-card pf-wish-head">
+              <div class="pf-wish-top">
+                <div>
+                  <h2 class="pf-wish-title"><i class="bi bi-bookmark-check"></i> Destinasi Favorit &amp; Wishlist</h2>
+                  <p class="pf-wish-sub">Daftar lokasi Web-GIS yang tersimpan dalam rencana perjalanan Bali Anda</p>
+                </div>
+                <span class="pf-saved-pill"><span id="pfSavedCount">12</span> Tersimpan</span>
+              </div>
+              <div class="pf-tabs" id="pfTabs" role="tablist">
+                <button type="button" class="pf-tab active" data-cat="all" data-count="12" role="tab">Semua</button>
+                <button type="button" class="pf-tab" data-cat="pantai" data-count="4" role="tab">Pantai</button>
+                <button type="button" class="pf-tab" data-cat="budaya" data-count="5" role="tab">Budaya &amp; Candi</button>
+                <button type="button" class="pf-tab" data-cat="alam" data-count="3" role="tab">Alam</button>
+              </div>
+            </div>
+
+            <div class="pf-list" id="pfList">
+              <article class="pf-card pf-item" data-cat="budaya" data-lat="-8.8291" data-lng="115.0849">
+                <div class="pf-photo">
+                  <img src="public/assets/uluwatu.jpg" alt="Pura Luhur Uluwatu" loading="lazy" />
+                  <span class="pf-rate"><i class="bi bi-star-fill"></i> 4.9</span>
+                  <button type="button" class="pf-save is-on" aria-label="Hapus dari wishlist" title="Hapus dari wishlist"><i class="bi bi-bookmark-fill"></i></button>
+                </div>
+                <div class="pf-item-body">
+                  <div class="pf-meta"><i class="bi bi-geo-alt"></i> <span>Badung Selatan, Bali</span> <i class="pf-dot"></i> <span class="pf-cat">Budaya &amp; Candi</span></div>
+                  <h3 class="pf-item-title">Pura Luhur Uluwatu</h3>
+                  <p class="pf-item-desc">Kuil tebing bertingkat megah dengan pemandangan Samudra Hindia lepas, tari Kecak saat matahari terbenam, dan zona konservasi monyet ekor panjang.</p>
+                  <div class="pf-item-foot">
+                    <div class="pf-stats"><span><i class="bi bi-cursor"></i> <b>14 km</b></span><span class="pf-time"><i class="bi bi-clock"></i> 35 mnt</span></div>
+                    <a class="pf-route" href="#" target="_blank" rel="noopener noreferrer"><i class="bi bi-map"></i> Buka Rute</a>
+                  </div>
+                </div>
+              </article>
+
+              <article class="pf-card pf-item" data-cat="pantai" data-lat="-8.8467" data-lng="115.1649">
+                <div class="pf-photo">
+                  <img src="public/assets/pantaipandawa.jpg" alt="Pantai Melasti Ungasan" loading="lazy" />
+                  <span class="pf-rate"><i class="bi bi-star-fill"></i> 4.8</span>
+                  <button type="button" class="pf-save is-on" aria-label="Hapus dari wishlist" title="Hapus dari wishlist"><i class="bi bi-bookmark-fill"></i></button>
+                </div>
+                <div class="pf-item-body">
+                  <div class="pf-meta"><i class="bi bi-geo-alt"></i> <span>Kuta Selatan, Badung</span> <i class="pf-dot"></i> <span class="pf-cat">Pantai</span></div>
+                  <h3 class="pf-item-title">Pantai Melasti Ungasan</h3>
+                  <p class="pf-item-desc">Pesisir pasir putih tenang berlatar tebing kapur kembar dramatis, ideal untuk wisata bahari ramah lingkungan dan upacara ritual Melasti.</p>
+                  <div class="pf-item-foot">
+                    <div class="pf-stats"><span><i class="bi bi-cursor"></i> <b>18 km</b></span><span class="pf-time"><i class="bi bi-clock"></i> 42 mnt</span></div>
+                    <a class="pf-route" href="#" target="_blank" rel="noopener noreferrer"><i class="bi bi-map"></i> Buka Rute</a>
+                  </div>
+                </div>
+              </article>
+
+              <article class="pf-card pf-item" data-cat="alam" data-lat="-8.4348" data-lng="115.2789">
+                <div class="pf-photo">
+                  <img src="public/assets/tegallalang.jpg" alt="Tegalalang Rice Terrace" loading="lazy" />
+                  <span class="pf-rate"><i class="bi bi-star-fill"></i> 4.8</span>
+                  <button type="button" class="pf-save is-on" aria-label="Hapus dari wishlist" title="Hapus dari wishlist"><i class="bi bi-bookmark-fill"></i></button>
+                </div>
+                <div class="pf-item-body">
+                  <div class="pf-meta"><i class="bi bi-geo-alt"></i> <span>Tegalalang, Ubud, Gianyar</span> <i class="pf-dot"></i> <span class="pf-cat">Alam &amp; Agro</span></div>
+                  <h3 class="pf-item-title">Tegalalang Rice Terrace</h3>
+                  <p class="pf-item-desc">Sistem irigasi tradisional Subak warisan dunia UNESCO, hamparan persawahan bertingkat nan sejuk dengan jalur trekking ramah ekosistem.</p>
+                  <div class="pf-item-foot">
+                    <div class="pf-stats"><span><i class="bi bi-cursor"></i> <b>26 km</b></span><span class="pf-time"><i class="bi bi-clock"></i> 50 mnt</span></div>
+                    <a class="pf-route" href="#" target="_blank" rel="noopener noreferrer"><i class="bi bi-map"></i> Buka Rute</a>
+                  </div>
+                </div>
+              </article>
+
+              <div class="pf-card pf-empty" id="pfEmpty" hidden>
+                <i class="bi bi-bookmark"></i>
+                <p>Belum ada destinasi tersimpan di kategori ini.</p>
+              </div>
+            </div>
+
+            <div class="pf-sync">
+              <span class="pf-sync-ic"><i class="bi bi-signpost-split"></i></span>
+              <div class="pf-sync-txt">
+                <strong>Sinkronisasi Rute Penjelajahan</strong>
+                <span>Wishlist aktif Anda terhubung langsung dengan peta GIS buffer 5 km.</span>
+              </div>
+              <button type="button" class="pf-sync-btn" onclick="switchSection('sec-jelajahi')">Lihat di Peta Web-GIS</button>
             </div>
           </div>
         </div>
+        <div class="pf-toast" id="pfToast" role="status" aria-live="polite"></div>
       </section>
     </main>
 
     <footer class="site">
-      <div class="container">
-        <div class="row g-4 pb-4">
-          <div class="col-md-4">
-            <div class="d-flex align-items-center gap-2 mb-2">
-              <img
-                src="public/assets/logo_langkahbaswara.png"
-                alt="Logo Langkah Baswara"
-                height="32"
-                style="width: auto; max-height: 32px; object-fit: contain"
-              />
-              <strong style="color: var(--dark-green); font-size: 1.1rem"
-                >Langkah Baswara</strong
-              >
-            </div>
-            <p class="muted mb-0">
-              Platform eksplorasi destinasi wisata Bali terpadu dengan panduan
-              budaya, keindahan alam, dan peta interaktif untuk merencanakan
-              perjalanan Anda.
-            </p>
+      <div class="ft-pattern" aria-hidden="true"></div>
+      <div class="ft-glow" aria-hidden="true"></div>
+
+      <div class="container ft-inner">
+        <!-- Ajakan singkat -->
+        <div class="ft-cta">
+          <div class="ft-cta-text">
+            <h3 class="ft-cta-title">Siap menjelajah Bali?</h3>
+            <p class="ft-cta-desc">Temukan destinasi favoritmu dan susun rute perjalanan terbaik dalam hitungan detik.</p>
           </div>
-          <div class="col-md-2">
-            <h6 class="fw-bold">Eksplorasi</h6>
-            <ul class="list-unstyled muted">
-              <li><a href="#">Peta Wisata</a></li>
-              <li><a href="#">Kategori</a></li>
-              <li><a href="#">Kabupaten</a></li>
-              <li><a href="#">Rute Perjalanan</a></li>
+          <button type="button" class="ft-cta-btn" data-section="sec-jelajahi">
+            Jelajahi Sekarang <i class="bi bi-arrow-right"></i>
+          </button>
+        </div>
+
+        <div class="row g-4 g-lg-5 ft-main">
+          <!-- Brand -->
+          <div class="col-lg-4">
+            <a class="ft-brand" href="#" data-section="sec-beranda" aria-label="Langkah Baswara - kembali ke Beranda">
+              <span class="ft-logo-badge">
+                <img src="public/assets/logofix.png" alt="Logo Langkah Baswara" />
+              </span>
+              <span class="ft-brand-name">Langkah Baswara</span>
+            </a>
+            <p class="ft-about">
+              Platform eksplorasi destinasi wisata Bali terpadu dengan panduan budaya, keindahan alam, dan peta interaktif untuk merencanakan perjalanan Anda.
+            </p>
+            <div class="ft-social">
+              <a href="#" aria-label="Instagram" title="Instagram"><i class="bi bi-instagram"></i></a>
+              <a href="#" aria-label="TikTok" title="TikTok"><i class="bi bi-tiktok"></i></a>
+              <a href="mailto:hello@langkahbaswara.id" aria-label="Email" title="Email"><i class="bi bi-envelope-fill"></i></a>
+            </div>
+          </div>
+
+          <!-- Eksplorasi -->
+          <div class="col-6 col-lg-2">
+            <h6 class="ft-heading">Eksplorasi</h6>
+            <ul class="ft-links">
+              <li><a href="#" data-section="sec-jelajahi">Peta Wisata</a></li>
+              <li><a href="#" data-section="sec-jelajahi">Kategori</a></li>
+              <li><a href="#" data-section="sec-jelajahi">Kabupaten</a></li>
+              <li><a href="#" data-section="sec-jelajahi">Rute Perjalanan</a></li>
             </ul>
           </div>
-          <div class="col-md-3">
-            <h6 class="fw-bold">Informasi</h6>
-            <ul class="list-unstyled muted">
-              <li><a href="#">Tentang Platform</a></li>
-              <li><a href="#">Budaya & Etika</a></li>
+
+          <!-- Informasi -->
+          <div class="col-6 col-lg-3">
+            <h6 class="ft-heading">Informasi</h6>
+            <ul class="ft-links">
+              <li><a href="#" data-section="sec-tentang">Tentang Platform</a></li>
+              <li><a href="#">Budaya &amp; Etika</a></li>
               <li><a href="#">Kebijakan Privasi</a></li>
               <li><a href="#">Syarat Layanan</a></li>
             </ul>
           </div>
-          <div class="col-md-3">
-            <h6 class="fw-bold">Kontak & Bantuan</h6>
-            <ul class="list-unstyled muted">
+
+          <!-- Kontak -->
+          <div class="col-12 col-lg-3">
+            <h6 class="ft-heading">Kontak &amp; Bantuan</h6>
+            <ul class="ft-links">
               <li><a href="#">Pusat Bantuan</a></li>
               <li><a href="#">Lapor Destinasi</a></li>
-              <li><a href="#">hello@langkahbaswara.id</a></li>
+              <li><a href="mailto:hello@langkahbaswara.id">hello@langkahbaswara.id</a></li>
               <li><a href="#">Instagram</a></li>
             </ul>
           </div>
         </div>
-        <div class="border-top pt-3 pb-2 small text-secondary">
-          © 2024 Bali Destination Platform. Seluruh hak cipta dilindungi
-          undang-undang.
+
+        <div class="ft-bottom">
+          <span>&copy; 2026 Langkah Baswara. Seluruh hak cipta dilindungi undang-undang.</span>
+          <span class="ft-made">Dibuat dengan <i class="bi bi-heart-fill"></i> di Pulau Dewata</span>
         </div>
       </div>
     </footer>
@@ -1130,6 +1381,22 @@
     <!-- Dependencies CDN: Leaflet JS & Bootstrap 5 Bundle JS (jalur /js/ yang valid) -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="main.js"></script>
+    <!-- Alamat backend (FastAPI). Jika tunnel berganti, cukup ubah di sini saja. -->
+    <script>
+      window.LB_CONFIG = { API_BASE: 'https://2fz3bcnb-8000.asse.devtunnels.ms' };
+    </script>
+    <script src="main.js" onerror="document.getElementById('lbLoader').classList.remove('is-active');document.getElementById('lbError').classList.add('is-active');"></script>
+    <script src="auth.js"></script>
+
+    <!-- Pengaman: jika main.js salah file / gagal jalan, loader tidak boleh mengunci web selamanya -->
+    <script>
+      setTimeout(function () {
+        if (window.LBLoader) return; // main.js berjalan normal
+        var l = document.getElementById('lbLoader');
+        if (l) l.classList.remove('is-active');
+        document.body.classList.remove('lb-lock');
+        console.error('[Langkah Baswara] main.js tidak berjalan dengan benar. Pastikan main.js adalah file utama proyek (yang berisi kode loader, peta, dan profil), bukan file lain.');
+      }, 6000);
+    </script>
   </body>
 </html>
