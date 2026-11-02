@@ -646,7 +646,7 @@ footer.site .ft-pattern::after {
   z-index: -1;
   width: clamp(240px, 28vw, 440px);
   aspect-ratio: 1 / 1;
-  background: url("public/assets/fiturabout.png") center / contain no-repeat;
+  background: url("/assets/fiturabout.png") center / contain no-repeat;
   opacity: 0.13;
   pointer-events: none;
 }
@@ -945,7 +945,7 @@ footer.site .ft-links a:hover {
   aspect-ratio: 1.55 / 1;
   min-height: 560px;
   border-radius: 0 !important;
-  background-image: url("public/assets/landingpage1.png");
+  background-image: url("/assets/landingpage1.png");
   background-size: cover;
   background-position: center bottom;
   background-repeat: no-repeat;
@@ -1180,7 +1180,7 @@ footer.site .ft-links a:hover {
   width: 100%;
   aspect-ratio: 1.44 / 1;
   border-radius: 0 !important;
-  background-image: url("public/assets/landingpage3.png");
+  background-image: url("/assets/landingpage3.png");
   background-size: cover;
   background-position: center bottom;
   background-repeat: no-repeat;
@@ -1693,7 +1693,7 @@ footer.site .ft-links a:hover {
     background-position: center bottom;
     background-image:
       linear-gradient(to bottom, rgba(30, 55, 15, 0) 0%, rgba(30, 55, 15, 0.45) 40%, rgba(30, 55, 15, 0.8) 100%),
-      url("public/assets/landingpage3.png");
+      url("/assets/landingpage3.png");
   }
   .steps-title {
     margin-bottom: 0;
@@ -1876,7 +1876,7 @@ footer.site .ft-links a:hover {
   width: 100%;
   aspect-ratio: 1.55 / 1;
   min-height: 440px;
-  background-image: url("public/assets/aboutpage1.png");
+  background-image: url("/assets/aboutpage1.png");
   background-size: cover;
   background-position: center bottom;
   background-repeat: no-repeat;
@@ -2019,7 +2019,7 @@ footer.site .ft-links a:hover {
   width: 73%;
   height: 100%;
   transform: translate(-50%, -50%);
-  background: url("public/assets/aboutpage2.png") center / contain no-repeat;
+  background: url("/assets/aboutpage2.png") center / contain no-repeat;
   z-index: 1;
 }
 
@@ -2113,7 +2113,7 @@ footer.site .ft-links a:hover {
   border-radius: 26px;
   text-align: center;
   background:
-    url("public/assets/fiturabout.png") center / cover no-repeat,
+    url("/assets/fiturabout.png") center / cover no-repeat,
     linear-gradient(to top, #FFE286 0%, #FEE8B6 100%);
   box-shadow: 0 8px 20px rgba(69, 129, 50, 0.12);
   transform: scale(0.88);
@@ -2182,7 +2182,7 @@ footer.site .ft-links a:hover {
   width: 100%;
   aspect-ratio: 1.6 / 1;
   min-height: 460px;
-  background-image: url("public/assets/aboutpage3.png");
+  background-image: url("/assets/aboutpage3.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -4950,7 +4950,7 @@ html:has(body.lb-lock) {
   position: absolute;
   width: var(--lb-pattern);
   aspect-ratio: 1 / 1;
-  background: url("public/assets/fiturabout.png") center / contain no-repeat;
+  background: url("/assets/fiturabout.png") center / contain no-repeat;
   opacity: 0.95;
 }
 
@@ -5772,7 +5772,7 @@ body.au-open {
   top: 0;
   left: 0;
   background:
-    url("public/assets/fiturabout.png") top left / var(--acc-pattern) var(--acc-pattern) no-repeat,
+    url("/assets/fiturabout.png") top left / var(--acc-pattern) var(--acc-pattern) no-repeat,
     radial-gradient(
       ellipse 100% 100% at 0% 0%,
       rgba(150, 236, 118, 0.6) 0%,
@@ -5788,7 +5788,7 @@ body.au-open {
   bottom: 0;
   transform: rotate(180deg);
   background:
-    url("public/assets/fiturabout.png") top left / var(--acc-pattern) var(--acc-pattern) no-repeat,
+    url("/assets/fiturabout.png") top left / var(--acc-pattern) var(--acc-pattern) no-repeat,
     radial-gradient(
       ellipse 100% 100% at 0% 0%,
       rgba(255, 233, 120, 0.62) 0%,
@@ -5841,4 +5841,49 @@ body:has(#sec-profil:not(.d-none)) footer.site {
 .au-btn[aria-busy='true'] {
   opacity: 0.7;
   cursor: progress;
+}
+
+/* =====================================================================
+   TAMBAHAN — placeholder foto kartu & jaring pengaman tinggi peta
+   ===================================================================== */
+.landing-card-thumb-ph {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.6rem;
+  color: rgba(69, 129, 50, 0.45);
+  background: linear-gradient(135deg, #f1dfcf, #e4efd8);
+}
+
+/* Container Leaflet WAJIB punya tinggi, kalau tidak peta setinggi 0px */
+#map {
+  width: 100%;
+  min-height: 450px;
+}
+
+.explore-shell #map {
+  min-height: 0; /* di dalam .explore-shell tinggi diatur absolute/inset */
+}
+
+/* =====================================================================
+   FEATURE WHEEL — tambahan untuk slider tanpa ujung (kelas asli tidak diubah)
+   ===================================================================== */
+/* indikator fokus saat slider dioperasikan dengan keyboard (panah kiri/kanan) */
+.about-wheel-track:focus-visible {
+  outline: 3px solid rgba(69, 129, 50, 0.35);
+  outline-offset: -3px;
+  border-radius: 26px;
+}
+
+/* kartu hasil kloning tidak boleh bisa dipilih/ditarik sebagai gambar */
+.about-feature-card[aria-hidden='true'] {
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-feature-card {
+    transition: none;
+  }
 }
