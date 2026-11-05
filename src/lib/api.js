@@ -9,7 +9,7 @@ export const GEOJSON_URL = '/data/wisata-bali.geojson';
 // Browser selalu memanggil /api di origin yang sama (login: /api/auth/login).
 // Dev: proxy Vite di vite.config.js. Produksi: fungsi Vercel di /api.
 // Jangan panggil URL ngrok langsung dari browser — backend menolak origin Vercel.
-export const API_BASE = '';
+export const API_BASE = 'https://bauble-clergyman-glisten.ngrok-free.dev';
 
 export const OTP_LENGTH = 6;
 export const BALI_CENTER = [-8.4095, 115.1889];
