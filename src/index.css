@@ -626,19 +626,28 @@ h1.page-title {
    Hijau brand + pola batik (fiturabout.png) + aksen kuning
    ======================================================== */
 footer.site {
-  --ft-yellow: var(--pastel-yellow);
+  --ft-yellow: #ffe56a;
   position: relative;
   isolation: isolate;
   overflow: hidden;
   margin-top: 2.5rem;
-  padding: 2.75rem 0 1.25rem;
+  padding: 1.6rem 0 1.15rem;
   color: #eaf5e2;
-  background: linear-gradient(160deg, #4f8c3a 0%, #3d7129 50%, #2c5a1f 100%);
-  border-radius: 44px 44px 0 0;
+  background: linear-gradient(180deg, #3f8a34 0%, #2f6d28 55%, #276022 100%);
+  border-radius: 36px 36px 0 0;
   border-top: 0;
 }
 
 /* Pola batik di kanan atas & kiri bawah */
+footer.site .ft-pattern {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: url("/assets/fiturabout.png") center / 460px repeat;
+  opacity: 0.07;
+  pointer-events: none;
+}
+
 footer.site .ft-pattern::before,
 footer.site .ft-pattern::after {
   content: '';
@@ -647,7 +656,7 @@ footer.site .ft-pattern::after {
   width: clamp(240px, 28vw, 440px);
   aspect-ratio: 1 / 1;
   background: url("/assets/fiturabout.png") center / contain no-repeat;
-  opacity: 0.13;
+  opacity: 0.55;
   pointer-events: none;
 }
 
@@ -678,31 +687,38 @@ footer.site .ft-glow {
   position: relative;
 }
 
+.ft-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) repeat(3, minmax(140px, 0.85fr));
+  gap: 2rem 2.75rem;
+  align-items: start;
+}
+
 /* ---------- Kartu ajakan ---------- */
 .ft-cta {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
-  margin: 0 0 3rem;
-  padding: 1.4rem 1.8rem;
-  background: var(--pastel-yellow);
-  border-radius: 28px;
-  box-shadow: 0 16px 36px rgba(20, 45, 12, 0.28);
+  margin: 0 0 2.4rem;
+  padding: 1.15rem 1.5rem;
+  background: var(--ft-yellow);
+  border-radius: 22px;
+  box-shadow: 0 10px 24px rgba(20, 45, 12, 0.18);
 }
 
 .ft-cta-title {
   font-family: 'Satoshi', sans-serif;
-  font-size: clamp(1.25rem, 2.2vw, 1.7rem);
+  font-size: clamp(1.2rem, 2vw, 1.55rem);
   font-weight: 800;
   letter-spacing: -0.02em;
   color: #1a2216;
-  margin: 0 0 0.25rem;
+  margin: 0 0 0.2rem;
 }
 
 .ft-cta-desc {
-  font-size: 0.95rem;
-  color: #4b4310;
+  font-size: 0.9rem;
+  color: #3d4a28;
   margin: 0;
 }
 
@@ -772,11 +788,11 @@ footer.site .ft-glow {
 }
 
 footer.site .ft-about {
-  font-size: 0.92rem;
-  line-height: 1.7;
-  color: rgba(255, 255, 255, 0.8);
-  max-width: 400px;
-  margin: 1rem 0 1.25rem;
+  font-size: 0.88rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.78);
+  max-width: 340px;
+  margin: 0.9rem 0 1.1rem;
 }
 
 .ft-social {
@@ -785,15 +801,16 @@ footer.site .ft-about {
 }
 
 footer.site .ft-social a {
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.14);
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.8);
   color: #fff;
-  font-size: 1.05rem;
+  font-size: 0.9rem;
   text-decoration: none;
   transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
@@ -809,14 +826,14 @@ footer.site .ft-social a:hover {
 .ft-heading {
   display: inline-block;
   font-family: 'Satoshi', sans-serif;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--pastel-yellow);
-  margin: 0.35rem 0 1rem;
-  padding-bottom: 0.45rem;
-  border-bottom: 2px solid rgba(255, 239, 145, 0.35);
+  color: var(--ft-yellow, var(--pastel-yellow));
+  margin: 0.15rem 0 0.95rem;
+  padding-bottom: 0;
+  border-bottom: 0;
 }
 
 .ft-links {
@@ -862,6 +879,16 @@ footer.site .ft-links a:hover {
   margin: 0 0.15rem;
 }
 
+@media (max-width: 991px) {
+  .ft-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ft-grid > :first-child {
+    grid-column: 1 / -1;
+  }
+}
+
 @media (max-width: 767px) {
   footer.site {
     border-radius: 32px 32px 0 0;
@@ -882,6 +909,10 @@ footer.site .ft-links a:hover {
   .ft-bottom {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .ft-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -963,7 +994,7 @@ footer.site .ft-links a:hover {
   width: 100%;
   min-height: 0;
   padding-top: clamp(9rem, 19vw, 24rem);
-  padding-bottom: clamp(1.25rem, 2.6vw, 3.5rem);
+  padding-bottom: clamp(3.75rem, 6vw, 5.25rem);
 }
 
 .hero-content-left {
@@ -1035,7 +1066,7 @@ footer.site .ft-links a:hover {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 10px 22px rgba(22, 48, 16, 0.18);
   transition: all 0.2s ease;
 }
 
@@ -4186,6 +4217,441 @@ body.ex-noscroll {
   }
 }
 
+/* Panel filter muat di samping peta, kartu rute lebih rapi */
+#sec-jelajahi.content-section {
+  padding-top: 5.75rem;
+  padding-bottom: 3rem;
+}
+
+.page-wrap:has(#sec-jelajahi) {
+  padding-bottom: 0;
+}
+
+.explore-wrap {
+  margin-bottom: 0;
+}
+
+.explore-shell {
+  height: calc(100dvh - 6.4rem);
+  min-height: 520px;
+}
+
+.ex-panel .ex-card {
+  padding: 0.8rem 0.9rem 0.85rem;
+  border-radius: 22px;
+}
+
+.ex-panel .ex-label {
+  margin-bottom: 0.45rem;
+}
+
+.ex-panel .ex-search {
+  margin-bottom: 0.15rem;
+}
+
+.ex-panel .ex-search input {
+  height: 40px;
+}
+
+.ex-panel .ex-search .ex-search-icon {
+  z-index: 1;
+  pointer-events: none;
+}
+
+.ex-panel .ex-search .ex-clear {
+  right: 2.55rem;
+  z-index: 2;
+}
+
+.ex-panel .ex-search:has(.ex-clear) input {
+  padding-right: 4.7rem;
+}
+
+.ex-panel .ex-chips {
+  margin-top: 0.65rem;
+}
+
+.ex-panel .ex-label-link {
+  display: block;
+  margin: -0.15rem 0 0.35rem;
+}
+
+.ex-panel .form-select.ex-select {
+  width: 100%;
+  height: 38px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.ex-panel .ex-cta {
+  margin-top: 0.7rem;
+  padding: 0.72rem 0.95rem;
+  border-radius: 16px;
+  font-size: 0.74rem;
+}
+
+.ex-panel .au-msg {
+  margin-top: 0.55rem;
+}
+
+.ex-origin-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 0.55rem;
+}
+
+.ex-gps {
+  width: 100%;
+  margin: 0;
+  border: 1px solid var(--dark-green);
+  background: var(--pastel-green-light);
+  color: var(--dark-green);
+  border-radius: 999px;
+  padding: 0.48rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.ex-gps.is-on {
+  background: var(--dark-green);
+  color: #fff;
+}
+
+.ex-gps:hover {
+  background: var(--dark-green);
+  color: #fff;
+}
+
+.ex-gps:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.leaflet-container.is-picking,
+.leaflet-container.is-picking .leaflet-interactive {
+  cursor: crosshair !important;
+}
+
+.leaflet-container:not(.is-picking),
+.leaflet-container:not(.is-picking).leaflet-grab {
+  cursor: grab;
+}
+
+.ex-hint {
+  position: absolute;
+  z-index: 1000;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: calc(100% - 2rem);
+  background: #fff;
+  color: #1a2216;
+  border-radius: 999px;
+  padding: 0.45rem 0.95rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.14);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.explore-shell .ex-mapctrl {
+  position: absolute;
+  z-index: 1000;
+  left: 24px;
+  bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.28rem;
+  box-shadow: 0 10px 26px rgba(17, 24, 39, 0.14);
+}
+
+.explore-shell .ex-mapctrl .ex-zoom,
+.explore-shell .ex-mapctrl .map-mode {
+  position: static;
+  top: auto;
+  right: auto;
+  bottom: auto;
+  left: auto;
+  flex-direction: row;
+  background: transparent;
+  box-shadow: none;
+  border: 0;
+  padding: 0;
+  border-radius: 0;
+}
+
+.explore-shell .ex-mapctrl .ex-zoom {
+  border-right: 1px solid rgba(69, 129, 50, 0.16);
+  padding-right: 0.15rem;
+  margin-right: 0.1rem;
+}
+
+@media (min-width: 992px) {
+  .ex-panel {
+    top: 16px;
+    bottom: 96px;
+    gap: 0.55rem;
+  }
+}
+
+@media (max-width: 991px) {
+  .explore-shell .ex-mapctrl {
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
+    width: max-content;
+    max-width: calc(100% - 28px);
+  }
+}
+
+.ex-route {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.45rem;
+  width: min(320px, calc(100% - 40px));
+  max-height: min(340px, calc(100% - 120px));
+  background: #fff;
+  border: 1px solid rgba(69, 129, 50, 0.16);
+  border-radius: 22px;
+  padding: 0.85rem 0.85rem 0.7rem;
+  box-shadow: 0 16px 36px rgba(17, 24, 39, 0.14);
+}
+
+.ex-route-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.ex-route-title {
+  font-size: 1.02rem;
+  line-height: 1.2;
+  margin: 0.12rem 0 0;
+}
+
+.ex-route-meta {
+  margin: 0.15rem 0 0;
+  font-size: 0.72rem;
+  color: #5d6a58;
+}
+
+.ex-route-close {
+  position: static;
+  flex-shrink: 0;
+}
+
+.ex-route-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.15rem 0 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ex-route-list li {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0.38rem 0.45rem;
+  background: #f4f8f1;
+  border-radius: 12px;
+}
+
+.ex-route-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--dark-green);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ex-route-name {
+  min-width: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #1a2216;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ex-route-km {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--dark-green);
+}
+
+/* Kartu kanan sejajar dengan panel kiri; latar menyambung ke footer */
+.ex-side {
+  position: absolute;
+  z-index: 1000;
+  top: 16px;
+  right: 16px;
+  bottom: 24px;
+  width: var(--ex-panel-w);
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  overflow: auto;
+  scrollbar-width: none;
+  pointer-events: none;
+}
+
+.ex-side::-webkit-scrollbar {
+  display: none;
+}
+
+.ex-side > * {
+  pointer-events: auto;
+  flex-shrink: 0;
+}
+
+.explore-shell .ex-side .ex-route,
+.explore-shell .ex-side .ex-detail,
+.explore-shell.has-detail .ex-side .ex-route {
+  position: relative;
+  inset: auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: none;
+  margin: 0;
+  background: rgba(255, 255, 255, 0.97);
+  border: 0;
+  border-radius: 22px;
+  box-shadow: 0 10px 30px rgba(17, 24, 39, 0.1);
+  padding: 0.8rem 0.9rem 0.85rem;
+  animation: none;
+  overflow: visible;
+}
+
+.ex-side .ex-route-list {
+  max-height: 240px;
+}
+
+.ex-side .ex-route-list li {
+  display: block;
+  padding: 0;
+  background: transparent;
+}
+
+.ex-side .ex-route-name {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+}
+
+.ex-route-hit {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.38rem 0.45rem;
+  border: 0;
+  border-radius: 12px;
+  background: #f4f8f1;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ex-route-hit:hover {
+  background: #e7f6dc;
+}
+
+.ex-route-list li.is-active .ex-route-hit {
+  background: #e7f6dc;
+  outline: 1px solid rgba(69, 129, 50, 0.35);
+}
+
+.ex-side .ex-desc {
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  margin-bottom: 0.75rem;
+}
+
+.ex-review {
+  background: #f4f8f1;
+  border-radius: 14px;
+  padding: 0.7rem 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.ex-review p {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #374151;
+}
+
+.ex-review-score {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+  color: #1a2216;
+}
+
+.ex-review-score b {
+  font-size: 1.15rem;
+}
+
+.ex-review-score span:last-child {
+  font-size: 0.75rem;
+  color: #5d6a58;
+}
+
+.ex-stars {
+  color: var(--orange);
+  letter-spacing: 0.04em;
+}
+
+.ex-side .ex-open-btn {
+  align-self: flex-start;
+}
+
+@media (min-width: 992px) {
+  .explore-shell:has(.ex-side) .ex-status {
+    right: auto;
+    left: calc(var(--ex-panel-w) + 48px);
+  }
+}
+
+@media (max-width: 991px) {
+  .ex-side {
+    position: static;
+    order: 3;
+    width: 100%;
+    bottom: auto;
+    overflow: visible;
+  }
+}
+
 /* =====================================================================
    HALAMAN PROFIL (#sec-profil) — mengikuti mockup "Profile Page"
    ===================================================================== */
@@ -5833,7 +6299,11 @@ body:has(#sec-profil:not(.d-none)) footer.site {
   padding-bottom: 2rem;
 }
 
-#sec-jelajahi::after,
+#sec-jelajahi::after {
+  bottom: -3rem;
+  height: min(70vh, 560px);
+}
+
 #sec-profil::after {
   bottom: -3rem;
 }

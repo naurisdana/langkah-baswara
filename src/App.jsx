@@ -4,8 +4,8 @@ import useWisata from './lib/useWisata.js';
 import Navbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx';
 import AuthModal from './components/AuthModal.jsx';
-import MapSection from './components/MapSection.jsx';
 import Beranda from './pages/Beranda.jsx';
+import Jelajahi from './pages/Jelajahi.jsx';
 import Tentang from './pages/Tentang.jsx';
 import Profil from './pages/Profil.jsx';
 
@@ -54,7 +54,17 @@ export default function App() {
   } else if (activePage === 'tentang') {
     page = <Tentang onExplore={() => goTo('jelajahi')} />;
   } else if (activePage === 'jelajahi') {
-    page = <MapSection places={places} error={error} query={query} focus={focus} />;
+    page = (
+      <Jelajahi
+        places={places}
+        error={error}
+        query={query}
+        focus={focus}
+        user={user}
+        onNeedLogin={() => setAuthOpen(true)}
+        onOpenMap={(dest) => { setQuery(''); setFocus({ ...dest }); }}
+      />
+    );
   } else if (activePage === 'profil' && user) {
     page = <Profil user={user} onLogout={handleLogout} />;
   }

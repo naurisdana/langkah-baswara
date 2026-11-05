@@ -1,9 +1,11 @@
 const REVIEWS = [
   { tone: 'yellow', tag: 'Pantai Melasti & Ubud', initials: 'RP', name: 'Rian Pratama', role: 'Solo Traveler • Jakarta', quote: 'Fitur peta interaktifnya juara banget! Bikin kami nggak bingung milih rute jalan dan bisa hemat waktu 3 jam di perjalanan tanpa drama nyasar.' },
+  { tone: 'yellow', tag: 'Tanah Lot & Bedugul', initials: 'SA', name: 'Sinta Anggraini', role: 'Family Trip • Bandung', quote: 'Kami bawa dua anak, jadi jarak tempuh harus masuk akal. Slider radiusnya ngebantu banget nyusun pura, danau, dan tempat makan dalam satu hari tanpa kelelahan.' },
+  { tone: 'yellow', tag: 'Uluwatu Sunset', initials: 'DW', name: 'Dimas Wicaksono', role: 'Fotografer • Surabaya', quote: 'Saya cari spot budaya yang masih sepi. Filter kategorinya langsung nunjukin pura dan tebing, jadi jadwal syuting sunset nggak tabrakan sama keramaian pantai.' },
   { tone: 'green', tag: 'Nusa Penida Day Trip', initials: 'NU', name: 'Nadia Utami', role: 'Bali Explorer • Yogyakarta', quote: 'Sistem pencarian cerdasnya ngebantu banget pilih objek wisata alam & budaya yang pas dengan budget backpacker kami. Sangat direkomendasikan!' },
+  { tone: 'green', tag: 'Kintamani & Besakih', initials: 'MA', name: 'Made Arya', role: 'Pemandu Lokal • Bangli', quote: 'Tamu saya sering minta rute yang nggak muter-muter. Urutan titik terdekatnya masuk akal, dari danau ke pura, jadi saya tinggal sesuaikan jam keberangkatan.' },
+  { tone: 'green', tag: 'Sanur & Nusa Dua', initials: 'LK', name: 'Laras Kirana', role: 'Honeymoon • Semarang', quote: 'Kami cuma punya dua hari. Setelah pakai lokasi sendiri, kartu rutenya langsung ngasih enam tempat yang masih saling dekat. Liburan jadi tenang, nggak kejebak macet.' },
 ];
-// Susunan sama seperti HTML lama: 3 kartu kuning lalu 3 kartu hijau (isi masih contoh)
-const ROWS = [0, 0, 0, 1, 1, 1].map((r, i) => ({ ...REVIEWS[r], key: i }));
 
 export default function Testimonials() {
   return (
@@ -18,8 +20,8 @@ export default function Testimonials() {
           </p>
         </div>
         <div className="row g-4">
-          {ROWS.map((r) => (
-            <div className="col-lg-4 col-md-6 about-reveal" style={{ '--reveal-delay': `${(r.key % 3) * 0.1}s` }} key={r.key}>
+          {REVIEWS.map((r, i) => (
+            <div className="col-lg-4 col-md-6 about-reveal" style={{ '--reveal-delay': `${(i % 3) * 0.1}s` }} key={r.name}>
               <div className={`about-review-card about-review-${r.tone}`}>
                 <div className="arc-top">
                   <span className="arc-stars">

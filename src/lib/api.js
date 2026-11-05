@@ -48,7 +48,17 @@ export function normalizeWisata(payload) {
       const lat = g ? Number(g[1]) : Number(p.latitude ?? p.lat);
       const lng = g ? Number(g[0]) : Number(p.longitude ?? p.lng ?? p.lon);
       const kategori = p.kategori && typeof p.kategori === 'object' ? p.kategori.nama : p.kategori;
-      return { nama: p.nama || p.name || '', kategori: kategori || '', lat, lng };
+      const rating = p.rating == null || p.rating === '' ? null : Number(p.rating);
+      return {
+        nama: p.nama || p.name || '',
+        kategori: kategori || '',
+        kabupaten: p.kabupaten_kota || p.kabupaten || p.kota || '',
+        preferensi: p.preferensi || '',
+        rating: Number.isFinite(rating) ? rating : null,
+        link: p.link || p.url || '',
+        lat,
+        lng,
+      };
     })
     .filter((x) => Number.isFinite(x.lat) && Number.isFinite(x.lng));
 }
