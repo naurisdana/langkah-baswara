@@ -57,7 +57,7 @@ export default function AuthModal({ open, onClose, onLoggedIn }) {
     if (d && otpRefs.current[i + 1]) otpRefs.current[i + 1].focus();
   };
 
-  const msg = typeof errorMessage === 'string' && errorMessage ? <p className="au-msg" role="alert">{errorMessage}</p> : null;
+  const msg = typeof errorMessage === 'string' && errorMessage ? <p className="au-msg" data-type="error" role="alert">{errorMessage}</p> : null;
   const eye = (
     <button type="button" className="au-eye" aria-label="Tampilkan kata sandi" onClick={() => setShowPass((s) => !s)}>
       <i className={`bi ${showPass ? 'bi-eye' : 'bi-eye-slash'}`}></i>
