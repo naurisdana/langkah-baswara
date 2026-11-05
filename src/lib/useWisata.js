@@ -5,6 +5,7 @@ import { apiRequest, normalizeWisata, GEOJSON_URL } from './api.js';
 export default function useWisata() {
   const [places, setPlaces] = useState([]);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let alive = true;
@@ -12,7 +13,10 @@ export default function useWisata() {
       let list = [];
       let apiMsg = null;
       try {
-        const r = await apiRequest('/api/wisata');
+        const r = await Promise.race([
+          apiRequest('/api/wisata'),
+          new Promise((_, reject) => { setTimeout(() => reject(new Error('timeout')), 8000); }),
+        ]);
         if (r.ok) list = normalizeWisata(r.data);
         else apiMsg = r.message;
       } catch (err) {
@@ -28,10 +32,11 @@ export default function useWisata() {
       }
       if (!alive) return;
       setPlaces(list);
+      setLoading(false);
       if (!list.length) setError(apiMsg || 'Data wisata tidak dapat dimuat.');
     })();
     return () => { alive = false; };
   }, []);
 
-  return { places, error };
+  return { places, error, loading };
 }

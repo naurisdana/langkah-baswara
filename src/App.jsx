@@ -8,6 +8,7 @@ import Beranda from './pages/Beranda.jsx';
 import Jelajahi from './pages/Jelajahi.jsx';
 import Tentang from './pages/Tentang.jsx';
 import Profil from './pages/Profil.jsx';
+import Loader from './components/Loader.jsx';
 
 export default function App() {
   const [activePage, setActivePage] = useState('beranda'); // 'beranda' | 'tentang' | 'jelajahi' | 'profil'
@@ -15,7 +16,7 @@ export default function App() {
   const [authOpen, setAuthOpen] = useState(false);
   const [query, setQuery] = useState('');   // kata kunci dari pencarian Hero
   const [focus, setFocus] = useState(null); // destinasi dari tombol "Buka di Peta"
-  const { places, error } = useWisata();  
+  const { places, error, loading } = useWisata();  
 
   // Satu-satunya pintu perpindahan halaman (dipakai Navbar, Hero, kartu, Footer)
   const goTo = useCallback(
@@ -47,7 +48,6 @@ export default function App() {
         user={user}
         onNeedLogin={() => setAuthOpen(true)}
         onExplore={() => goTo('jelajahi')}
-        onSearch={(q) => { setQuery(q); setFocus(null); goTo('jelajahi'); }}
         onOpenMap={(dest) => { setQuery(''); setFocus({ ...dest }); goTo('jelajahi'); }}
       />
     );
@@ -71,6 +71,7 @@ export default function App() {
 
   return (
     <>
+      <Loader done={!loading} />
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} onLoggedIn={(u) => { setUser(u); setAuthOpen(false); }} />
 
       <Navbar activePage={activePage} onSelect={goTo} user={user} onAuthClick={handleAuthClick} />

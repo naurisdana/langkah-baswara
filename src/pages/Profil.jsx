@@ -24,10 +24,22 @@ export default function Profil({ user, onLogout }) {
         </div>
       </div>
       <div className="pf-main">
-        <div className="pf-card pf-wish-head">
+        <section className="pf-card pf-wish-head">
+          <h2 className="pf-wish-title"><i className="bi bi-heart-fill"></i> Destinasi Favorit</h2>
+          <p className="pf-wish-sub">Tempat yang kamu tandai favorit akan muncul di sini.</p>
+          <div className="pf-empty">
+            <i className="bi bi-heart"></i>
+            <p>Belum ada destinasi favorit.</p>
+          </div>
+        </section>
+        <section className="pf-card pf-wish-head">
           <h2 className="pf-wish-title"><i className="bi bi-bookmark-heart-fill"></i> Wishlist Saya</h2>
           <p className="pf-wish-sub">Destinasi yang kamu simpan akan muncul di sini.</p>
-        </div>
+          <div className="pf-empty">
+            <i className="bi bi-bookmark"></i>
+            <p>Wishlist masih kosong.</p>
+          </div>
+        </section>
       </div>
     </div>
   );

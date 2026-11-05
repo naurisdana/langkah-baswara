@@ -1485,6 +1485,44 @@ footer.site .ft-links a:hover {
   line-height: 1.3;
 }
 
+.landing-card-title-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.landing-card-thumb {
+  cursor: pointer;
+}
+
+.landing-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.btn-card-detail {
+  background: transparent;
+  color: var(--dark-green);
+  border: 1.5px solid rgba(69, 129, 50, 0.45);
+  border-radius: 999px;
+  padding: 0.55rem 1.25rem;
+  font-family: 'Satoshi', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  width: 100%;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.btn-card-detail:hover {
+  background: rgba(69, 129, 50, 0.08);
+}
+
 .landing-card-desc {
   font-size: 0.9rem;
   color: #4b5548;
@@ -2103,43 +2141,31 @@ footer.site .ft-links a:hover {
   margin-top: 1.5rem;
 }
 
-.about-wheel-track {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: var(--afc-gap);
+.about-wheel-viewport {
+  overflow: hidden;
   padding: 3.5rem 0 5rem;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
   cursor: grab;
+  touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
   outline: none;
 }
 
-.about-wheel-track::-webkit-scrollbar {
-  display: none;
-}
-
-.about-wheel-track.is-dragging {
+.about-wheel-viewport.is-dragging {
   cursor: grabbing;
-  scroll-snap-type: none;
 }
 
-/* Spacer agar kartu pertama & terakhir bisa berada tepat di tengah */
-.about-wheel-track::before,
-.about-wheel-track::after {
-  content: '';
-  flex: 0 0 max(0px, calc(50% - var(--afc-w) / 2 - var(--afc-gap)));
+.about-wheel-track {
+  display: flex;
+  align-items: center;
+  gap: var(--afc-gap);
+  width: max-content;
+  will-change: transform;
 }
 
 .about-feature-card {
   flex: 0 0 var(--afc-w);
-  scroll-snap-align: center;
-  scroll-snap-stop: always;
+  transform-origin: center center;
   padding: 1.1rem 1.1rem 1.6rem;
   border-radius: 26px;
   text-align: center;
@@ -5541,11 +5567,12 @@ html:has(body.lb-lock) {
 
 .lb-flower {
   position: absolute;
-  left: -10px;
-  top: 0;
+  left: calc(var(--p) * 1% - 23px);
+  top: 50%;
   z-index: 4;
   width: 46px;
   height: 46px;
+  margin-top: -23px;
   filter: drop-shadow(0 2px 5px rgba(255, 170, 40, 0.45));
   animation: lbSpin 9s linear infinite;
 }
@@ -6341,7 +6368,7 @@ body:has(#sec-profil:not(.d-none)) footer.site {
    FEATURE WHEEL — tambahan untuk slider tanpa ujung (kelas asli tidak diubah)
    ===================================================================== */
 /* indikator fokus saat slider dioperasikan dengan keyboard (panah kiri/kanan) */
-.about-wheel-track:focus-visible {
+.about-wheel-viewport:focus-visible {
   outline: 3px solid rgba(69, 129, 50, 0.35);
   outline-offset: -3px;
   border-radius: 26px;
@@ -6356,4 +6383,96 @@ body:has(#sec-profil:not(.d-none)) footer.site {
   .about-feature-card {
     transition: none;
   }
+}
+
+/* Foto di kartu detail Jelajahi */
+.ex-side .ex-detail .ex-photo {
+  height: 148px;
+  margin-bottom: 0.7rem;
+  border-radius: 16px;
+}
+
+/* Popup destinasi populer di Beranda */
+.dest-pop {
+  position: fixed;
+  inset: 0;
+  z-index: 2600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+}
+
+.dest-pop-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgba(18, 32, 14, 0.46);
+  cursor: pointer;
+}
+
+.dest-pop-card {
+  position: relative;
+  z-index: 1;
+  width: min(440px, 100%);
+  max-height: min(88vh, 640px);
+  overflow: auto;
+  background: #fffdf6;
+  border-radius: 28px;
+  box-shadow: 0 24px 60px rgba(22, 48, 16, 0.28);
+}
+
+.dest-pop-photo {
+  position: relative;
+  height: 230px;
+  background: #e5e7eb;
+}
+
+.dest-pop-photo img,
+.dest-pop-photo .ex-photo-ph {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.dest-pop-x {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.94);
+  color: #1a2216;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dest-pop-body {
+  padding: 1.05rem 1.25rem 1.3rem;
+}
+
+.dest-pop-body h3 {
+  font-family: 'Satoshi', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #1a2216;
+  margin: 0.15rem 0 0.55rem;
+}
+
+.dest-pop-body p {
+  margin: 0;
+  color: #3d4a38;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.dest-pop-body .btn-card-explore {
+  margin-top: 1.05rem;
 }

@@ -3,8 +3,8 @@ import L from 'leaflet';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-import { BALI_CENTER } from '../lib/api.js';
-import { BALI_MIN_ZOOM, BALI_NE, BALI_SW } from '../data/destinations.js';
+import { assetUrl, BALI_CENTER } from '../lib/api.js';
+import { BALI_MIN_ZOOM, BALI_NE, BALI_SW, categoryGroup, photoForPlace } from '../data/destinations.js';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({ iconRetinaUrl: markerIcon2x, iconUrl: markerIcon, shadowUrl: markerShadow });
@@ -12,9 +12,8 @@ L.Icon.Default.mergeOptions({ iconRetinaUrl: markerIcon2x, iconUrl: markerIcon, 
 const BASEMAPS = {
   street: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' }],
   satellite: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }],
-  dark: ['https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }],
 };
-const BASEMAP_LABELS = [['street', 'Jalan'], ['satellite', 'Satelit'], ['dark', 'Gelap']];
+const BASEMAP_LABELS = [['street', 'Jalan'], ['satellite', 'Satelit']];
 
 const PIN_ICON = {
   alam: 'bi-tree-fill',
@@ -36,6 +35,29 @@ function pinIcon(cat, active) {
 function samePlace(a, b) {
   if (!a || !b) return false;
   return a.nama === b.nama && Number(a.lat) === Number(b.lat) && Number(a.lng) === Number(b.lng);
+}
+
+function PlacePhoto({ place, score }) {
+  const files = photoForPlace(place) || [];
+  const [idx, setIdx] = useState(0);
+  const cat = categoryGroup(place.kategori);
+  const icon = PIN_ICON[cat] || PIN_ICON.umum;
+  const failed = !files.length || idx >= files.length;
+
+  return (
+    <div className="ex-photo">
+      {failed ? (
+        <div className={`ex-photo-ph cat-${cat}`} role="img" aria-label={`Foto ${place.nama} belum tersedia`}>
+          <i className={`bi ${icon}`}></i>
+        </div>
+      ) : (
+        <img src={assetUrl(files[idx])} alt={place.nama} onError={() => setIdx((i) => i + 1)} />
+      )}
+      {score != null ? (
+        <span className="ex-rating"><i className="bi bi-star-fill"></i> {score.toFixed(1)}</span>
+      ) : null}
+    </div>
+  );
 }
 
 function placeBlurb(p) {
@@ -324,6 +346,7 @@ export default function MapSection({
 
               {selected ? (
                 <article className="ex-detail">
+                  <PlacePhoto key={`${selected.nama}-${selected.lat}`} place={selected} score={score} />
                   <div className="ex-detail-head">
                     <div className="ex-detail-titles">
                       <div className="ex-eyebrow">Detail wisata</div>

@@ -230,7 +230,7 @@ export default function Jelajahi({ places, error, query, focus }) {
             <label className="ex-label" htmlFor="stayDays">Lama liburan</label>
             <select id="stayDays" className="form-select ex-select" value={days} onChange={(e) => setDays(Number(e.target.value))}>
               {DAY_OPTIONS.map((d) => (
-                <option key={d} value={d}>{d} hari · {d * 3} titik</option>
+                <option key={d} value={d}>{d} hari</option>
               ))}
             </select>
             <button type="button" className="ex-cta" onClick={startRoute}>

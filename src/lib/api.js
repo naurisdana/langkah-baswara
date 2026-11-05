@@ -6,10 +6,15 @@ export const assetUrl = (file) => `/assets/${encodeURIComponent(file)}`;
 // Data spasial: public/data/wisata-bali.geojson  →  /data/wisata-bali.geojson
 export const GEOJSON_URL = '/data/wisata-bali.geojson';
 
-// Opsional: isi VITE_API_BASE di .env (mis. http://localhost:8000) bila backend dipakai
-export const API_BASE = String(
-  (import.meta.env && import.meta.env.VITE_API_BASE) || (window.LB_CONFIG && window.LB_CONFIG.API_BASE) || '',
+// Isi VITE_API_URL di .env (contoh: https://....ngrok-free.dev). Login memakai ${API_BASE}/api/auth/login.
+const CONFIGURED_API = String(
+  (import.meta.env && (import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE))
+    || (window.LB_CONFIG && window.LB_CONFIG.API_BASE)
+    || '',
 ).replace(/\/+$/, '');
+
+// Dev memakai proxy Vite (same-origin). Build produksi tetap memanggil VITE_API_URL langsung.
+export const API_BASE = import.meta.env.DEV ? '' : CONFIGURED_API;
 
 export const OTP_LENGTH = 6;
 export const BALI_CENTER = [-8.4095, 115.1889];
@@ -26,14 +31,35 @@ export function messageFrom(body) {
 }
 
 export async function apiRequest(path, { method = 'GET', body } = {}) {
-  const res = await fetch(API_BASE + path, {
-    method,
-    headers: { Accept: 'application/json', ...(body ? { 'Content-Type': 'application/json' } : {}) },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  let data = null;
-  try { data = await res.json(); } catch (e) { data = null; }
-  return { ok: res.ok, data, message: res.ok ? null : messageFrom(data) };
+  try {
+    const res = await fetch(API_BASE + path, {
+      method,
+      headers: {
+        Accept: 'application/json',
+        ...(body ? { 'Content-Type': 'application/json' } : {}),
+        ...(API_BASE.includes('ngrok') ? { 'ngrok-skip-browser-warning': 'true' } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    let data = null;
+    try { data = await res.json(); } catch (e) { data = null; }
+    return { ok: res.ok, data, message: res.ok ? null : messageFrom(data) };
+  } catch (err) {
+    console.error(err);
+    return { ok: false, data: null, message: 'Tidak dapat terhubung ke server.' };
+  }
+}
+
+/** GET /api/beranda/search?q= — hasil kotak cari di Beranda. */
+export function searchBeranda(q) {
+  const params = new URLSearchParams({ q: String(q || '').trim() });
+  return apiRequest(`/api/beranda/search?${params}`);
+}
+
+/** GET /api/beranda/populer?kategori= — kartu destinasi populer di Beranda. */
+export function populerBeranda(kategori = 'all') {
+  const params = new URLSearchParams({ kategori: kategori || 'all' });
+  return apiRequest(`/api/beranda/populer?${params}`);
 }
 
 // Ubah balasan /api/wisata atau GeoJSON menjadi daftar { nama, kategori, lat, lng }

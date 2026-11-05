@@ -8,225 +8,203 @@ const FEATURES = [
   { img: 'fiturabout5.png', title: 'Detail Wisata', alt: 'Fitur Detail Wisata', desc: 'Klik titik di peta untuk melihat foto, deskripsi, dan info dari tempat yang dikunjungi.' },
 ];
 
-/* ---------------------------------------------------------------------
-   Loop tanpa ujung: set kartu asli diapit COPIES set kloning di kiri & kanan.
-   Urutan DOM: [kloning x2][ASLI][kloning x2]. Begitu pengguna masuk ke set
-   kloning, posisi scroll dipindah diam-diam ke kartu yang sama di set asli
-   (lihat recenter) — tampilannya identik sehingga tidak terlihat ada lompatan.
-   --------------------------------------------------------------------- */
+/* Tiga set identik. Posisi digeser terus, lalu dilipat balik selebar satu set
+   supaya tampilannya sama dan putaran tidak pernah mentok. */
 const N = FEATURES.length;
-const COPIES = 2;
-const HOME = COPIES * N; // indeks kartu pertama di set asli
-const START_INDEX = HOME + Math.min(2, N - 1); // kartu ke-3 berada di tengah saat pertama tampil
-const mod = (i) => ((i % N) + N) % N;
+const COPIES = 4;
+const START = Math.min(2, N - 1);
+const SPEED = 64;
 
 const ITEMS = [];
-for (let c = -COPIES; c <= COPIES; c += 1) {
+for (let c = 0; c < COPIES; c += 1) {
   FEATURES.forEach((f, i) => ITEMS.push({ f, clone: c !== 0, key: `${c}:${i}` }));
 }
 
-/**
- * Props:
- *  - autoPlay     : geser otomatis ke kartu berikutnya (default true)
- *  - interval     : jeda autoplay dalam ms (default 3500)
- *  - captureWheel : kalau true, roda mouse vertikal di atas slider ikut menggeser slider
- *                   (default false supaya scroll halaman tidak "tersangkut"; trackpad/Shift+roda
- *                   selalu bisa menggeser slider)
- */
-export default function FeatureWheel({ autoPlay = true, interval = 3500, captureWheel = false }) {
+const mod = (i) => ((i % N) + N) % N;
+
+export default function FeatureWheel({ autoPlay = true, captureWheel = false }) {
+  const viewRef = useRef(null);
   const trackRef = useRef(null);
   const apiRef = useRef(null);
-  const [active, setActive] = useState(START_INDEX); // indeks GLOBAL kartu di tengah (0 … ITEMS.length-1)
+  const [active, setActive] = useState(START);
 
   useEffect(() => {
+    const view = viewRef.current;
     const track = trackRef.current;
-    if (!track) return undefined;
+    if (!view || !track) return undefined;
 
     const cards = Array.from(track.children);
     const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    let activeIndex = -1;
-    let initialized = false;
-    let ticking = false;
-    let dragging = false;
-    let pressed = false;
-    let hovered = false;
-    let focused = false;
-    let lastScroll = 0;
-    let idleTimer = null;
-    let playTimer = null;
-    let raf = 0;
-    let startX = 0;
-    let startScroll = 0;
-
     const cardCenter = (card) => card.offsetLeft + card.offsetWidth / 2;
 
-    const scrollToCard = (i, smooth) => {
-      const card = cards[Math.max(0, Math.min(cards.length - 1, i))];
-      track.scrollTo({
-        left: cardCenter(card) - track.clientWidth / 2,
-        behavior: smooth && !reduceMotion ? 'smooth' : 'auto',
-      });
+    let setWidth = 0;
+    let x = 0;
+    let placed = false;
+    let dragging = false;
+    let activeIndex = -1;
+    let raf = 0;
+    let last = performance.now();
+    let glide = null;
+    let pointer = null;
+
+    const measure = () => {
+      const next = cards[N];
+      const first = cards[0];
+      if (!first || !next) return 0;
+      setWidth = next.offsetLeft - first.offsetLeft;
+      return setWidth;
     };
 
-    const nearestIndex = () => {
-      const mid = track.scrollLeft + track.clientWidth / 2;
+    const wrap = (v) => {
+      if (!setWidth) return 0;
+      const w = setWidth;
+      v %= w;
+      return v < 0 ? v + w : v;
+    };
+
+    const shortest = (from, to) => {
+      let d = wrap(to) - wrap(from);
+      if (d > setWidth / 2) d -= setWidth;
+      if (d < -setWidth / 2) d += setWidth;
+      return d;
+    };
+
+    let shown = -1;
+    const apply = () => {
+      track.style.transform = `translate3d(${-x}px, 0, 0)`;
+      const mid = view.getBoundingClientRect().left + view.clientWidth / 2;
+      const span = (cards[0]?.offsetWidth || 1) * 1.25;
+      const dists = cards.map((c) => {
+        const rect = c.getBoundingClientRect();
+        return Math.abs(rect.left + rect.width / 2 - mid);
+      });
       let best = 0;
-      let bestDist = Infinity;
-      cards.forEach((c, i) => {
-        const d = Math.abs(cardCenter(c) - mid);
-        if (d < bestDist) { bestDist = d; best = i; }
+      dists.forEach((dist, i) => {
+        const t = Math.min(dist / span, 1);
+        cards[i].style.transform = `scale(${1.08 - t * 0.22})`;
+        cards[i].style.opacity = `${1 - t * 0.22}`;
+        if (dist < dists[best]) best = i;
       });
-      return best;
-    };
-
-    // Skala & opacity mengikuti jarak ke tengah (efek roda); indeks aktif → state React
-    const update = () => {
-      ticking = false;
-      const mid = track.scrollLeft + track.clientWidth / 2;
-      const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
-      cards.forEach((c) => {
-        const t = Math.min(Math.abs(cardCenter(c) - mid) / (c.offsetWidth + gap), 1);
-        c.style.transform = `scale(${(1.06 - t * 0.18).toFixed(3)})`;
-        c.style.opacity = (1 - t * 0.25).toFixed(2);
-      });
-      const best = nearestIndex();
-      if (best !== activeIndex) {
-        activeIndex = best;
-        setActive(best);
+      if (best !== shown) {
+        if (shown >= 0) cards[shown].style.boxShadow = '';
+        cards[best].style.boxShadow = '0 14px 30px rgba(69, 129, 50, 0.2)';
+        shown = best;
+        const logical = mod(best);
+        if (logical !== activeIndex) {
+          activeIndex = logical;
+          setActive(logical);
+        }
       }
     };
 
-    // Masuk set kloning? lompat diam-diam ke kartu yang sama di set asli
-    const recenter = () => {
-      if (dragging || track.clientWidth === 0) return;
-      const idx = nearestIndex();
-      if (idx >= HOME && idx < HOME + N) return;
-      const target = HOME + mod(idx);
-      const delta = cardCenter(cards[target]) - cardCenter(cards[idx]);
-      track.style.scrollSnapType = 'none'; // cegah snap menganimasikan lompatan
-      track.scrollLeft += delta;
-      requestAnimationFrame(() => {
-        track.style.scrollSnapType = '';
-        update();
-      });
-    };
-
-    const onScroll = () => {
-      lastScroll = Date.now();
-      if (!ticking) {
-        ticking = true;
-        raf = requestAnimationFrame(update);
+    const goTo = (logical, smooth) => {
+      if (!measure()) return;
+      const target = wrap(cardCenter(cards[mod(logical)]) - view.clientWidth / 2);
+      if (!smooth || reduceMotion) {
+        glide = null;
+        x = target;
+        apply();
+        return;
       }
-      clearTimeout(idleTimer);
-      idleTimer = setTimeout(recenter, 140);
+      glide = { from: x, delta: shortest(x, target), t0: performance.now(), dur: 900 };
     };
 
-    // Section bisa tampil belakangan (lebar 0 saat pertama render): posisikan saat ukuran tersedia
-    const ro = new ResizeObserver(() => {
-      if (track.clientWidth === 0) return;
-      const idx = initialized && activeIndex >= 0 ? HOME + mod(activeIndex) : START_INDEX;
-      initialized = true;
-      scrollToCard(idx, false);
-      update();
-    });
-    ro.observe(track);
+    const frame = (now) => {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      if (!setWidth) measure();
+      if (setWidth && view.clientWidth) {
+        if (!placed) {
+          x = wrap(cardCenter(cards[START]) - view.clientWidth / 2);
+          placed = true;
+        }
+        if (glide) {
+          const t = Math.min(1, (now - glide.t0) / glide.dur);
+          const eased = 1 - (1 - t) ** 3;
+          x = wrap(glide.from + glide.delta * eased);
+          if (t >= 1) glide = null;
+        } else if (autoPlay && !dragging && !reduceMotion) {
+          x = wrap(x + SPEED * dt);
+        }
+        apply();
+      }
+      raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
 
-    // ---- Drag mouse (sentuhan memakai scroll/swipe bawaan browser + scroll-snap) ----
     const onPointerDown = (e) => {
-      pressed = true;
-      if (e.pointerType !== 'mouse' || e.button !== 0) return;
-      dragging = true;
-      startX = e.clientX;
-      startScroll = track.scrollLeft;
-      track.classList.add('is-dragging');
-      track.setPointerCapture(e.pointerId);
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      pointer = { id: e.pointerId, x: e.clientX, y: e.clientY, moved: false };
     };
     const onPointerMove = (e) => {
-      if (dragging) track.scrollLeft = startScroll - (e.clientX - startX);
-    };
-    const endPress = (e) => {
-      pressed = false;
-      if (!dragging) return;
-      dragging = false;
-      track.classList.remove('is-dragging');
-      if (e && e.pointerId !== undefined && track.hasPointerCapture(e.pointerId)) {
-        track.releasePointerCapture(e.pointerId);
+      if (!pointer || e.pointerId !== pointer.id) return;
+      const dx = e.clientX - pointer.x;
+      const dy = e.clientY - pointer.y;
+      if (!pointer.moved) {
+        if (Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
+        if (Math.abs(dy) > Math.abs(dx)) {
+          pointer = null;
+          return;
+        }
+        pointer.moved = true;
+        dragging = true;
+        glide = null;
+        view.classList.add('is-dragging');
+        view.setPointerCapture(e.pointerId);
       }
-      scrollToCard(nearestIndex(), true);
+      x = wrap(x - dx);
+      pointer.x = e.clientX;
+    };
+    const endPointer = (e) => {
+      if (!pointer || e.pointerId !== pointer.id) return;
+      if (dragging && view.hasPointerCapture(e.pointerId)) view.releasePointerCapture(e.pointerId);
+      dragging = false;
+      pointer = null;
+      view.classList.remove('is-dragging');
     };
 
-    // ---- Roda mouse (opsional): vertikal → horizontal ----
-    const onWheel = (e) => {
-      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return; // gerak horizontal sudah ditangani browser
-      e.preventDefault();
-      track.scrollLeft += e.deltaY;
-    };
-
-    // ---- Keyboard ----
     const onKeyDown = (e) => {
-      if (e.key === 'ArrowRight') { e.preventDefault(); scrollToCard(nearestIndex() + 1, true); }
-      else if (e.key === 'ArrowLeft') { e.preventDefault(); scrollToCard(nearestIndex() - 1, true); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); goTo(activeIndex + 1, true); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(activeIndex - 1, true); }
     };
 
-    // ---- Pause autoplay: hover (mouse), fokus keyboard ----
-    const onEnter = () => { hovered = true; };
-    const onLeave = () => { hovered = false; };
-    const onFocusIn = () => { focused = true; };
-    const onFocusOut = () => { focused = false; };
+    const onWheel = (e) => {
+      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX) && e.deltaX === 0) return;
+      const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      if (!delta) return;
+      e.preventDefault();
+      glide = null;
+      x = wrap(x + delta);
+    };
 
-    track.addEventListener('scroll', onScroll, { passive: true });
-    track.addEventListener('pointerdown', onPointerDown);
-    track.addEventListener('pointermove', onPointerMove);
-    track.addEventListener('pointerup', endPress);
-    track.addEventListener('pointercancel', endPress);
-    track.addEventListener('keydown', onKeyDown);
-    track.addEventListener('mouseenter', onEnter);
-    track.addEventListener('mouseleave', onLeave);
-    track.addEventListener('focusin', onFocusIn);
-    track.addEventListener('focusout', onFocusOut);
-    if (captureWheel) track.addEventListener('wheel', onWheel, { passive: false });
+    const ro = new ResizeObserver(() => { measure(); });
+    ro.observe(view);
 
-    // ---- Autoplay: geser pelan ke kartu berikutnya ----
-    if (autoPlay && !reduceMotion) {
-      playTimer = setInterval(() => {
-        if (hovered || pressed || dragging || focused || document.hidden) return;
-        if (Date.now() - lastScroll < 600) return; // masih bergerak (inersia swipe / animasi)
-        scrollToCard(nearestIndex() + 1, true);
-      }, interval);
-    }
+    view.addEventListener('pointerdown', onPointerDown);
+    view.addEventListener('pointermove', onPointerMove);
+    view.addEventListener('pointerup', endPointer);
+    view.addEventListener('pointercancel', endPointer);
+    view.addEventListener('keydown', onKeyDown);
+    if (captureWheel) view.addEventListener('wheel', onWheel, { passive: false });
 
-    apiRef.current = { scrollToCard, nearestIndex };
+    apiRef.current = { goTo };
 
     return () => {
       apiRef.current = null;
       ro.disconnect();
-      clearInterval(playTimer);
-      clearTimeout(idleTimer);
       cancelAnimationFrame(raf);
-      track.removeEventListener('scroll', onScroll);
-      track.removeEventListener('pointerdown', onPointerDown);
-      track.removeEventListener('pointermove', onPointerMove);
-      track.removeEventListener('pointerup', endPress);
-      track.removeEventListener('pointercancel', endPress);
-      track.removeEventListener('keydown', onKeyDown);
-      track.removeEventListener('mouseenter', onEnter);
-      track.removeEventListener('mouseleave', onLeave);
-      track.removeEventListener('focusin', onFocusIn);
-      track.removeEventListener('focusout', onFocusOut);
-      track.removeEventListener('wheel', onWheel);
-      track.style.scrollSnapType = '';
+      view.removeEventListener('pointerdown', onPointerDown);
+      view.removeEventListener('pointermove', onPointerMove);
+      view.removeEventListener('pointerup', endPointer);
+      view.removeEventListener('pointercancel', endPointer);
+      view.removeEventListener('keydown', onKeyDown);
+      view.removeEventListener('wheel', onWheel);
+      view.classList.remove('is-dragging');
     };
-  }, [autoPlay, interval, captureWheel]);
+  }, [autoPlay, captureWheel]);
 
-  // Klik titik → meluncur lewat jalur terpendek (kiri/kanan) ke kartu yang bersangkutan
   const goToDot = (i) => {
-    const api = apiRef.current;
-    if (!api) return;
-    const cur = api.nearestIndex();
-    let diff = mod(i - cur);
-    if (diff > N / 2) diff -= N;
-    api.scrollToCard(cur + diff, true);
+    apiRef.current?.goTo(i, true);
   };
 
   return (
@@ -244,36 +222,37 @@ export default function FeatureWheel({ autoPlay = true, interval = 3500, capture
       </div>
       <div className="about-wheel about-reveal">
         <div
-          className="about-wheel-track"
-          id="aboutWheelTrack"
-          ref={trackRef}
+          className="about-wheel-viewport"
+          ref={viewRef}
           tabIndex={0}
           role="group"
           aria-roledescription="carousel"
           aria-label="Daftar fitur unggulan, geser atau gunakan tombol panah untuk melihat fitur lainnya"
         >
-          {ITEMS.map(({ f, clone, key }, idx) => (
-            <article
-              className={`about-feature-card${idx === active ? ' is-active' : ''}`}
-              key={key}
-              aria-hidden={clone ? 'true' : undefined}
-            >
-              <div className="afc-visual">
-                <img src={`/assets/${f.img}`} alt={clone ? '' : f.alt} draggable="false" />
-              </div>
-              <h3 className="afc-title">{f.title}</h3>
-              <p className="afc-desc">{f.desc}</p>
-            </article>
-          ))}
+          <div className="about-wheel-track" id="aboutWheelTrack" ref={trackRef}>
+            {ITEMS.map(({ f, clone, key }) => (
+              <article
+                className="about-feature-card"
+                key={key}
+                aria-hidden={clone ? 'true' : undefined}
+              >
+                <div className="afc-visual">
+                  <img src={`/assets/${f.img}`} alt={clone ? '' : f.alt} draggable="false" />
+                </div>
+                <h3 className="afc-title">{f.title}</h3>
+                <p className="afc-desc">{f.desc}</p>
+              </article>
+            ))}
+          </div>
         </div>
         <div className="about-wheel-dots" id="aboutWheelDots">
           {FEATURES.map((f, i) => (
             <button
               key={f.title}
               type="button"
-              className={i === mod(active) ? 'active' : ''}
+              className={i === active ? 'active' : ''}
               aria-label={`Lihat fitur ${f.title}`}
-              aria-current={i === mod(active) ? 'true' : undefined}
+              aria-current={i === active ? 'true' : undefined}
               onClick={() => goToDot(i)}
             ></button>
           ))}

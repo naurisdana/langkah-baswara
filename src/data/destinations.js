@@ -3,13 +3,24 @@
    match  = nama tempat di GeoJSON, coords = [lat, lng] cadangan bila tidak ada di GeoJSON
    Setelah nama file di public/assets/ dipastikan, sisakan satu nama saja per destinasi. */
 export const DESTINATIONS = [
-  { key: 'Uluwatu', cat: 'budaya', img: ['uluwatu.jpg', 'pura-uluwatu.jpg'], title: 'Uluwatu, Bali', rating: '4.8', match: 'Uluwatu Temple', coords: [-8.8291, 115.0849] },
-  { key: 'Tanah Lot', cat: 'budaya', img: ['tanahlot.jpg', 'tanah-lot.jpg', 'pura-tanah-lot.jpg'], title: 'Pura Tanah Lot, Tabanan', rating: '4.7', match: 'Tanah Lot', coords: [-8.6212, 115.0868] },
-  { key: 'Tegallalang', cat: 'alam', img: ['tegallalang.jpg', 'tegalalang.jpg'], title: 'Tegallalang Rice Terrace', rating: '4.6', match: 'Ricefields Tegallalang', coords: [-8.4312, 115.2792] },
-  { key: 'Kuta', cat: 'olahraga', img: ['pantai-kuta.jpg', 'kuta.jpg'], title: 'Pantai Kuta & Legian', rating: '4.5', match: 'Pantai Kuta', coords: [-8.7180, 115.1686] },
-  { key: 'Ulun Danu Beratan', cat: 'budaya', img: ['pura-ulun-danu.jpg', 'puraulundanu.webp', 'pura-ulun-danu.webp'], title: 'Pura Ulun Danu Beratan', rating: '4.8', match: 'Ulun Danu Beratan', coords: [-8.2755, 115.1666] },
-  { key: 'Pandawa', cat: 'alam edukasi', img: ['pantai-pandawa.jpg', 'pantaipandawa.jpg'], title: 'Pantai Pandawa, Badung', rating: '4.7', match: 'Pantai Pandawa', coords: [-8.8456, 115.1869] },
+  { key: 'Uluwatu', cat: 'budaya', img: ['uluwatu.jpg', 'pura-uluwatu.jpg'], title: 'Uluwatu, Bali', rating: '4.8', match: 'Uluwatu Temple', coords: [-8.8291, 115.0849], blurb: 'Pura di tepi tebing kapur dengan pemandangan samudra Hindia. Waktu terbaik datang menjelang sore, saat langit berubah jingga di atas jurang.' },
+  { key: 'Tanah Lot', cat: 'budaya', img: ['tanahlot.jpg', 'tanah-lot.jpg', 'pura-tanah-lot.jpg'], title: 'Pura Tanah Lot, Tabanan', rating: '4.7', match: 'Tanah Lot', coords: [-8.6212, 115.0868], blurb: 'Pura yang berdiri di atas batu karang di tengah laut. Saat air surut, pengunjung bisa mendekat dan melihat ombak mengelilingi kaki pura.' },
+  { key: 'Tegallalang', cat: 'alam', img: ['tegallalang.jpg', 'tegalalang.jpg'], title: 'Tegallalang Rice Terrace', rating: '4.6', match: 'Ricefields Tegallalang', coords: [-8.4312, 115.2792], blurb: 'Sawah berundak di utara Ubud. Jalur setapak mengikuti pematang, dengan pemandangan hijau yang berlapis sampai ke lembah.' },
+  { key: 'Kuta', cat: 'olahraga', img: ['pantai-kuta.jpg', 'kuta.jpg'], title: 'Pantai Kuta & Legian', rating: '4.5', match: 'Pantai Kuta', coords: [-8.7180, 115.1686], blurb: 'Pantai pasir panjang dengan ombak yang ramah untuk pemula. Senja di sini ramai, dengan deretan kafe tepat di belakang pantai.' },
+  { key: 'Ulun Danu Beratan', cat: 'budaya', img: ['pura-ulun-danu.jpg', 'puraulundanu.webp', 'pura-ulun-danu.webp'], title: 'Pura Ulun Danu Beratan', rating: '4.8', match: 'Ulun Danu Beratan', coords: [-8.2755, 115.1666], blurb: 'Pura di tepi Danau Beratan, Bedugul. Sebagian pelataran seolah mengapung ketika permukaan danau sedang tinggi.' },
+  { key: 'Pandawa', cat: 'alam edukasi', img: ['pantai-pandawa.jpg', 'pantaipandawa.jpg'], title: 'Pantai Pandawa, Badung', rating: '4.7', match: 'Pantai Pandawa', coords: [-8.8456, 115.1869], blurb: 'Pantai tersembunyi di balik tebing kapur, dengan patung Pandawa di dinding batu. Airnya jernih dan pasirnya putih.' },
 ];
+
+/** Foto lokal bila nama tempat cocok dengan destinasi populer. */
+export function photoForPlace(place) {
+  const name = String(place?.nama || place?.title || '').toLowerCase();
+  if (!name) return null;
+  const hit = DESTINATIONS.find((d) => {
+    const keys = [d.match, d.title, d.key].map((s) => String(s || '').toLowerCase());
+    return keys.some((k) => k && (name.includes(k) || k.includes(name)));
+  });
+  return hit ? hit.img : null;
+}
 
 export const CHIPS = [['all', 'All'], ['budaya', 'Budaya'], ['alam', 'Alam'], ['olahraga', 'Olahraga'], ['edukasi', 'Edukasi']];
 
