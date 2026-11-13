@@ -34,11 +34,13 @@ function pinIcon(cat, active) {
 
 function samePlace(a, b) {
   if (!a || !b) return false;
+  if (a.id != null && b.id != null) return String(a.id) === String(b.id);
   return a.nama === b.nama && Number(a.lat) === Number(b.lat) && Number(a.lng) === Number(b.lng);
 }
 
 function PlacePhoto({ place, score }) {
-  const files = photoForPlace(place) || [];
+  const remote = typeof place.foto === 'string' && /^https?:\/\//.test(place.foto) ? place.foto : '';
+  const files = remote ? [remote] : (photoForPlace(place) || []);
   const [idx, setIdx] = useState(0);
   const cat = categoryGroup(place.kategori);
   const icon = PIN_ICON[cat] || PIN_ICON.umum;
@@ -51,7 +53,7 @@ function PlacePhoto({ place, score }) {
           <i className={`bi ${icon}`}></i>
         </div>
       ) : (
-        <img src={assetUrl(files[idx])} alt={place.nama} onError={() => setIdx((i) => i + 1)} />
+        <img src={remote ? files[idx] : assetUrl(files[idx])} alt={place.nama} onError={() => setIdx((i) => i + 1)} />
       )}
       {score != null ? (
         <span className="ex-rating"><i className="bi bi-star-fill"></i> {score.toFixed(1)}</span>
@@ -64,6 +66,12 @@ function placeBlurb(p) {
   const kind = p.preferensi || (p.kategori ? `wisata ${String(p.kategori).toLowerCase()}` : 'destinasi wisata');
   const where = p.kabupaten ? ` di ${p.kabupaten}` : ' di Bali';
   return `${p.nama} termasuk ${kind}${where}.`;
+}
+
+function reviewsOf(place) {
+  const raw = place && place.ulasan;
+  const list = Array.isArray(raw) ? raw : (raw && typeof raw === 'object' ? [raw] : []);
+  return list.filter((u) => u && typeof u.komentar === 'string' && u.komentar.trim());
 }
 
 const USER_ICON = L.divIcon({
@@ -332,7 +340,7 @@ export default function MapSection({
                   </div>
                   <ol className="ex-route-list">
                     {routeStops.map((p, i) => (
-                      <li key={`${p.nama}-${p.lat}`} className={samePlace(selected, p) ? 'is-active' : ''}>
+                      <li key={p.id != null ? p.id : `${p.nama}-${p.lat}`} className={samePlace(selected, p) ? 'is-active' : ''}>
                         <button type="button" className="ex-route-hit" onClick={() => onSelectPlace && onSelectPlace(p)}>
                           <span className="ex-route-num">{i + 1}</span>
                           <span className="ex-route-name">{p.nama}</span>
@@ -346,7 +354,7 @@ export default function MapSection({
 
               {selected ? (
                 <article className="ex-detail">
-                  <PlacePhoto key={`${selected.nama}-${selected.lat}`} place={selected} score={score} />
+                  <PlacePhoto key={`${selected.id ?? selected.nama}-${selected.foto || selected.lat}`} place={selected} score={score} />
                   <div className="ex-detail-head">
                     <div className="ex-detail-titles">
                       <div className="ex-eyebrow">Detail wisata</div>
@@ -358,34 +366,45 @@ export default function MapSection({
                   </div>
                   <p className="ex-addr">
                     <i className="bi bi-geo-alt"></i>
-                    <span>{selected.kabupaten || 'Pulau Bali'}</span>
+                    <span>{selected.lokasi || selected.kabupaten || 'Pulau Bali'}</span>
                   </p>
                   <div className="ex-tags">
                     {selected.kategori ? <span className="ex-tag">{selected.kategori}</span> : null}
                     {selected.preferensi ? <span className="ex-tag">{selected.preferensi}</span> : null}
                   </div>
-                  <p className="ex-desc">{placeBlurb(selected)}</p>
+                  <p className="ex-desc">{selected.deskripsi || placeBlurb(selected)}</p>
                   <div className="ex-review">
                     <div className="ex-eyebrow">Hasil ulasan</div>
                     {score != null ? (
-                      <>
-                        <div className="ex-review-score">
-                          <span className="ex-stars" aria-hidden="true">
-                            {[1, 2, 3, 4, 5].map((n) => (
-                              <i key={n} className={`bi ${n <= Math.round(score) ? 'bi-star-fill' : 'bi-star'}`}></i>
-                            ))}
-                          </span>
-                          <b>{score.toFixed(1)}</b>
-                          <span>/ 5</span>
-                        </div>
-                        <p>Skor ini dirangkum dari ulasan pengunjung untuk {selected.nama}.</p>
-                      </>
-                    ) : (
+                      <div className="ex-review-score">
+                        <span className="ex-stars" aria-hidden="true">
+                          {[1, 2, 3, 4, 5].map((n) => (
+                            <i key={n} className={`bi ${n <= Math.round(score) ? 'bi-star-fill' : 'bi-star'}`}></i>
+                          ))}
+                        </span>
+                        <b>{score.toFixed(1)}</b>
+                        <span>/ 5</span>
+                      </div>
+                    ) : null}
+                    {selected.detailLoading ? <p>Memuat detail...</p> : null}
+                    {!selected.detailLoading && reviewsOf(selected).length ? (
+                      reviewsOf(selected).slice(0, 2).map((u, i) => (
+                        <p className="ex-review-quote" key={`${u.nama_pengulas || 'ulasan'}-${i}`}>
+                          {u.komentar}
+                          {u.nama_pengulas || u.waktu ? (
+                            <span className="ex-review-by">
+                              {' '}— {u.nama_pengulas || 'Pengunjung'}{u.waktu ? `, ${u.waktu}` : ''}
+                            </span>
+                          ) : null}
+                        </p>
+                      ))
+                    ) : null}
+                    {!selected.detailLoading && score == null && !reviewsOf(selected).length ? (
                       <p>Belum ada ulasan untuk tempat ini.</p>
-                    )}
+                    ) : null}
                   </div>
-                  {selected.link ? (
-                    <a className="ex-open-btn" href={selected.link} target="_blank" rel="noreferrer">Lihat lokasi</a>
+                  {selected.link || selected.link_maps ? (
+                    <a className="ex-open-btn" href={selected.link || selected.link_maps} target="_blank" rel="noreferrer">Lihat lokasi</a>
                   ) : null}
                 </article>
               ) : null}

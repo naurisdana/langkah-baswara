@@ -1,6 +1,9 @@
+import { useEffect } from 'react';
+
 // Placeholder: form profil & wishlist lengkap menyusul (kelas .pf-* sudah ada di index.css)
-export default function Profil({ user, onLogout }) {
+export default function Profil({ user, onLogout, onReady }) {
   const initial = String(user.name || '?').trim().charAt(0).toUpperCase();
+  useEffect(() => { onReady?.(); }, [onReady]);
   return (
     <div className="pf-wrap">
       <div className="pf-card pf-account">

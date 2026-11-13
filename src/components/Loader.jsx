@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-/** Splash awal. Bar merayap sampai data wisata siap, lalu menghilang. */
+/** Splash penuh. Bar merayap sampai halaman siap, lalu menghilang. Dipasang ulang tiap pindah halaman. */
 export default function Loader({ done }) {
   const barRef = useRef(null);
   const [phase, setPhase] = useState('show');

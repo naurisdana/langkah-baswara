@@ -19,9 +19,10 @@ function useReveal(rootRef) {
   }, [rootRef]);
 }
 
-export default function Tentang({ onExplore }) {
+export default function Tentang({ onExplore, onReady }) {
   const rootRef = useRef(null);
   useReveal(rootRef);
+  useEffect(() => { onReady?.(); }, [onReady]);
 
   return (
     <div className="about-wrap about-js" ref={rootRef}>

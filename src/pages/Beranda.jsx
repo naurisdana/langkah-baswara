@@ -66,7 +66,7 @@ function DestGrid({ items, favs, onToggleFav, onOpenMap, onOpenDetail }) {
   );
 }
 
-export default function Beranda({ user, onNeedLogin, onExplore, onOpenMap }) {
+export default function Beranda({ user, onNeedLogin, onExplore, onOpenMap, onReady }) {
   const [filter, setFilter] = useState('all');
   const [favs, setFavs] = useState({});
   const [detail, setDetail] = useState(null);
@@ -78,6 +78,7 @@ export default function Beranda({ user, onNeedLogin, onExplore, onOpenMap }) {
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState(null);
   const resultsRef = useRef(null);
+  const toldReady = useRef(false);
 
   const toggleFav = (key) => {
     if (!user) return onNeedLogin(); // favorit hanya untuk yang sudah masuk
@@ -102,6 +103,12 @@ export default function Beranda({ user, onNeedLogin, onExplore, onOpenMap }) {
     })();
     return () => { alive = false; };
   }, [filter]);
+
+  useEffect(() => {
+    if (popLoading || toldReady.current) return;
+    toldReady.current = true;
+    onReady?.();
+  }, [popLoading, onReady]);
 
   useEffect(() => {
     if (searched) resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });

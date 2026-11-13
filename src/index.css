@@ -4635,6 +4635,14 @@ body.ex-noscroll {
   color: #374151;
 }
 
+.ex-review-quote {
+  white-space: pre-line;
+}
+
+.ex-review-by {
+  color: #5d6a58;
+}
+
 .ex-review-score {
   display: flex;
   align-items: center;

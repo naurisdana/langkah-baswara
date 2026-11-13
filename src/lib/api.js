@@ -60,6 +60,41 @@ export function populerBeranda(kategori = 'all') {
   return apiRequest(`/api/beranda/populer?${params}`);
 }
 
+/** GET /api/jelajahi/destinasi — daftar titik di peta Jelajahi. */
+export function destinasiJelajahi({ q, kategori = [], lat, lng, radiusKm, limit = 1000 } = {}) {
+  const params = new URLSearchParams();
+  const query = String(q || '').trim();
+  if (query) params.set('q', query.slice(0, 100));
+  kategori.forEach((k) => { if (k) params.append('kategori', k); });
+  if (lat != null && lng != null && radiusKm != null) {
+    params.set('lat', String(lat));
+    params.set('lng', String(lng));
+    params.set('radius_km', String(radiusKm));
+  }
+  if (limit) params.set('limit', String(limit));
+  const qs = params.toString();
+  return apiRequest(`/api/jelajahi/destinasi${qs ? `?${qs}` : ''}`);
+}
+
+/** GET /api/jelajahi/destinasi/{id} — detail satu destinasi (nama path di server). */
+export function detailJelajahi(id) {
+  return apiRequest(`/api/jelajahi/destinasi/${encodeURIComponent(id)}`);
+}
+
+/** POST /api/jelajahi/rute — susun rute dari titik awal. Server menolak GET. */
+export function ruteJelajahi({ lat, lng, radiusKm = 15, hari, kategori = [] }) {
+  return apiRequest('/api/jelajahi/rute', {
+    method: 'POST',
+    body: {
+      lat,
+      lng,
+      radius_km: radiusKm,
+      hari,
+      kategori,
+    },
+  });
+}
+
 // Ubah balasan /api/wisata atau GeoJSON menjadi daftar { nama, kategori, lat, lng }
 export function normalizeWisata(payload) {
   const rows = Array.isArray(payload)

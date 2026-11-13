@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { PAGE_IDS } from './data/pageConfig.js';
 import useWisata from './lib/useWisata.js';
 import Navbar from './components/Navbar.jsx';
@@ -16,7 +16,20 @@ export default function App() {
   const [authOpen, setAuthOpen] = useState(false);
   const [query, setQuery] = useState('');   // kata kunci dari pencarian Hero
   const [focus, setFocus] = useState(null); // destinasi dari tombol "Buka di Peta"
-  const { places, error, loading } = useWisata();  
+  const [visit, setVisit] = useState(0);
+  const [pageReady, setPageReady] = useState(false);
+  const { places, error, loading } = useWisata();
+  const pageRef = useRef(activePage);
+  const markPageReady = useCallback(() => setPageReady(true), []);
+
+  const beginVisit = useCallback((id) => {
+    if (pageRef.current !== id) {
+      setPageReady(false);
+      setVisit((n) => n + 1);
+    }
+    pageRef.current = id;
+    setActivePage(id);
+  }, []);
 
   // Satu-satunya pintu perpindahan halaman (dipakai Navbar, Hero, kartu, Footer)
   const goTo = useCallback(
@@ -26,10 +39,10 @@ export default function App() {
         setAuthOpen(true); // Profil butuh login
         return;
       }
-      setActivePage(id);
+      beginVisit(id);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
-    [user],
+    [user, beginVisit],
   );
 
   const handleAuthClick = () => (user ? goTo('profil') : setAuthOpen(true));
@@ -37,7 +50,7 @@ export default function App() {
   const handleLogout = () => {
     localStorage.removeItem('lb_token');
     setUser(null);
-    setActivePage('beranda');
+    beginVisit('beranda');
     window.scrollTo({ top: 0 });
   };
 
@@ -48,11 +61,12 @@ export default function App() {
         user={user}
         onNeedLogin={() => setAuthOpen(true)}
         onExplore={() => goTo('jelajahi')}
+        onReady={markPageReady}
         onOpenMap={(dest) => { setQuery(''); setFocus({ ...dest }); goTo('jelajahi'); }}
       />
     );
   } else if (activePage === 'tentang') {
-    page = <Tentang onExplore={() => goTo('jelajahi')} />;
+    page = <Tentang onExplore={() => goTo('jelajahi')} onReady={markPageReady} />;
   } else if (activePage === 'jelajahi') {
     page = (
       <Jelajahi
@@ -60,18 +74,19 @@ export default function App() {
         error={error}
         query={query}
         focus={focus}
+        onReady={markPageReady}
         user={user}
         onNeedLogin={() => setAuthOpen(true)}
         onOpenMap={(dest) => { setQuery(''); setFocus({ ...dest }); }}
       />
     );
   } else if (activePage === 'profil' && user) {
-    page = <Profil user={user} onLogout={handleLogout} />;
+    page = <Profil user={user} onLogout={handleLogout} onReady={markPageReady} />;
   }
 
   return (
     <>
-      <Loader done={!loading} />
+      <Loader key={visit} done={!loading && pageReady} />
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} onLoggedIn={(u) => { setUser(u); setAuthOpen(false); }} />
 
       <Navbar activePage={activePage} onSelect={goTo} user={user} onAuthClick={handleAuthClick} />

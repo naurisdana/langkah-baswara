@@ -1,11 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import MapSection from '../components/MapSection.jsx';
-import { BALI_CENTER } from '../lib/api.js';
+import { BALI_CENTER, destinasiJelajahi, detailJelajahi, ruteJelajahi } from '../lib/api.js';
 import {
   EXPLORE_CATS,
-  buildRoute,
   categoryGroup,
-  filterPlaces,
   haversineKm,
   BALI_NE,
   BALI_SW,
@@ -17,7 +15,61 @@ function insideBali(ll) {
   return ll[0] >= BALI_SW[0] && ll[0] <= BALI_NE[0] && ll[1] >= BALI_SW[1] && ll[1] <= BALI_NE[1];
 }
 
-export default function Jelajahi({ places, error, query, focus }) {
+function countGroups(rows) {
+  const c = { alam: 0, budaya: 0, rekreasi: 0, umum: 0 };
+  rows.forEach((p) => {
+    c[categoryGroup(p.kategori)] += 1;
+  });
+  return c;
+}
+
+function toPlace(row) {
+  const lat = Number(row.latitude ?? row.lat);
+  const lng = Number(row.longitude ?? row.lng);
+  const rating = row.rating == null || row.rating === '' ? null : Number(row.rating);
+  return {
+    id: row.id,
+    nama: row.nama || row.name || '',
+    kategori: row.kategori || '',
+    kabupaten: row.kabupaten || row.kabupaten_kota || '',
+    lokasi: row.lokasi || '',
+    preferensi: row.preferensi || '',
+    deskripsi: row.deskripsi || '',
+    foto: row.foto || '',
+    ulasan: row.ulasan || null,
+    link: row.link_maps || row.link || '',
+    rating: Number.isFinite(rating) ? rating : null,
+    lat,
+    lng,
+  };
+}
+
+function routeRows(payload) {
+  if (!payload) return [];
+  if (Array.isArray(payload)) return payload;
+  const keys = ['data', 'rute', 'hasil', 'titik', 'stops', 'items', 'destinasi', 'waypoints'];
+  for (const key of keys) {
+    if (Array.isArray(payload[key])) return payload[key];
+  }
+  const arrays = Object.values(payload).filter(Array.isArray);
+  return arrays.length === 1 ? arrays[0] : [];
+}
+
+function toStops(payload, origin) {
+  let cursor = origin;
+  return routeRows(payload)
+    .map((row) => {
+      const place = toPlace(row);
+      if (!Number.isFinite(place.lat) || !Number.isFinite(place.lng)) return null;
+      const given = Number(row.jarak_km ?? row.jarak ?? row.km ?? row.distance_km);
+      const km = Number.isFinite(given) ? given : (cursor ? haversineKm(cursor, [place.lat, place.lng]) : 0);
+      cursor = [place.lat, place.lng];
+      return { ...place, km };
+    })
+    .filter(Boolean);
+}
+
+export default function Jelajahi({ query, focus, onReady }) {
   const [search, setSearch] = useState(query || '');
   const [cats, setCats] = useState([]);
   const [origin, setOrigin] = useState(null);
@@ -26,40 +78,109 @@ export default function Jelajahi({ places, error, query, focus }) {
   const [radiusKm, setRadiusKm] = useState(15);
   const [days, setDays] = useState(2);
   const [routeOn, setRouteOn] = useState(false);
+  const [routeTick, setRouteTick] = useState(0);
+  const flyAfterRoute = useRef(false);
+  const [routeStops, setRouteStops] = useState([]);
+  const [routeLoading, setRouteLoading] = useState(false);
   const [flyToken, setFlyToken] = useState(0);
   const [hint, setHint] = useState('');
   const [gpsBusy, setGpsBusy] = useState(false);
   const [selected, setSelected] = useState(null);
+  const [places, setPlaces] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [counts, setCounts] = useState({ alam: 0, budaya: 0, rekreasi: 0, umum: 0 });
+  const [listLoading, setListLoading] = useState(true);
+  const [listError, setListError] = useState(null);
+  const toldReady = useRef(false);
 
   useEffect(() => {
     setSearch(query || '');
   }, [query]);
 
-  const counts = useMemo(() => {
-    const c = { alam: 0, budaya: 0, rekreasi: 0, umum: 0 };
-    places.forEach((p) => {
-      const g = categoryGroup(p.kategori);
-      c[g] += 1;
-    });
-    return c;
-  }, [places]);
+  useEffect(() => {
+    if (listLoading || toldReady.current) return;
+    toldReady.current = true;
+    onReady?.();
+  }, [listLoading, onReady]);
 
-  const mapPlaces = useMemo(
-    () => filterPlaces(places, { query: search, categories: cats, origin, radiusOn, radiusKm })
-      .map((p) => ({ ...p, group: categoryGroup(p.kategori) })),
-    [places, search, cats, origin, radiusOn, radiusKm],
-  );
+  useEffect(() => {
+    let alive = true;
+    const timer = setTimeout(async () => {
+      setListLoading(true);
+      const kategori = cats
+        .map((id) => EXPLORE_CATS.find((c) => c.id === id)?.label)
+        .filter(Boolean);
+      const spatial = origin && radiusOn;
+      const r = await destinasiJelajahi({
+        q: search,
+        kategori,
+        lat: spatial ? origin[0] : null,
+        lng: spatial ? origin[1] : null,
+        radiusKm: spatial ? radiusKm : null,
+      });
+      if (!alive) return;
+      setListLoading(false);
+      if (!r.ok) {
+        setPlaces([]);
+        setTotal(0);
+        setListError(r.message || 'Destinasi tidak dapat dimuat.');
+        return;
+      }
+      const rows = ((r.data && r.data.data) || []).map(toPlace).filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng));
+      setPlaces(rows);
+      setTotal(Number(r.data && r.data.total) || rows.length);
+      if (!cats.length) setCounts(countGroups(rows));
+      setListError(null);
+    }, 300);
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+    };
+  }, [search, cats, origin, radiusOn, radiusKm]);
 
-  const routeStops = useMemo(() => {
-    if (!routeOn || !origin) return [];
-    const stops = buildRoute(origin, mapPlaces, days);
-    let cursor = origin;
-    return stops.map((p) => {
-      const km = haversineKm(cursor, [p.lat, p.lng]);
-      cursor = [p.lat, p.lng];
-      return { ...p, km };
-    });
-  }, [routeOn, origin, mapPlaces, days]);
+  useEffect(() => {
+    if (!routeOn || !origin) {
+      setRouteStops([]);
+      setRouteLoading(false);
+      return undefined;
+    }
+    let alive = true;
+    setRouteLoading(true);
+    (async () => {
+      const kategori = cats
+        .map((id) => EXPLORE_CATS.find((c) => c.id === id)?.label)
+        .filter(Boolean);
+      const r = await ruteJelajahi({
+        lat: origin[0],
+        lng: origin[1],
+        radiusKm,
+        hari: days,
+        kategori,
+      });
+      if (!alive) return;
+      setRouteLoading(false);
+      if (!r.ok) {
+        setRouteStops([]);
+        setRouteOn(false);
+        setHint(r.message && r.message !== 'Not Found' ? r.message : 'Tidak ada rute untuk titik dan filter ini.');
+        return;
+      }
+      const stops = toStops(r.data, origin);
+      if (!stops.length) {
+        setRouteStops([]);
+        setRouteOn(false);
+        setHint('Tidak ada destinasi yang masuk filter ini.');
+        return;
+      }
+      setRouteStops(stops);
+      setHint('');
+      if (flyAfterRoute.current) {
+        flyAfterRoute.current = false;
+        setFlyToken((n) => n + 1);
+      }
+    })();
+    return () => { alive = false; };
+  }, [routeOn, routeTick, origin, radiusKm, days, cats]);
 
   const toggleCat = (id) => {
     setCats((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -121,31 +242,53 @@ export default function Jelajahi({ places, error, query, focus }) {
     if (!fromDrag) setLocMode('set');
   };
 
+  const openPlace = (place) => {
+    if (!place) {
+      setSelected(null);
+      return;
+    }
+    setSelected({ ...place, detailLoading: place.id != null });
+    if (place.id == null) return;
+    const requestId = place.id;
+    detailJelajahi(requestId).then((r) => {
+      if (!r.ok) {
+        setSelected((cur) => (cur && cur.id === requestId ? { ...cur, detailLoading: false } : cur));
+        return;
+      }
+      const detail = toPlace(r.data || {});
+      setSelected((cur) => {
+        if (!cur || cur.id !== requestId) return cur;
+        const extra = Object.fromEntries(Object.entries(detail).filter(([, v]) => {
+          if (v == null || v === '') return false;
+          if (typeof v === 'number' && !Number.isFinite(v)) return false;
+          return true;
+        }));
+        return { ...cur, ...extra, detailLoading: false };
+      });
+    });
+  };
+
   const startRoute = () => {
     if (!origin) {
       setHint('Pakai lokasi saya, atau klik peta untuk memilih titik.');
       setLocMode('pin');
       return;
     }
-    if (!mapPlaces.length) {
-      setHint('Tidak ada destinasi yang masuk filter ini.');
-      setRouteOn(false);
-      return;
-    }
-    setRouteOn(true);
     setHint('');
-    setFlyToken((n) => n + 1);
+    flyAfterRoute.current = true;
+    setRouteOn(true);
+    setRouteTick((n) => n + 1);
   };
 
   const radiusLabel = origin
-    ? `${mapPlaces.length} tempat dalam ${radiusKm} km`
+    ? `${total} tempat dalam ${radiusKm} km`
     : 'Belum dipilih';
 
   return (
     <>
       <MapSection
-        places={mapPlaces}
-        error={error}
+        places={places}
+        error={listError}
         query=""
         focus={focus}
         origin={origin}
@@ -155,9 +298,9 @@ export default function Jelajahi({ places, error, query, focus }) {
         routeStops={routeStops}
         flyToken={flyToken}
         onOriginChange={placeOrigin}
-        onClearRoute={() => setRouteOn(false)}
+        onClearRoute={() => { setRouteOn(false); setRouteStops([]); }}
         selected={selected}
-        onSelectPlace={setSelected}
+        onSelectPlace={openPlace}
       >
         <aside className="ex-panel">
           <div className="ex-card">
@@ -192,6 +335,7 @@ export default function Jelajahi({ places, error, query, focus }) {
                 </button>
               ))}
             </div>
+            {listLoading ? <p className="ex-route-meta">Memuat destinasi...</p> : null}
           </div>
 
           <div className="ex-card">
@@ -233,8 +377,8 @@ export default function Jelajahi({ places, error, query, focus }) {
                 <option key={d} value={d}>{d} hari</option>
               ))}
             </select>
-            <button type="button" className="ex-cta" onClick={startRoute}>
-              Buat rute
+            <button type="button" className="ex-cta" onClick={startRoute} disabled={routeLoading}>
+              {routeLoading ? 'Menyusun rute...' : 'Buat rute'}
               <span className="ex-cta-arrow"><i className="bi bi-arrow-right"></i></span>
             </button>
             {hint ? <p className="au-msg" role="status" data-type="info">{hint}</p> : null}
