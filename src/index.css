@@ -968,12 +968,12 @@ footer.site .ft-links a:hover {
 }
 
 /* 1. HERO SECTION (FULL WIDTH)
-   Rasio tinggi section dikunci sesuai rasio gambar (aspect-ratio),
-   jadi gambar TIDAK terpotong. Isi diposisikan pakai satuan vw. */
+   Rasio tinggi section mengikuti komposisi animasi (1920×1203).
+   Gambar statis tampil dulu, lalu diganti animasi Lottie. */
 .hero-landing {
   position: relative;
   width: 100%;
-  aspect-ratio: 1.55 / 1;
+  aspect-ratio: 1920 / 1203;
   min-height: 560px;
   border-radius: 0 !important;
   background-image: url("/assets/landingpage1.png");
@@ -987,7 +987,60 @@ footer.site .ft-links a:hover {
   margin: 0;
 }
 
+.hero-landing.is-animated {
+  background-image: none;
+}
+
+.lb-anim {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  container-type: size;
+}
+
+.lb-anim-stage {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.lb-anim-stage svg {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+@supports (width: 1cqw) {
+  .lb-anim:not(.is-contain) .lb-anim-stage {
+    left: 50%;
+    width: max(100cqw, calc(100cqh * var(--lb-w) / var(--lb-h)));
+    height: max(100cqh, calc(100cqw * var(--lb-h) / var(--lb-w)));
+    transform: translateX(-50%);
+  }
+}
+
+.about-art {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.about-art .about-hero-img {
+  display: block;
+}
+
+.about-art.is-animated .about-hero-img {
+  visibility: hidden;
+}
+
 .hero-inner {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -1204,17 +1257,18 @@ footer.site .ft-links a:hover {
 }
 
 /* 3. STEPS SECTION (FULL WIDTH)
-   Sama seperti hero: rasio dikunci mengikuti rasio gambar supaya utuh. */
+   Rasio mengikuti gambar landingpage3. */
 .steps-landing-section {
   --step-size: clamp(76px, 8.5vw, 128px);
   position: relative;
   width: 100%;
-  aspect-ratio: 1.44 / 1;
+  aspect-ratio: 750 / 500;
   border-radius: 0 !important;
   background-image: url("/assets/landingpage3.png");
   background-size: cover;
   background-position: center bottom;
   background-repeat: no-repeat;
+  min-height: 560px;
   /* Isi (judul + langkah) diletakkan tepat di tengah section secara vertikal */
   display: flex;
   flex-direction: column;
@@ -1223,6 +1277,20 @@ footer.site .ft-links a:hover {
   box-shadow: none !important;
   overflow: hidden;
   margin: 0;
+}
+
+.steps-landing-section.is-animated {
+  background-image: none;
+}
+
+.steps-landing-section.is-animated .step-item-title,
+.steps-landing-section.is-animated .step-item-desc {
+  color: #1a2216;
+  text-shadow: 0 1px 10px rgba(255, 250, 236, 0.95);
+}
+
+.steps-landing-section.is-animated .steps-connector-line {
+  border-top-color: rgba(69, 129, 50, 0.45);
 }
 
 .steps-landing-section > .container {
@@ -1747,6 +1815,12 @@ footer.site .ft-links a:hover {
     background-size: cover;
     background-position: 68% bottom;
   }
+  @supports (width: 1cqw) {
+    .hero-landing .lb-anim-stage {
+      left: 68%;
+      transform: translateX(-68%);
+    }
+  }
   .hero-inner {
     padding-top: 8rem;
     padding-bottom: 1.75rem;
@@ -1763,6 +1837,9 @@ footer.site .ft-links a:hover {
     background-image:
       linear-gradient(to bottom, rgba(30, 55, 15, 0) 0%, rgba(30, 55, 15, 0.45) 40%, rgba(30, 55, 15, 0.8) 100%),
       url("/assets/landingpage3.png");
+  }
+  .steps-landing-section.is-animated {
+    background-image: none;
   }
   .steps-title {
     margin-bottom: 0;
@@ -1804,6 +1881,12 @@ footer.site .ft-links a:hover {
   .hero-landing {
     min-height: 600px;
     background-position: 74% bottom;
+  }
+  @supports (width: 1cqw) {
+    .hero-landing .lb-anim-stage {
+      left: 74%;
+      transform: translateX(-74%);
+    }
   }
   .hero-inner {
     padding-top: 7rem;
@@ -1943,7 +2026,7 @@ footer.site .ft-links a:hover {
 .about-hero {
   position: relative;
   width: 100%;
-  aspect-ratio: 1.55 / 1;
+  aspect-ratio: 1920 / 1080;
   min-height: 440px;
   background-image: url("/assets/aboutpage1.png");
   background-size: cover;
@@ -1952,6 +2035,10 @@ footer.site .ft-links a:hover {
   overflow: hidden;
   display: flex;
   align-items: center;
+}
+
+.about-hero.is-animated {
+  background-image: none;
 }
 
 .about-hero-inner {
@@ -2136,14 +2223,15 @@ footer.site .ft-links a:hover {
 }
 
 .about-wheel {
-  --afc-w: clamp(235px, 23vw, 310px);
-  --afc-gap: clamp(14px, 2vw, 28px);
-  margin-top: 1.5rem;
+  --afc-w: clamp(640px, 70vw, 880px);
+  --afc-h: clamp(280px, 28vw, 350px);
+  --afc-gap: clamp(18px, 1.8vw, 28px);
+  margin-top: 0.5rem;
 }
 
 .about-wheel-viewport {
   overflow: hidden;
-  padding: 3.5rem 0 5rem;
+  padding: 1.75rem 0 5rem;
   cursor: grab;
   touch-action: pan-y;
   user-select: none;
@@ -2157,64 +2245,113 @@ footer.site .ft-links a:hover {
 
 .about-wheel-track {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: var(--afc-gap);
   width: max-content;
   will-change: transform;
 }
 
 .about-feature-card {
+  position: relative;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: stretch;
   flex: 0 0 var(--afc-w);
+  height: var(--afc-h);
+  border-radius: 36px;
+  overflow: hidden;
+  background: linear-gradient(155deg, #4c983c 0%, #357228 58%, #2b6322 100%);
+  box-shadow: 0 10px 28px rgba(40, 60, 20, 0.06);
   transform-origin: center center;
-  padding: 1.1rem 1.1rem 1.6rem;
-  border-radius: 26px;
-  text-align: center;
-  background:
-    url("/assets/fiturabout.png") center / cover no-repeat,
-    linear-gradient(to top, #FFE286 0%, #FEE8B6 100%);
-  box-shadow: 0 8px 20px rgba(69, 129, 50, 0.12);
-  transform: scale(0.88);
-  transition: box-shadow 0.35s ease;
   will-change: transform;
 }
 
-.about-feature-card.is-active {
-  box-shadow: 0 14px 30px rgba(69, 129, 50, 0.2);
+.about-feature-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("/assets/fiturabout.png") center / 420px repeat;
+  opacity: 0.14;
+  pointer-events: none;
+}
+
+.about-feature-card::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  right: -8%;
+  top: -30%;
+  width: 62%;
+  height: 90%;
+  background: radial-gradient(closest-side, rgba(255, 239, 145, 0.34) 0%, rgba(255, 239, 145, 0) 72%);
+  pointer-events: none;
 }
 
 .afc-visual {
-  margin: 0.25rem 0 1rem;
+  position: relative;
+  z-index: 1;
+  flex: 1.15 1 0;
+  min-width: 0;
+  margin: 0.35rem 0.2rem 0.35rem 0;
+  background: transparent;
 }
 
-.afc-visual img {
-  display: block;
-  width: 100%;
-  height: auto;
-  pointer-events: none;
-  -webkit-user-drag: none;
-  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.08));
+.afc-visual .lb-anim {
+  inset: 0.45rem 0.35rem 0.45rem 0.15rem;
+}
+
+.afc-copy {
+  position: relative;
+  z-index: 1;
+  flex: 0.95 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 0.7rem 0.25rem 0.7rem 0.7rem;
+  padding: 1.25rem 1.2rem 1.3rem 1.3rem;
+  text-align: left;
+  background: #ffe56a;
+  border-radius: 26px;
+  box-shadow: 0 12px 26px rgba(20, 45, 12, 0.18);
+}
+
+.afc-kicker {
+  align-self: flex-start;
+  margin-bottom: 0.7rem;
+  padding: 0.28rem 0.72rem;
+  border-radius: 999px;
+  background: var(--dark-green);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
 }
 
 .afc-title {
   font-family: 'Satoshi', sans-serif;
-  font-size: 1.05rem;
+  font-size: clamp(1.25rem, 1.7vw, 1.7rem);
   font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
   color: #1a2216;
-  margin-bottom: 0.45rem;
+  margin: 0 0 0.55rem;
 }
 
 .afc-desc {
-  font-size: 0.92rem;
+  font-size: 0.98rem;
+  font-weight: 500;
   line-height: 1.5;
-  color: #1a2216;
+  color: #24301c;
   margin: 0;
 }
 
 .about-wheel-dots {
   display: flex;
   justify-content: center;
-  gap: 0.5rem;
-  margin-top: -1.5rem;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.15rem;
 }
 
 .about-wheel-dots button {
@@ -2230,7 +2367,7 @@ footer.site .ft-links a:hover {
 
 .about-wheel-dots button.active {
   width: 26px;
-  background: var(--dark-green);
+  background: #1a2216;
 }
 
 /* ---------- 4. AJAKAN (CTA) ---------- */
@@ -2440,6 +2577,12 @@ footer.site .ft-links a:hover {
     min-height: 480px;
     background-position: 66% bottom;
   }
+  @supports (width: 1cqw) {
+    .about-hero .lb-anim-stage {
+      left: 66%;
+      transform: translateX(-66%);
+    }
+  }
 
   .about-intro-stage {
     display: flex;
@@ -2481,7 +2624,24 @@ footer.site .ft-links a:hover {
   }
 
   .about-wheel {
-    --afc-w: clamp(235px, 66vw, 300px);
+    --afc-w: min(88vw, 480px);
+    --afc-h: auto;
+  }
+
+  .about-feature-card {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .about-feature-card .afc-visual {
+    flex: none;
+    height: 200px;
+    margin: 0.3rem 0.3rem 0;
+  }
+
+  .about-feature-card .afc-copy {
+    margin: 0.35rem 0.7rem 0.7rem;
+    padding: 1.1rem 1.15rem 1.2rem;
   }
 
   .about-cta {
@@ -4258,8 +4418,47 @@ body.ex-noscroll {
 }
 
 .explore-shell {
+  --ex-panel-w: clamp(280px, 24vw, 330px);
   height: calc(100dvh - 6.4rem);
   min-height: 520px;
+}
+
+.ex-dock {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: auto;
+  border: 0;
+  background: rgba(255, 255, 255, 0.96);
+  color: #1a2216;
+  font-family: 'Satoshi', Inter, system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.48rem 0.85rem;
+  box-shadow: 0 8px 22px rgba(17, 24, 39, 0.12);
+  cursor: pointer;
+}
+
+.ex-dock i {
+  color: #458132;
+  font-size: 0.95rem;
+}
+
+.ex-dock:hover {
+  background: #fff;
+}
+
+.ex-side .ex-dock {
+  align-self: flex-end;
+}
+
+.ex-panel.is-min,
+.ex-side.is-min {
+  bottom: auto;
+  width: auto;
+  overflow: visible;
 }
 
 .ex-panel .ex-card {
@@ -4614,11 +4813,16 @@ body.ex-noscroll {
 }
 
 .ex-side .ex-desc {
-  display: block;
-  overflow: visible;
-  -webkit-line-clamp: unset;
-  line-clamp: unset;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow: hidden;
   margin-bottom: 0.75rem;
+}
+
+.ex-side .ex-route-list {
+  max-height: 168px;
 }
 
 .ex-review {

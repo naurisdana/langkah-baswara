@@ -1,7 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import About from '../components/About.jsx';
 import FeatureWheel from '../components/FeatureWheel.jsx';
 import Testimonials from '../components/Testimonials.jsx';
+import LottiePlayer from '../components/LottiePlayer.jsx';
+
+const loadAboutHero = () => import('../assets/animation/aboutpage_landingpage_revisi.json');
 
 // Animasi muncul saat di-scroll: .about-reveal -> tambah .is-visible (CSS: .about-js .about-reveal)
 function useReveal(rootRef) {
@@ -21,12 +24,14 @@ function useReveal(rootRef) {
 
 export default function Tentang({ onExplore, onReady }) {
   const rootRef = useRef(null);
+  const [heroReady, setHeroReady] = useState(false);
   useReveal(rootRef);
   useEffect(() => { onReady?.(); }, [onReady]);
 
   return (
     <div className="about-wrap about-js" ref={rootRef}>
-      <div className="about-hero">
+      <div className={`about-hero${heroReady ? ' is-animated' : ''}`}>
+        <LottiePlayer load={loadAboutHero} width={1920} height={1080} onReady={() => setHeroReady(true)} />
         <div className="about-hero-inner">
           <h1 className="about-hero-title">
             Mengenal <strong>Langkah Baswara</strong>
@@ -37,7 +42,7 @@ export default function Tentang({ onExplore, onReady }) {
         </div>
       </div>
 
-      <About onExplore={onExplore} />
+      <About onExplore={onExplore} variant="about" />
       <FeatureWheel />
 
       <div className="about-cta">

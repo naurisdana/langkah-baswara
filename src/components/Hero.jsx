@@ -1,9 +1,15 @@
 import { useState } from 'react';
+import LottiePlayer from './LottiePlayer.jsx';
+
+const loadHero = () => import('../assets/animation/landingpage_langkahbaswara.json');
 
 export default function Hero({ onExplore, onSearch }) {
   const [q, setQ] = useState('');
+  const [ready, setReady] = useState(false);
+
   return (
-    <div className="hero-landing">
+    <div className={`hero-landing${ready ? ' is-animated' : ''}`}>
+      <LottiePlayer load={loadHero} width={1920} height={1203} onReady={() => setReady(true)} />
       <div className="container hero-inner">
         <div className="hero-content-left">
           <h1 className="hero-title">

@@ -5,7 +5,7 @@
 const TARGET = String(
   process.env.VITE_API_URL
     || process.env.VITE_API_BASE
-    || 'https://bauble-clergyman-glisten.ngrok-free.dev',
+    || 'https://web-production-3071457d.up.railway.app',
 ).replace(/\/+$/, '');
 
 function upstreamUrl(req) {
@@ -31,7 +31,6 @@ export default async function handler(req, res) {
       method: req.method,
       headers: {
         Accept: 'application/json',
-        'ngrok-skip-browser-warning': 'true',
         ...(req.headers['content-type'] ? { 'Content-Type': req.headers['content-type'] } : {}),
         ...(req.headers.authorization ? { Authorization: req.headers.authorization } : {}),
       },

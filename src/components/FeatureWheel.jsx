@@ -1,28 +1,56 @@
 import { useEffect, useRef, useState } from 'react';
+import LottiePlayer from './LottiePlayer.jsx';
+
+const loadHow1 = () => import('../assets/animation/howto_bagian1.json');
+const loadHow2 = () => import('../assets/animation/howto_bagian2.json');
+const loadHow3 = () => import('../assets/animation/howto_bagian3.json');
+const loadHow4 = () => import('../assets/animation/howto_bagian4.json');
 
 const FEATURES = [
-  { img: 'fiturabout1.png', title: 'Wishlist', alt: 'Fitur Wishlist', desc: 'Simpan tempat wisata impianmu agar mudah menyusun rencana perjalanan.' },
-  { img: 'fiturabout2.png', title: 'Filter Jarak (Radius)', alt: 'Fitur Filter Jarak (Radius)', desc: 'Cari dan temukanlah tempat-tempat seru yang lokasinya paling dekat dari posisi kamu.' },
-  { img: 'fiturabout3.png', title: 'Peta Interaktif', alt: 'Fitur Peta Interaktif', desc: 'Lihat dan jelajahi sebaran tempat wisata di Bali langsung lewat peta yang mudah digunakan.' },
-  { img: 'fiturabout4.png', title: 'Pencarian & Filter Cerdas', alt: 'Fitur Pencarian dan Filter Cerdas', desc: 'Cari tempat wisata sesuai kategori favoritmu (alam, budaya, budget, pantai) atau berdasarkan lokasi kabupaten.' },
-  { img: 'fiturabout5.png', title: 'Detail Wisata', alt: 'Fitur Detail Wisata', desc: 'Klik titik di peta untuk melihat foto, deskripsi, dan info dari tempat yang dikunjungi.' },
+  {
+    title: 'Tentukan Titik Awal',
+    desc: 'Pakai lokasi kamu atau pilih titik di peta, lalu terapkan untuk melihat destinasi di sekitarmu.',
+    load: loadHow4,
+    w: 533,
+    h: 520,
+  },
+  {
+    title: 'Peta Interaktif',
+    desc: 'Geser peta, ganti tampilan satelit, dan temukan tempat wisata langsung di Pulau Bali.',
+    load: loadHow1,
+    w: 554,
+    h: 420,
+  },
+  {
+    title: 'Simpan ke Wishlist',
+    desc: 'Tandai dan simpan tempat wisata favoritmu agar mudah dilihat kembali saat menyusun rencana liburan.',
+    load: loadHow2,
+    w: 510,
+    h: 349,
+  },
+  {
+    title: 'Cari & Lihat Detail',
+    desc: 'Cari destinasi, buka kartunya, dan lihat lokasi serta informasi tempat yang ingin kamu kunjungi.',
+    load: loadHow3,
+    w: 694,
+    h: 499,
+  },
 ];
 
-/* Tiga set identik. Posisi digeser terus, lalu dilipat balik selebar satu set
-   supaya tampilannya sama dan putaran tidak pernah mentok. */
+/* Beberapa set disambung supaya geseran bisa berputar tanpa mentok.
+   Posisinya hanya berubah saat digeser atau titik di bawah ditekan. */
 const N = FEATURES.length;
-const COPIES = 4;
-const START = Math.min(2, N - 1);
-const SPEED = 64;
+const COPIES = 3;
+const START = 0;
 
 const ITEMS = [];
 for (let c = 0; c < COPIES; c += 1) {
-  FEATURES.forEach((f, i) => ITEMS.push({ f, clone: c !== 0, key: `${c}:${i}` }));
+  FEATURES.forEach((f, i) => ITEMS.push({ f, n: i + 1, clone: c !== 0, key: `${c}:${i}` }));
 }
 
 const mod = (i) => ((i % N) + N) % N;
 
-export default function FeatureWheel({ autoPlay = true, captureWheel = false }) {
+export default function FeatureWheel({ captureWheel = false }) {
   const viewRef = useRef(null);
   const trackRef = useRef(null);
   const apiRef = useRef(null);
@@ -43,9 +71,10 @@ export default function FeatureWheel({ autoPlay = true, captureWheel = false }) 
     let dragging = false;
     let activeIndex = -1;
     let raf = 0;
-    let last = performance.now();
     let glide = null;
     let pointer = null;
+    let velocity = 0;
+    let lastMove = 0;
 
     const measure = () => {
       const next = cards[N];
@@ -69,72 +98,95 @@ export default function FeatureWheel({ autoPlay = true, captureWheel = false }) 
       return d;
     };
 
-    let shown = -1;
     const apply = () => {
       track.style.transform = `translate3d(${-x}px, 0, 0)`;
       const mid = view.getBoundingClientRect().left + view.clientWidth / 2;
-      const span = (cards[0]?.offsetWidth || 1) * 1.25;
-      const dists = cards.map((c) => {
-        const rect = c.getBoundingClientRect();
-        return Math.abs(rect.left + rect.width / 2 - mid);
-      });
+      const span = Math.max(view.clientWidth * 0.72, 1);
       let best = 0;
-      dists.forEach((dist, i) => {
+      let bestDist = Infinity;
+      cards.forEach((card, i) => {
+        const rect = card.getBoundingClientRect();
+        const dist = Math.abs(rect.left + rect.width / 2 - mid);
         const t = Math.min(dist / span, 1);
-        cards[i].style.transform = `scale(${1.08 - t * 0.22})`;
-        cards[i].style.opacity = `${1 - t * 0.22}`;
-        if (dist < dists[best]) best = i;
-      });
-      if (best !== shown) {
-        if (shown >= 0) cards[shown].style.boxShadow = '';
-        cards[best].style.boxShadow = '0 14px 30px rgba(69, 129, 50, 0.2)';
-        shown = best;
-        const logical = mod(best);
-        if (logical !== activeIndex) {
-          activeIndex = logical;
-          setActive(logical);
+        const scale = reduceMotion ? 1 : 1 - t * 0.14;
+        card.style.transform = `scale(${scale})`;
+        card.style.boxShadow = t < 0.35
+          ? '0 18px 36px rgba(40, 60, 20, 0.16)'
+          : '0 8px 18px rgba(40, 60, 20, 0.05)';
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = i;
         }
+      });
+      const logical = mod(best);
+      if (logical !== activeIndex) {
+        activeIndex = logical;
+        setActive(logical);
       }
+    };
+
+    const kick = () => {
+      if (!raf) raf = requestAnimationFrame(frame);
     };
 
     const goTo = (logical, smooth) => {
       if (!measure()) return;
-      const target = wrap(cardCenter(cards[mod(logical)]) - view.clientWidth / 2);
+      const feature = ((logical % N) + N) % N;
+      const target = wrap(cardCenter(cards[feature]) - view.clientWidth / 2);
       if (!smooth || reduceMotion) {
         glide = null;
         x = target;
         apply();
         return;
       }
-      glide = { from: x, delta: shortest(x, target), t0: performance.now(), dur: 900 };
+      const delta = shortest(x, target);
+      glide = {
+        from: x,
+        delta,
+        t0: performance.now(),
+        dur: Math.min(480, Math.max(340, Math.abs(delta) * 0.55)),
+      };
+      kick();
     };
 
     const frame = (now) => {
-      const dt = Math.min(0.05, (now - last) / 1000);
-      last = now;
+      raf = 0;
       if (!setWidth) measure();
-      if (setWidth && view.clientWidth) {
-        if (!placed) {
-          x = wrap(cardCenter(cards[START]) - view.clientWidth / 2);
-          placed = true;
-        }
-        if (glide) {
-          const t = Math.min(1, (now - glide.t0) / glide.dur);
-          const eased = 1 - (1 - t) ** 3;
-          x = wrap(glide.from + glide.delta * eased);
-          if (t >= 1) glide = null;
-        } else if (autoPlay && !dragging && !reduceMotion) {
-          x = wrap(x + SPEED * dt);
-        }
-        apply();
+      if (!(setWidth && view.clientWidth)) {
+        kick();
+        return;
       }
-      raf = requestAnimationFrame(frame);
+      if (!placed) {
+        x = wrap(cardCenter(cards[START]) - view.clientWidth / 2);
+        placed = true;
+      } else if (glide && !dragging) {
+        const t = Math.min(1, (now - glide.t0) / glide.dur);
+        const eased = 1 - (1 - t) ** 4;
+        x = wrap(glide.from + glide.delta * eased);
+        if (t >= 1) glide = null;
+      }
+      apply();
+      if ((glide && !dragging) || !placed) kick();
     };
-    raf = requestAnimationFrame(frame);
+    kick();
+
+    const settle = () => {
+      if (!measure()) return;
+      apply();
+      const speed = velocity;
+      velocity = 0;
+      let feature = activeIndex;
+      if (speed > 0.45) feature += 1;
+      else if (speed < -0.45) feature -= 1;
+      goTo(feature, true);
+    };
 
     const onPointerDown = (e) => {
       if (e.pointerType === 'mouse' && e.button !== 0) return;
       pointer = { id: e.pointerId, x: e.clientX, y: e.clientY, moved: false };
+      velocity = 0;
+      lastMove = performance.now();
+      glide = null;
     };
     const onPointerMove = (e) => {
       if (!pointer || e.pointerId !== pointer.id) return;
@@ -150,17 +202,24 @@ export default function FeatureWheel({ autoPlay = true, captureWheel = false }) 
         dragging = true;
         glide = null;
         view.classList.add('is-dragging');
-        view.setPointerCapture(e.pointerId);
+        try { view.setPointerCapture(e.pointerId); } catch { /* pointer sintetis tidak bisa ditangkap */ }
       }
+      const now = performance.now();
+      const dt = Math.max(1, now - lastMove);
+      velocity = velocity * 0.65 + (-dx / dt) * 0.35;
+      lastMove = now;
       x = wrap(x - dx);
       pointer.x = e.clientX;
+      kick();
     };
     const endPointer = (e) => {
       if (!pointer || e.pointerId !== pointer.id) return;
+      const wasDragging = dragging;
       if (dragging && view.hasPointerCapture(e.pointerId)) view.releasePointerCapture(e.pointerId);
       dragging = false;
       pointer = null;
       view.classList.remove('is-dragging');
+      if (wasDragging) settle();
     };
 
     const onKeyDown = (e) => {
@@ -175,6 +234,7 @@ export default function FeatureWheel({ autoPlay = true, captureWheel = false }) 
       e.preventDefault();
       glide = null;
       x = wrap(x + delta);
+      apply();
     };
 
     const ro = new ResizeObserver(() => { measure(); });
@@ -201,7 +261,7 @@ export default function FeatureWheel({ autoPlay = true, captureWheel = false }) 
       view.removeEventListener('wheel', onWheel);
       view.classList.remove('is-dragging');
     };
-  }, [autoPlay, captureWheel]);
+  }, [captureWheel]);
 
   const goToDot = (i) => {
     apiRef.current?.goTo(i, true);
@@ -230,17 +290,20 @@ export default function FeatureWheel({ autoPlay = true, captureWheel = false }) 
           aria-label="Daftar fitur unggulan, geser atau gunakan tombol panah untuk melihat fitur lainnya"
         >
           <div className="about-wheel-track" id="aboutWheelTrack" ref={trackRef}>
-            {ITEMS.map(({ f, clone, key }) => (
+            {ITEMS.map(({ f, n, clone, key }) => (
               <article
                 className="about-feature-card"
                 key={key}
                 aria-hidden={clone ? 'true' : undefined}
               >
                 <div className="afc-visual">
-                  <img src={`/assets/${f.img}`} alt={clone ? '' : f.alt} draggable="false" />
+                  <LottiePlayer load={f.load} width={f.w} height={f.h} fit="contain" lazy />
                 </div>
-                <h3 className="afc-title">{f.title}</h3>
-                <p className="afc-desc">{f.desc}</p>
+                <div className="afc-copy">
+                  <span className="afc-kicker">{String(n).padStart(2, '0')}</span>
+                  <h3 className="afc-title">{f.title}</h3>
+                  <p className="afc-desc">{f.desc}</p>
+                </div>
               </article>
             ))}
           </div>

@@ -1,4 +1,13 @@
-export default function About({ onExplore }) {
+import { useState } from 'react';
+import LottiePlayer from './LottiePlayer.jsx';
+
+const loadLanding = () => import('../assets/animation/landingpage_bagian1_langkahbaswara.json');
+const loadAbout = () => import('../assets/animation/aboutpage_bagian1.json');
+
+export default function About({ onExplore, variant = 'landing' }) {
+  const [ready, setReady] = useState(false);
+  const aboutArt = variant === 'about';
+
   return (
     <div className="container">
       <div className="about-landing-section">
@@ -18,7 +27,21 @@ export default function About({ onExplore }) {
             </button>
           </div>
           <div className="col-lg-6 text-center">
-            <img src="/assets/landingpage2.png" alt="Ilustrasi Apa itu Langkah Baswara" className="img-fluid about-hero-img" />
+            <div className={`about-art${aboutArt ? ' is-about' : ''}${ready ? ' is-animated' : ''}`}>
+              <img
+                src={aboutArt ? '/assets/aboutpage2.png' : '/assets/landingpage2.png'}
+                alt="Ilustrasi Apa itu Langkah Baswara"
+                className="img-fluid about-hero-img"
+              />
+              <LottiePlayer
+                lazy
+                load={aboutArt ? loadAbout : loadLanding}
+                width={1920}
+                height={1080}
+                fit="contain"
+                onReady={() => setReady(true)}
+              />
+            </div>
           </div>
         </div>
       </div>

@@ -47,7 +47,14 @@ function toPlace(row) {
 function routeRows(payload) {
   if (!payload) return [];
   if (Array.isArray(payload)) return payload;
-  const keys = ['data', 'rute', 'hasil', 'titik', 'stops', 'items', 'destinasi', 'waypoints'];
+  if (Array.isArray(payload.hari) && payload.hari.some((day) => Array.isArray(day?.destinasi))) {
+    return payload.hari.flatMap((day) => (
+      Array.isArray(day.destinasi)
+        ? day.destinasi.map((row) => ({ ...row, hari_ke: day.hari_ke }))
+        : []
+    ));
+  }
+  const keys = ['data', 'rute', 'hasil', 'titik', 'stops', 'items', 'destinasi', 'waypoints', 'hari'];
   for (const key of keys) {
     if (Array.isArray(payload[key])) return payload[key];
   }
@@ -61,7 +68,13 @@ function toStops(payload, origin) {
     .map((row) => {
       const place = toPlace(row);
       if (!Number.isFinite(place.lat) || !Number.isFinite(place.lng)) return null;
-      const given = Number(row.jarak_km ?? row.jarak ?? row.km ?? row.distance_km);
+      const given = Number(
+        row.jarak_dari_sebelumnya_km
+        ?? row.jarak_km
+        ?? row.jarak
+        ?? row.km
+        ?? row.distance_km,
+      );
       const km = Number.isFinite(given) ? given : (cursor ? haversineKm(cursor, [place.lat, place.lng]) : 0);
       cursor = [place.lat, place.lng];
       return { ...place, km };
@@ -91,6 +104,7 @@ export default function Jelajahi({ query, focus, onReady }) {
   const [counts, setCounts] = useState({ alam: 0, budaya: 0, rekreasi: 0, umum: 0 });
   const [listLoading, setListLoading] = useState(true);
   const [listError, setListError] = useState(null);
+  const [toolsOpen, setToolsOpen] = useState(true);
   const toldReady = useRef(false);
 
   useEffect(() => {
@@ -169,7 +183,9 @@ export default function Jelajahi({ query, focus, onReady }) {
       if (!stops.length) {
         setRouteStops([]);
         setRouteOn(false);
-        setHint('Tidak ada destinasi yang masuk filter ini.');
+        setHint(kategori.length
+          ? 'Tidak ada destinasi yang masuk filter ini.'
+          : 'Tidak ada destinasi untuk titik dan jarak ini.');
         return;
       }
       setRouteStops(stops);
@@ -302,7 +318,18 @@ export default function Jelajahi({ query, focus, onReady }) {
         selected={selected}
         onSelectPlace={openPlace}
       >
-        <aside className="ex-panel">
+        <aside className={`ex-panel${toolsOpen ? '' : ' is-min'}`}>
+          <button
+            type="button"
+            className="ex-dock"
+            aria-expanded={toolsOpen}
+            onClick={() => setToolsOpen((open) => !open)}
+          >
+            <i className={`bi ${toolsOpen ? 'bi-chevron-left' : 'bi-sliders'}`}></i>
+            {toolsOpen ? 'Sembunyikan' : 'Filter & rute'}
+          </button>
+          {toolsOpen ? (
+          <>
           <div className="ex-card">
             <div className="ex-label">
               <span>Saring destinasi</span>
@@ -383,6 +410,8 @@ export default function Jelajahi({ query, focus, onReady }) {
             </button>
             {hint ? <p className="au-msg" role="status" data-type="info">{hint}</p> : null}
           </div>
+          </>
+          ) : null}
         </aside>
       </MapSection>
     </>

@@ -110,9 +110,18 @@ export default function MapSection({
   const originRef = useRef(origin);
   const locModeRef = useRef(locMode);
   const [basemap, setBasemap] = useState('street');
+  const [sideOpen, setSideOpen] = useState(true);
+  const sideSig = `${routeStops.map((p) => p.id ?? p.nama).join(',')}|${selected?.id ?? selected?.nama ?? ''}`;
+  const prevSide = useRef(sideSig);
 
   onOriginRef.current = onOriginChange;
   onSelectRef.current = onSelectPlace;
+
+  useEffect(() => {
+    if (prevSide.current === sideSig) return;
+    prevSide.current = sideSig;
+    if (routeStops.length || selected) setSideOpen(true);
+  }, [sideSig, routeStops.length, selected]);
   originRef.current = origin;
   locModeRef.current = locMode;
 
@@ -323,7 +332,18 @@ export default function MapSection({
           </div>
 
           {showSide ? (
-            <aside className="ex-side">
+            <aside className={`ex-side${sideOpen ? '' : ' is-min'}`}>
+              <button
+                type="button"
+                className="ex-dock"
+                aria-expanded={sideOpen}
+                onClick={() => setSideOpen((open) => !open)}
+              >
+                <i className={`bi ${sideOpen ? 'bi-chevron-right' : 'bi-signpost-2'}`}></i>
+                {sideOpen ? 'Sembunyikan' : (routeStops.length ? `Rute · ${routeStops.length}` : 'Detail')}
+              </button>
+              {sideOpen ? (
+              <>
               {routeStops.length > 0 ? (
                 <div className="ex-route">
                   <div className="ex-route-head">
@@ -407,6 +427,8 @@ export default function MapSection({
                     <a className="ex-open-btn" href={selected.link || selected.link_maps} target="_blank" rel="noreferrer">Lihat lokasi</a>
                   ) : null}
                 </article>
+              ) : null}
+              </>
               ) : null}
             </aside>
           ) : null}
