@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { assetUrl } from '../lib/api.js';
+import { photoSrc } from '../lib/api.js';
 
 /** Popup detail destinasi populer di Beranda. */
 export default function DestPopup({ dest, onClose, onOpenMap }) {
-  const files = Array.isArray(dest?.img) ? dest.img : [];
+  const files = (Array.isArray(dest?.img) ? dest.img : []).filter(Boolean);
   const [idx, setIdx] = useState(0);
 
   useEffect(() => { setIdx(0); }, [dest]);
@@ -33,7 +33,7 @@ export default function DestPopup({ dest, onClose, onOpenMap }) {
               <i className="bi bi-image"></i>
             </div>
           ) : (
-            <img src={assetUrl(files[idx])} alt={dest.title} onError={() => setIdx((i) => i + 1)} />
+            <img src={photoSrc(files[idx])} alt={dest.title} referrerPolicy="no-referrer" onError={() => setIdx((i) => i + 1)} />
           )}
           <span className="ex-rating"><i className="bi bi-star-fill"></i> {dest.rating}</span>
         </div>

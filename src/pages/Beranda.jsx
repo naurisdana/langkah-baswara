@@ -44,9 +44,11 @@ function Steps() {
 function toCard(row) {
   const nama = String(row.nama || '').trim() || 'Destinasi';
   const rating = row.rating == null || row.rating === '' ? null : Number(row.rating);
+  const remote = typeof row.foto === 'string' ? row.foto.trim() : '';
+  const local = photoForPlace({ nama }) || [];
   return {
     key: String(row.id ?? nama),
-    img: photoForPlace({ nama }) || [],
+    img: remote ? [remote, ...local] : local,
     title: nama,
     rating: Number.isFinite(rating) ? String(rating) : '–',
     match: nama,

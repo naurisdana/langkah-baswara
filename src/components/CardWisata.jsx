@@ -1,19 +1,38 @@
-import { useState } from 'react';
-import { assetUrl } from '../lib/api.js';
+import { useEffect, useRef, useState } from 'react';
+import { photoSrc } from '../lib/api.js';
 
-/* Kartu destinasi (seragam): foto + tombol favorit, judul, rating bintang, tombol "Buka di Peta". Foto dibaca dari public/assets/ lewat URL "/assets/<nama-file>".
-   dest.img boleh string atau daftar nama file; kalau satu gagal dimuat, dicoba nama berikutnya. */
+/* Kartu destinasi: foto dari URL backend, atau nama file di public/assets bila URL tidak ada.
+   dest.img boleh string atau daftar; kalau satu gagal dimuat, dicoba sumber berikutnya. */
 export default function CardWisata({ dest, isFav, onToggleFav, onOpenMap, onOpenDetail }) {
-  const files = Array.isArray(dest.img) ? dest.img : [dest.img];
+  const files = (Array.isArray(dest.img) ? dest.img : [dest.img]).filter(Boolean);
   const [idx, setIdx] = useState(0);
+  const [focus, setFocus] = useState('center 45%');
+  const imgRef = useRef(null);
   const allFailed = idx >= files.length;
+
+  const placePhoto = (img) => {
+    const w = img?.naturalWidth;
+    const h = img?.naturalHeight;
+    if (!w || !h) return;
+    if (/kedonganan/i.test(dest.title)) {
+      setFocus('center 30%');
+      return;
+    }
+    const ratio = h / w;
+    // Foto tegak subjeknya sering di bawah; foto hampir persegi (gapura) lebih ke bawah lagi.
+    if (ratio > 1.15) setFocus('center 62%');
+    else if (ratio > 0.98) setFocus('center 78%');
+    else setFocus('center 40%');
+  };
+
+  useEffect(() => {
+    const img = imgRef.current;
+    if (img?.complete) placePhoto(img);
+  });
 
   const handleError = () => {
     if (idx + 1 >= files.length) {
-      console.warn(
-        `[CardWisata] Foto "${dest.title}" tidak ditemukan. Sudah dicoba: ${files.map(assetUrl).join(', ')}. ` +
-          'Samakan nama file dengan isi folder public/assets/ (perhatikan huruf besar/kecil & tanda "-").',
-      );
+      console.warn(`[CardWisata] Foto "${dest.title}" tidak dapat dimuat. Sudah dicoba: ${files.map(photoSrc).join(', ')}.`);
     }
     setIdx((i) => i + 1);
   };
@@ -26,7 +45,7 @@ export default function CardWisata({ dest, isFav, onToggleFav, onOpenMap, onOpen
             <i className="bi bi-image"></i>
           </div>
         ) : (
-          <img key={files[idx]} src={assetUrl(files[idx])} alt={dest.title} loading="lazy" onError={handleError} />
+          <img ref={imgRef} key={files[idx]} src={photoSrc(files[idx])} alt={dest.title} loading="lazy" referrerPolicy="no-referrer" style={{ objectPosition: focus }} onLoad={(event) => placePhoto(event.currentTarget)} onError={handleError} />
         )}
         <button
           type="button"

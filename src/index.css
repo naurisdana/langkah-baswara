@@ -1464,7 +1464,7 @@ footer.site .ft-links a:hover {
 .landing-card-thumb {
   position: relative;
   width: 100%;
-  height: 220px;
+  height: 236px;
   overflow: hidden;
   background-color: #f1dfcf;
   border-top-left-radius: 22px;
@@ -1475,6 +1475,7 @@ footer.site .ft-links a:hover {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center 45%;
   transition: transform 0.45s ease;
   display: block;
 }
@@ -1490,12 +1491,12 @@ footer.site .ft-links a:hover {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 65%;
+  height: 34%;
   background: linear-gradient(
     to bottom,
     rgba(255, 248, 231, 0) 0%,
-    rgba(255, 248, 231, 0.45) 45%,
-    rgba(255, 248, 231, 0.88) 80%,
+    rgba(255, 248, 231, 0.35) 48%,
+    rgba(255, 248, 231, 0.86) 82%,
     #FFF8E7 100%
   ) !important;
   pointer-events: none;
@@ -1919,7 +1920,7 @@ footer.site .ft-links a:hover {
     display: none;
   }
   .landing-card-thumb {
-    height: 190px;
+    height: 210px;
   }
   .landing-chip {
     padding: 0.35rem 1.05rem;
@@ -2346,12 +2347,52 @@ footer.site .ft-links a:hover {
   margin: 0;
 }
 
+.about-wheel-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.85rem;
+  margin-top: 0.15rem;
+}
+
+.about-wheel-arrow {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--dark-green);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--dark-green);
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(40, 60, 20, 0.1);
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.about-wheel-arrow:hover {
+  background: var(--dark-green);
+  color: #fff;
+}
+
+.about-wheel-arrow:active {
+  transform: scale(0.96);
+}
+
+.about-wheel-arrow:focus-visible {
+  outline: 3px solid rgba(69, 129, 50, 0.35);
+  outline-offset: 3px;
+}
+
 .about-wheel-dots {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 0.45rem;
-  margin-top: 0.15rem;
+  margin-top: 0;
 }
 
 .about-wheel-dots button {
@@ -2761,15 +2802,17 @@ body:has(#sec-profil:not(.d-none)) {
 
 .lb-pin i {
   transform: rotate(45deg);
-  color: #fff;
+  color: var(--pin-ink, #fff);
   font-size: 0.88rem;
   line-height: 1;
 }
 
-.lb-pin.cat-alam { --pin: var(--dark-green); }
-.lb-pin.cat-budaya { --pin: #7c5cdb; }
-.lb-pin.cat-rekreasi { --pin: var(--orange); }
-.lb-pin.cat-umum { --pin: #6b7280; }
+/* Warna mengikuti chip filter: Alam hijau, Budaya ungu, Rekreasi kuning, Umum abu-abu */
+.lb-pin.cat-alam { --pin: #9ad872; --pin-ink: #245218; }
+.lb-pin.cat-budaya { --pin: #7c5cdb; --pin-ink: #fff; }
+.lb-pin.cat-rekreasi { --pin: #ffef91; --pin-ink: #8a5300; }
+.lb-pin.cat-umum { --pin: #d5dde8; --pin-ink: #374151; }
+.lb-pin.is-origin { --pin: #ffa12f; --pin-ink: #fff; }
 
 .lb-low .lb-pin {
   transform: rotate(-45deg) scale(0.68);
@@ -3409,10 +3452,10 @@ body:has(#sec-profil:not(.d-none)) {
   background: linear-gradient(135deg, var(--pin, var(--dark-green)), var(--pastel-green));
 }
 
-.ex-photo-ph.cat-alam { --pin: var(--dark-green); }
+.ex-photo-ph.cat-alam { --pin: #9ad872; }
 .ex-photo-ph.cat-budaya { --pin: #7c5cdb; }
-.ex-photo-ph.cat-rekreasi { --pin: var(--orange); }
-.ex-photo-ph.cat-umum { --pin: #6b7280; }
+.ex-photo-ph.cat-rekreasi { --pin: #ffef91; }
+.ex-photo-ph.cat-umum { --pin: #d5dde8; }
 
 .ex-rating {
   position: absolute;
@@ -4359,7 +4402,9 @@ body.ex-noscroll {
 /* ---------- Desktop: posisi elemen seperti mockup ---------- */
 @media (min-width: 992px) {
   .ex-panel {
-    bottom: 200px; /* sisakan ruang untuk kontrol peta di kiri-bawah */
+    top: 16px;
+    bottom: 76px; /* tepat di atas kontrol peta, kedua kartu muat tanpa scroll */
+    gap: 0.5rem;
   }
 
   .ex-zoom {
@@ -4513,6 +4558,34 @@ body.ex-noscroll {
   padding: 0.72rem 0.95rem;
   border-radius: 16px;
   font-size: 0.74rem;
+}
+
+@media (max-height: 860px) {
+  .ex-panel {
+    gap: 0.4rem;
+  }
+
+  .ex-panel .ex-card {
+    padding: 0.62rem 0.8rem 0.65rem;
+  }
+
+  .ex-panel .ex-chips {
+    margin-top: 0.4rem;
+  }
+
+  .ex-origin-actions {
+    gap: 0.28rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .ex-gps {
+    padding: 0.36rem 0.7rem;
+  }
+
+  .ex-panel .ex-cta {
+    margin-top: 0.45rem;
+    padding: 0.55rem 0.85rem;
+  }
 }
 
 .ex-panel .au-msg {
@@ -4823,6 +4896,56 @@ body.ex-noscroll {
 
 .ex-side .ex-route-list {
   max-height: 168px;
+}
+
+.ex-side .ex-route.is-compact .ex-route-list {
+  display: none;
+}
+
+.ex-side .ex-route.is-compact .ex-route-title {
+  margin-bottom: 0;
+}
+
+.ex-route-expand {
+  align-self: flex-start;
+  margin: 0.15rem 0 0.1rem;
+  border: 0;
+  background: transparent;
+  color: var(--dark-green);
+  font-family: 'Satoshi', Inter, system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.explore-shell.has-detail .ex-side {
+  overflow: hidden;
+}
+
+.explore-shell.has-detail .ex-side .ex-detail {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #9ad872 transparent;
+}
+
+.explore-shell.has-detail .ex-side .ex-detail::-webkit-scrollbar {
+  width: 8px;
+}
+
+.explore-shell.has-detail .ex-side .ex-detail::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 14px 0;
+}
+
+.explore-shell.has-detail .ex-side .ex-detail::-webkit-scrollbar-thumb {
+  background: #9ad872;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 .ex-review {
@@ -6597,11 +6720,24 @@ body:has(#sec-profil:not(.d-none)) footer.site {
   }
 }
 
-/* Foto di kartu detail Jelajahi */
+/* Foto di kartu detail Jelajahi. Jangan ikut menyusut, kalau tidak tingginya jadi 0. */
+.ex-side .ex-detail > * {
+  flex-shrink: 0;
+}
+
 .ex-side .ex-detail .ex-photo {
-  height: 148px;
+  flex: 0 0 auto;
+  height: 168px;
+  min-height: 168px;
   margin-bottom: 0.7rem;
   border-radius: 16px;
+}
+
+.ex-side .ex-detail .ex-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
 }
 
 /* Popup destinasi populer di Beranda */

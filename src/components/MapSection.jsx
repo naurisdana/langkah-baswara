@@ -3,7 +3,7 @@ import L from 'leaflet';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-import { assetUrl, BALI_CENTER } from '../lib/api.js';
+import { BALI_CENTER, photoSrc } from '../lib/api.js';
 import { BALI_MIN_ZOOM, BALI_NE, BALI_SW, categoryGroup, photoForPlace } from '../data/destinations.js';
 
 delete L.Icon.Default.prototype._getIconUrl;
@@ -39,8 +39,8 @@ function samePlace(a, b) {
 }
 
 function PlacePhoto({ place, score }) {
-  const remote = typeof place.foto === 'string' && /^https?:\/\//.test(place.foto) ? place.foto : '';
-  const files = remote ? [remote] : (photoForPlace(place) || []);
+  const remote = typeof place.foto === 'string' ? place.foto.trim() : '';
+  const files = remote ? [remote, ...(photoForPlace(place) || [])] : (photoForPlace(place) || []);
   const [idx, setIdx] = useState(0);
   const cat = categoryGroup(place.kategori);
   const icon = PIN_ICON[cat] || PIN_ICON.umum;
@@ -53,7 +53,7 @@ function PlacePhoto({ place, score }) {
           <i className={`bi ${icon}`}></i>
         </div>
       ) : (
-        <img src={remote ? files[idx] : assetUrl(files[idx])} alt={place.nama} onError={() => setIdx((i) => i + 1)} />
+        <img src={photoSrc(files[idx])} alt={place.nama} referrerPolicy="no-referrer" onError={() => setIdx((i) => i + 1)} />
       )}
       {score != null ? (
         <span className="ex-rating"><i className="bi bi-star-fill"></i> {score.toFixed(1)}</span>
@@ -76,7 +76,7 @@ function reviewsOf(place) {
 
 const USER_ICON = L.divIcon({
   className: 'lb-pin-wrap',
-  html: '<span class="lb-pin cat-rekreasi is-selected"><i class="bi bi-geo-alt-fill"></i></span>',
+  html: '<span class="lb-pin is-origin"><i class="bi bi-geo-alt-fill"></i></span>',
   iconSize: [32, 32],
   iconAnchor: [16, 30],
 });
@@ -111,6 +111,7 @@ export default function MapSection({
   const locModeRef = useRef(locMode);
   const [basemap, setBasemap] = useState('street');
   const [sideOpen, setSideOpen] = useState(true);
+  const [routeCompact, setRouteCompact] = useState(false);
   const sideSig = `${routeStops.map((p) => p.id ?? p.nama).join(',')}|${selected?.id ?? selected?.nama ?? ''}`;
   const prevSide = useRef(sideSig);
 
@@ -121,6 +122,7 @@ export default function MapSection({
     if (prevSide.current === sideSig) return;
     prevSide.current = sideSig;
     if (routeStops.length || selected) setSideOpen(true);
+    setRouteCompact(Boolean(selected) && routeStops.length > 0);
   }, [sideSig, routeStops.length, selected]);
   originRef.current = origin;
   locModeRef.current = locMode;
@@ -174,7 +176,9 @@ export default function MapSection({
     if (!markersRef.current) return;
     markersRef.current.clearLayers();
     shown.forEach((p) => {
-      const group = ['alam', 'budaya', 'rekreasi', 'umum'].includes(p.group) ? p.group : 'umum';
+      const group = ['alam', 'budaya', 'rekreasi', 'umum'].includes(p.group)
+        ? p.group
+        : categoryGroup(p.kategori);
       const marker = L.marker([p.lat, p.lng], { icon: pinIcon(group, samePlace(selected, p)) }).addTo(markersRef.current);
       marker.on('click', (e) => {
         L.DomEvent.stopPropagation(e);
@@ -345,7 +349,7 @@ export default function MapSection({
               {sideOpen ? (
               <>
               {routeStops.length > 0 ? (
-                <div className="ex-route">
+                <div className={`ex-route${routeCompact ? ' is-compact' : ''}`}>
                   <div className="ex-route-head">
                     <div>
                       <div className="ex-eyebrow">Rute perjalanan</div>
@@ -358,6 +362,11 @@ export default function MapSection({
                       <i className="bi bi-x-lg"></i>
                     </button>
                   </div>
+                  {routeCompact ? (
+                    <button type="button" className="ex-route-expand" onClick={() => setRouteCompact(false)}>
+                      Lihat daftar rute
+                    </button>
+                  ) : null}
                   <ol className="ex-route-list">
                     {routeStops.map((p, i) => (
                       <li key={p.id != null ? p.id : `${p.nama}-${p.lat}`} className={samePlace(selected, p) ? 'is-active' : ''}>

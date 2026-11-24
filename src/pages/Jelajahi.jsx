@@ -41,6 +41,7 @@ function toPlace(row) {
     rating: Number.isFinite(rating) ? rating : null,
     lat,
     lng,
+    group: categoryGroup(row.kategori),
   };
 }
 

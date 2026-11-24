@@ -308,17 +308,35 @@ export default function FeatureWheel({ captureWheel = false }) {
             ))}
           </div>
         </div>
-        <div className="about-wheel-dots" id="aboutWheelDots">
-          {FEATURES.map((f, i) => (
-            <button
-              key={f.title}
-              type="button"
-              className={i === active ? 'active' : ''}
-              aria-label={`Lihat fitur ${f.title}`}
-              aria-current={i === active ? 'true' : undefined}
-              onClick={() => goToDot(i)}
-            ></button>
-          ))}
+        <div className="about-wheel-nav">
+          <button
+            type="button"
+            className="about-wheel-arrow"
+            aria-label="Fitur sebelumnya"
+            onClick={() => goToDot(active - 1)}
+          >
+            <i className="bi bi-chevron-left" aria-hidden="true"></i>
+          </button>
+          <div className="about-wheel-dots" id="aboutWheelDots">
+            {FEATURES.map((f, i) => (
+              <button
+                key={f.title}
+                type="button"
+                className={i === active ? 'active' : ''}
+                aria-label={`Lihat fitur ${f.title}`}
+                aria-current={i === active ? 'true' : undefined}
+                onClick={() => goToDot(i)}
+              ></button>
+            ))}
+          </div>
+          <button
+            type="button"
+            className="about-wheel-arrow"
+            aria-label="Fitur berikutnya"
+            onClick={() => goToDot(active + 1)}
+          >
+            <i className="bi bi-chevron-right" aria-hidden="true"></i>
+          </button>
         </div>
       </div>
     </div>

@@ -3,12 +3,21 @@
 // Foto/gambar: public/assets/<nama-file>  →  /assets/<nama-file>
 export const assetUrl = (file) => `/assets/${encodeURIComponent(file)}`;
 
+/** URL foto: tautan dari backend dipakai apa adanya, nama file lokal lewat /assets. */
+export function photoSrc(file) {
+  const s = String(file || '').trim();
+  if (!s) return '';
+  if (/^(https?:)?\/\//i.test(s) || s.startsWith('data:') || s.startsWith('/')) return s;
+  return assetUrl(s);
+}
+
 // Data spasial: public/data/wisata-bali.geojson  →  /data/wisata-bali.geojson
 export const GEOJSON_URL = '/data/wisata-bali.geojson';
 
-// Browser memanggil backend Railway langsung. Origin localhost:5174 dan
-// domain Vercel sudah diizinkan di CORS backend.
-export const API_BASE = 'https://web-production-3071457d.up.railway.app';
+const RAILWAY = 'https://web-production-3071457d.up.railway.app';
+// Saat development, permintaan lewat proxy Vite (/api) supaya pin tetap muncul
+// di port mana pun. Production tetap memanggil Railway langsung.
+export const API_BASE = import.meta.env.DEV ? '' : RAILWAY;
 
 export const OTP_LENGTH = 6;
 export const BALI_CENTER = [-8.4095, 115.1889];
