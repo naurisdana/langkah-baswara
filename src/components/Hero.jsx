@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import LottiePlayer from './LottiePlayer.jsx';
+import { useI18n } from '../lib/i18n.jsx';
 
 const loadHero = () => import('../assets/animation/landingpage_langkahbaswara.json');
 
 export default function Hero({ onExplore, onSearch }) {
+  const { t } = useI18n();
   const [q, setQ] = useState('');
   const [ready, setReady] = useState(false);
 
@@ -13,14 +15,14 @@ export default function Hero({ onExplore, onSearch }) {
       <div className="container hero-inner">
         <div className="hero-content-left">
           <h1 className="hero-title">
-            Jelajahi Keindahan Bali,<br />
-            <span className="hero-nowrap">Dalam Satu Genggaman.</span>
+            {t('hero.l1')}<br />
+            <span className="hero-nowrap">{t('hero.l2')}</span>
           </h1>
           <p className="hero-tagline">
-            Temukan lebih dari 700 destinasi wisata impian dan susun rute perjalanan terbaikmu secara efisien bersama Langkah Baswara.
+            {t('hero.tag')}
           </p>
           <button type="button" className="btn-hero-explore" onClick={onExplore}>
-            Jelajahi Sekarang
+            {t('hero.cta')}
           </button>
         </div>
         <div className="hero-search-wrapper">
@@ -36,12 +38,12 @@ export default function Hero({ onExplore, onSearch }) {
               type="text"
               id="heroSearchInput"
               className="hero-search-input"
-              placeholder="Masukkan kata kunci atau nama tempat..."
+              placeholder={t('hero.ph')}
               autoComplete="off"
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
-            <button type="submit" className="hero-search-btn" aria-label="Cari Destinasi">
+            <button type="submit" className="hero-search-btn" aria-label={t('hero.find')}>
               <i className="bi bi-search"></i>
             </button>
           </form>

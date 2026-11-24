@@ -3,6 +3,7 @@ import About from '../components/About.jsx';
 import FeatureWheel from '../components/FeatureWheel.jsx';
 import Testimonials from '../components/Testimonials.jsx';
 import LottiePlayer from '../components/LottiePlayer.jsx';
+import { useI18n } from '../lib/i18n.jsx';
 
 const loadAboutHero = () => import('../assets/animation/aboutpage_landingpage_revisi.json');
 
@@ -23,6 +24,7 @@ function useReveal(rootRef) {
 }
 
 export default function Tentang({ onExplore, onReady }) {
+  const { t } = useI18n();
   const rootRef = useRef(null);
   const [heroReady, setHeroReady] = useState(false);
   useReveal(rootRef);
@@ -34,10 +36,10 @@ export default function Tentang({ onExplore, onReady }) {
         <LottiePlayer load={loadAboutHero} width={1920} height={1080} onReady={() => setHeroReady(true)} />
         <div className="about-hero-inner">
           <h1 className="about-hero-title">
-            Mengenal <strong>Langkah Baswara</strong>
+            {t('ab.hero1')} <strong>{t('ab.hero2')}</strong>
           </h1>
           <p className="about-hero-tagline">
-            Web-GIS interaktif untuk merencanakan liburan di Bali: <strong>lebih efektif, hemat waktu, sesuai preferensi.</strong>
+            {t('ab.tag')} <strong>{t('ab.tagb')}</strong>
           </p>
         </div>
       </div>
@@ -48,15 +50,15 @@ export default function Tentang({ onExplore, onReady }) {
       <div className="about-cta">
         <div className="about-cta-inner about-reveal">
           <h2 className="about-cta-title">
-            <strong>Siap</strong> Memulai
-            <span className="highlight-oval-yellow"> Liburan<br />Impianmu</span>
-            {' '}di <strong>Bali?</strong>
+            <strong>{t('ab.ready')}</strong> {t('ab.start')}
+            <span className="highlight-oval-yellow"> {t('ab.dream')}<br />{t('ab.dream2')}</span>
+            {' '}{t('ab.in')} <strong>{t('ab.bali')}</strong>
           </h2>
           <p className="about-cta-desc">
-            Temukan tempat wisata favoritmu dan dapatkan rute perjalanan terbaik hanya dalam hitungan detik.
+            {t('ab.ctaD')}
           </p>
           <button type="button" className="btn btn-green-pill" onClick={onExplore}>
-            Jelajahi Sekarang
+            {t('about.cta')}
           </button>
         </div>
       </div>

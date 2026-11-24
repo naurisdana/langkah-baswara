@@ -1,3 +1,5 @@
+import { useI18n } from '../lib/i18n.jsx';
+
 const REVIEWS = [
   { tone: 'yellow', tag: 'Pantai Melasti & Ubud', initials: 'RP', name: 'Rian Pratama', role: 'Solo Traveler • Jakarta', quote: 'Fitur peta interaktifnya juara banget! Bikin kami nggak bingung milih rute jalan dan bisa hemat waktu 3 jam di perjalanan tanpa drama nyasar.' },
   { tone: 'yellow', tag: 'Tanah Lot & Bedugul', initials: 'SA', name: 'Sinta Anggraini', role: 'Family Trip • Bandung', quote: 'Kami bawa dua anak, jadi jarak tempuh harus masuk akal. Slider radiusnya ngebantu banget nyusun pura, danau, dan tempat makan dalam satu hari tanpa kelelahan.' },
@@ -8,15 +10,16 @@ const REVIEWS = [
 ];
 
 export default function Testimonials() {
+  const { t } = useI18n();
   return (
     <div className="container">
       <div className="about-review-section">
         <div className="text-center mb-5 about-reveal">
           <h2 className="about-heading">
-            <span className="highlight-oval-yellow">Apa</span> Kata <strong>Mereka?</strong>
+            <span className="highlight-oval-yellow">{t('rev.h1')}</span> {t('rev.h2')} <strong>{t('rev.h3')}</strong>
           </h2>
           <p className="about-subheading">
-            Dengar cerita dan pengalaman langsung dari para wisatawan yang telah merencanakan liburan impian mereka di Bali bersama Langkah Baswara.
+            {t('rev.sub')}
           </p>
         </div>
         <div className="row g-4">

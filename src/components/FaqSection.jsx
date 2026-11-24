@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { FAQS } from '../data/faq.js';
+import { useI18n } from '../lib/i18n.jsx';
 
 /* FAQ accordion. Gaya: .faq-* di index.css (pill hijau, aktif → kuning, ikon + / ×).
    Satu item terbuka pada satu waktu — sama seperti perilaku di main.js lama. */
 export default function FaqSection() {
+  const { t } = useI18n();
   const [openIndex, setOpenIndex] = useState(null);
+  const faqs = [1, 2, 3, 4, 5].map((n) => ({ q: t(`faq.${n}.q`), a: t(`faq.${n}.a`) }));
 
   const toggle = (i) => setOpenIndex((cur) => (cur === i ? null : i));
 
@@ -12,11 +14,11 @@ export default function FaqSection() {
     <div className="container">
       <div className="faq-landing-section">
         <h2 className="faq-section-title text-center mb-4">
-          <span className="highlight-oval-yellow">Pertanyaan</span> yang Sering<br />Diajukan
+          <span className="highlight-oval-yellow">{t('faq.h1')}</span> {t('faq.h2')}<br />{t('faq.h3')}
         </h2>
 
         <div className="faq-accordion-custom mx-auto">
-          {FAQS.map((item, i) => {
+          {faqs.map((item, i) => {
             const open = openIndex === i;
             return (
               <div key={item.q} className={`faq-item-custom${open ? ' active' : ''}`} onClick={() => toggle(i)}>

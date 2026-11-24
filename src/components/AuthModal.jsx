@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { apiRequest, OTP_LENGTH } from '../lib/api.js';
+import { useI18n } from '../lib/i18n.jsx';
 
 const GOOGLE_ICON = (
   <svg viewBox="0 0 48 48" width="22" height="22" aria-hidden="true">
@@ -11,6 +12,7 @@ const GOOGLE_ICON = (
 );
 
 export default function AuthModal({ open, onClose, onLoggedIn }) {
+  const { t } = useI18n();
   const [errorMessage, setErrorMessage] = useState(null); // hanya terisi dari respon API
   const [view, setView] = useState('login');
   const [f, setF] = useState({ name: '', email: '', password: '' });
@@ -59,15 +61,15 @@ export default function AuthModal({ open, onClose, onLoggedIn }) {
 
   const msg = typeof errorMessage === 'string' && errorMessage ? <p className="au-msg" data-type="error" role="alert">{errorMessage}</p> : null;
   const eye = (
-    <button type="button" className="au-eye" aria-label="Tampilkan kata sandi" onClick={() => setShowPass((s) => !s)}>
+    <button type="button" className="au-eye" aria-label={showPass ? t('au.hide') : t('au.show')} onClick={() => setShowPass((s) => !s)}>
       <i className={`bi ${showPass ? 'bi-eye' : 'bi-eye-slash'}`}></i>
     </button>
   );
 
   return (
-    <div className={`au-screen${open ? ' is-active' : ''}`} id="authScreen" data-view={view} role="dialog" aria-modal="true" aria-label="Masuk atau daftar akun">
+    <div className={`au-screen${open ? ' is-active' : ''}`} id="authScreen" data-view={view} role="dialog" aria-modal="true" aria-label={t('au.dialog')}>
       <div className="au-photo">
-        <img src="/assets/authenticationpage.png" alt="Ilustrasi wisatawan menatap gapura Bali saat matahari terbit" draggable="false" />
+        <img src="/assets/authenticationpage.png" alt={t('au.alt')} draggable="false" />
       </div>
       <div className="au-right">
         <div className="au-bg" aria-hidden="true">
@@ -76,14 +78,14 @@ export default function AuthModal({ open, onClose, onLoggedIn }) {
         </div>
         <div className="au-main">
           <div className="au-box">
-            <a className="au-logo" href="#" aria-label="Kembali ke beranda" onClick={(e) => { e.preventDefault(); onClose(); }}>
+            <a className="au-logo" href="#" aria-label={t('au.back')} onClick={(e) => { e.preventDefault(); onClose(); }}>
               <img src="/assets/logofix.png" alt="Logo Langkah Baswara" />
             </a>
 
             {/* MASUK */}
             <section className={`au-view${view === 'login' ? ' is-current' : ''}`} data-view="login">
-              <h1 className="au-title">Masuk ke Akun Anda</h1>
-              <p className="au-sub">Halo! Senang melihatmu kembali.<br />Silakan masuk ke akun Anda.</p>
+              <h1 className="au-title">{t('au.loginT')}</h1>
+              <p className="au-sub">{t('au.loginS')}<br />{t('au.loginS2')}</p>
               <form className="au-form" onSubmit={submit('/api/auth/login', { email: f.email, password: f.password }, finish)}>
                 <label className="au-field">
                   <i className="bi bi-envelope-fill" aria-hidden="true"></i>
@@ -95,29 +97,29 @@ export default function AuthModal({ open, onClose, onLoggedIn }) {
                   {eye}
                 </label>
                 {view === 'login' ? msg : null}
-                <button type="submit" className="au-btn au-btn-primary" disabled={busy}>Masuk</button>
+                <button type="submit" className="au-btn au-btn-primary" disabled={busy}>{t('au.login')}</button>
               </form>
-              <div className="au-or"><span>atau</span></div>
+              <div className="au-or"><span>{t('au.or')}</span></div>
               <button
                 type="button"
                 className="au-btn au-btn-google"
-                aria-label="Masuk dengan Google"
-                title="Masuk dengan Google"
+                aria-label={t('au.google')}
+                title={t('au.google')}
                 onClick={submit('/api/auth/google', null, (d) => { if (d && d.url) window.location.href = d.url; })}
               >
                 {GOOGLE_ICON}
               </button>
-              <p className="au-switch">Belum punya akun? <button type="button" className="au-link" onClick={() => go('register')}>Daftar</button></p>
+              <p className="au-switch">{t('au.noAccount')} <button type="button" className="au-link" onClick={() => go('register')}>{t('au.register')}</button></p>
             </section>
 
             {/* DAFTAR */}
             <section className={`au-view${view === 'register' ? ' is-current' : ''}`} data-view="register">
-              <h1 className="au-title">Daftar Akun</h1>
-              <p className="au-sub">Halo! Senang melihatmu kembali.<br />Silakan buat akun Anda.</p>
+              <h1 className="au-title">{t('au.regT')}</h1>
+              <p className="au-sub">{t('au.loginS')}<br />{t('au.regS2')}</p>
               <form className="au-form" onSubmit={submit('/api/auth/register', { name: f.name, email: f.email, password: f.password }, () => go('verify'))}>
                 <label className="au-field">
                   <i className="bi bi-person-fill" aria-hidden="true"></i>
-                  <input type="text" required minLength={2} placeholder="Nama" autoComplete="name" aria-label="Nama" value={f.name} onChange={set('name')} />
+                  <input type="text" required minLength={2} placeholder={t('au.name')} autoComplete="name" aria-label={t('au.name')} value={f.name} onChange={set('name')} />
                 </label>
                 <label className="au-field">
                   <i className="bi bi-envelope-fill" aria-hidden="true"></i>
@@ -129,17 +131,17 @@ export default function AuthModal({ open, onClose, onLoggedIn }) {
                   {eye}
                 </label>
                 {view === 'register' ? msg : null}
-                <button type="submit" className="au-btn au-btn-primary au-btn-gap" disabled={busy}>Daftar</button>
+                <button type="submit" className="au-btn au-btn-primary au-btn-gap" disabled={busy}>{t('au.register')}</button>
               </form>
-              <p className="au-switch">Sudah punya akun? <button type="button" className="au-link" onClick={() => go('login')}>Masuk</button></p>
+              <p className="au-switch">{t('au.has')} <button type="button" className="au-link" onClick={() => go('login')}>{t('au.login')}</button></p>
             </section>
 
             {/* VERIFIKASI OTP */}
             <section className={`au-view${view === 'verify' ? ' is-current' : ''}`} data-view="verify">
-              <h1 className="au-title">Masukkan Kode Verifikasi</h1>
-              <p className="au-sub">Kami telah mengirimkan kode<br />verifikasi ke email anda.</p>
+              <h1 className="au-title">{t('au.otpT')}</h1>
+              <p className="au-sub">{t('au.otpS')}<br />{t('au.otpS2')}</p>
               <p className="au-mail">{f.email}</p>
-              <div className="au-otp" role="group" aria-label="Kode verifikasi">
+              <div className="au-otp" role="group" aria-label={t('au.otp')}>
                 {otp.map((d, i) => (
                   <input
                     key={i}
@@ -157,13 +159,13 @@ export default function AuthModal({ open, onClose, onLoggedIn }) {
               </div>
               {view === 'verify' ? msg : null}
               <p className="au-resend-row">
-                Tidak menerima kode?{' '}
-                <button type="button" className="au-resend" onClick={submit('/api/auth/resend-otp', { email: f.email }, () => {})}>Kirim ulang</button>
+                {t('au.noCode')}{' '}
+                <button type="button" className="au-resend" onClick={submit('/api/auth/resend-otp', { email: f.email }, () => {})}>{t('au.resend')}</button>
               </p>
               <button type="button" className="au-btn au-btn-primary" disabled={busy || otp.join('').length < OTP_LENGTH} onClick={submit('/api/auth/verify-email', { email: f.email, otp: otp.join('') }, finish)}>
-                Verifikasi
+                {t('au.verify')}
               </button>
-              <p className="au-switch"><button type="button" className="au-link" onClick={() => go('register')}>Salah email? Kembali</button></p>
+              <p className="au-switch"><button type="button" className="au-link" onClick={() => go('register')}>{t('au.wrong')}</button></p>
             </section>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { PAGE_IDS } from './data/pageConfig.js';
 import useWisata from './lib/useWisata.js';
 import Navbar from './components/Navbar.jsx';
@@ -9,10 +9,13 @@ import Jelajahi from './pages/Jelajahi.jsx';
 import Tentang from './pages/Tentang.jsx';
 import Profil from './pages/Profil.jsx';
 import Loader from './components/Loader.jsx';
+import { loadSaved, placeSnapshot, saveSaved, togglePlace } from './lib/savedPlaces.js';
+import { saveProfile, withProfile } from './lib/profile.js';
 
 export default function App() {
   const [activePage, setActivePage] = useState('beranda'); // 'beranda' | 'tentang' | 'jelajahi' | 'profil'
   const [user, setUser] = useState(null);
+  const [saved, setSaved] = useState({ wishlist: [], visited: [] });
   const [authOpen, setAuthOpen] = useState(false);
   const [query, setQuery] = useState('');   // kata kunci dari pencarian Hero
   const [focus, setFocus] = useState(null); // destinasi dari tombol "Buka di Peta"
@@ -20,6 +23,27 @@ export default function App() {
   const [pageReady, setPageReady] = useState(false);
   const { places, error, loading } = useWisata();
   const pageRef = useRef(activePage);
+
+  useEffect(() => {
+    setSaved(user?.email ? loadSaved(user.email) : { wishlist: [], visited: [] });
+  }, [user?.email]);
+
+  const toggleSaved = useCallback((kind, dest) => {
+    if (!user?.email || (kind !== 'wishlist' && kind !== 'visited')) return;
+    setSaved((current) => {
+      const next = { ...current, [kind]: togglePlace(current[kind], placeSnapshot(dest)) };
+      saveSaved(user.email, next);
+      return next;
+    });
+  }, [user]);
+  const updateUser = useCallback((patch) => {
+    setUser((current) => {
+      if (!current?.email) return current;
+      const next = { ...current, ...patch };
+      saveProfile(current.email, next);
+      return next;
+    });
+  }, []);
   const markPageReady = useCallback(() => setPageReady(true), []);
 
   const beginVisit = useCallback((id) => {
@@ -59,6 +83,8 @@ export default function App() {
     page = (
       <Beranda
         user={user}
+        saved={saved}
+        onToggleSaved={toggleSaved}
         onNeedLogin={() => setAuthOpen(true)}
         onExplore={() => goTo('jelajahi')}
         onReady={markPageReady}
@@ -81,13 +107,22 @@ export default function App() {
       />
     );
   } else if (activePage === 'profil' && user) {
-    page = <Profil user={user} onLogout={handleLogout} onReady={markPageReady} />;
+    page = (
+      <Profil
+        user={user}
+        saved={saved}
+        onToggleSaved={toggleSaved}
+        onLogout={handleLogout}
+        onUpdateUser={updateUser}
+        onReady={markPageReady}
+      />
+    );
   }
 
   return (
     <>
       <Loader key={visit} done={!loading && pageReady} />
-      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} onLoggedIn={(u) => { setUser(u); setAuthOpen(false); }} />
+      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} onLoggedIn={(u) => { setUser(withProfile(u)); setAuthOpen(false); }} />
 
       <Navbar activePage={activePage} onSelect={goTo} user={user} onAuthClick={handleAuthClick} />
 

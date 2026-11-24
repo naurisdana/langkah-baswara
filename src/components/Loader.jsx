@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
+import { useI18n } from '../lib/i18n.jsx';
 
 /** Splash penuh. Bar merayap sampai halaman siap, lalu menghilang. Dipasang ulang tiap pindah halaman. */
 export default function Loader({ done }) {
+  const { t } = useI18n();
   const barRef = useRef(null);
   const [phase, setPhase] = useState('show');
 
@@ -41,12 +43,12 @@ export default function Loader({ done }) {
   if (phase === 'gone') return null;
 
   return (
-    <div className={`lb-screen${phase === 'show' ? ' is-active' : ''}`} role="status" aria-live="polite" aria-label="Memuat Langkah Baswara">
+    <div className={`lb-screen${phase === 'show' ? ' is-active' : ''}`} role="status" aria-live="polite" aria-label={t('load.label')}>
       <div className="lb-deco lb-deco-tl"></div>
       <div className="lb-deco lb-deco-br"></div>
       <div className="lb-loader-box">
         <p className="lb-loader-text">
-          Memuat Langkah Baswara
+          {t('load.text')}
           <span className="lb-dots"><i>.</i><i>.</i><i>.</i></span>
         </p>
         <div ref={barRef} className="lb-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">

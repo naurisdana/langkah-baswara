@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import LottiePlayer from './LottiePlayer.jsx';
+import { useI18n } from '../lib/i18n.jsx';
 
 const loadHow1 = () => import('../assets/animation/howto_bagian1.json');
 const loadHow2 = () => import('../assets/animation/howto_bagian2.json');
@@ -51,6 +52,7 @@ for (let c = 0; c < COPIES; c += 1) {
 const mod = (i) => ((i % N) + N) % N;
 
 export default function FeatureWheel({ captureWheel = false }) {
+  const { t } = useI18n();
   const viewRef = useRef(null);
   const trackRef = useRef(null);
   const apiRef = useRef(null);
@@ -272,11 +274,11 @@ export default function FeatureWheel({ captureWheel = false }) {
       <div className="container">
         <div className="text-center about-reveal">
           <h2 className="about-heading">
-            <span className="highlight-oval-yellow">Fitur</span><br />
-            <strong>Unggulan Kami</strong>
+            <span className="highlight-oval-yellow">{t('ab.fitur')}</span><br />
+            <strong>{t('ab.unggulan')}</strong>
           </h2>
           <p className="about-subheading">
-            Solusi lengkap dan pintar untuk membantu kamu menemukan serta menyusun alur perjalanan wisata terbaik di Pulau Bali.
+            {t('ab.fiturSub')}
           </p>
         </div>
       </div>
@@ -301,8 +303,8 @@ export default function FeatureWheel({ captureWheel = false }) {
                 </div>
                 <div className="afc-copy">
                   <span className="afc-kicker">{String(n).padStart(2, '0')}</span>
-                  <h3 className="afc-title">{f.title}</h3>
-                  <p className="afc-desc">{f.desc}</p>
+                  <h3 className="afc-title">{t(`feat.${n}.t`)}</h3>
+                  <p className="afc-desc">{t(`feat.${n}.d`)}</p>
                 </div>
               </article>
             ))}
@@ -312,7 +314,7 @@ export default function FeatureWheel({ captureWheel = false }) {
           <button
             type="button"
             className="about-wheel-arrow"
-            aria-label="Fitur sebelumnya"
+            aria-label={t('feat.prev')}
             onClick={() => goToDot(active - 1)}
           >
             <i className="bi bi-chevron-left" aria-hidden="true"></i>
@@ -323,7 +325,7 @@ export default function FeatureWheel({ captureWheel = false }) {
                 key={f.title}
                 type="button"
                 className={i === active ? 'active' : ''}
-                aria-label={`Lihat fitur ${f.title}`}
+                aria-label={t('feat.see', { name: t(`feat.${i + 1}.t`) })}
                 aria-current={i === active ? 'true' : undefined}
                 onClick={() => goToDot(i)}
               ></button>
@@ -332,7 +334,7 @@ export default function FeatureWheel({ captureWheel = false }) {
           <button
             type="button"
             className="about-wheel-arrow"
-            aria-label="Fitur berikutnya"
+            aria-label={t('feat.next')}
             onClick={() => goToDot(active + 1)}
           >
             <i className="bi bi-chevron-right" aria-hidden="true"></i>

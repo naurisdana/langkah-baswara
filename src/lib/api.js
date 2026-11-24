@@ -36,13 +36,14 @@ export function messageFrom(body) {
   return typeof m === 'string' ? m : null;
 }
 
-export async function apiRequest(path, { method = 'GET', body } = {}) {
+export async function apiRequest(path, { method = 'GET', body, token } = {}) {
   try {
     const res = await fetch(API_BASE + path, {
       method,
       headers: {
         Accept: 'application/json',
         ...(body ? { 'Content-Type': 'application/json' } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(API_BASE.includes('ngrok') ? { 'ngrok-skip-browser-warning': 'true' } : {}),
       },
       body: body ? JSON.stringify(body) : undefined,

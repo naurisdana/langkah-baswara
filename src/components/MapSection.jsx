@@ -4,6 +4,8 @@ import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { BALI_CENTER, photoSrc } from '../lib/api.js';
+import { useI18n } from '../lib/i18n.jsx';
+import { sentenceCase } from '../lib/text.js';
 import { BALI_MIN_ZOOM, BALI_NE, BALI_SW, categoryGroup, photoForPlace } from '../data/destinations.js';
 
 delete L.Icon.Default.prototype._getIconUrl;
@@ -13,8 +15,6 @@ const BASEMAPS = {
   street: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' }],
   satellite: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }],
 };
-const BASEMAP_LABELS = [['street', 'Jalan'], ['satellite', 'Satelit']];
-
 const PIN_ICON = {
   alam: 'bi-tree-fill',
   budaya: 'bi-bank2',
@@ -39,6 +39,7 @@ function samePlace(a, b) {
 }
 
 function PlacePhoto({ place, score }) {
+  const { t } = useI18n();
   const remote = typeof place.foto === 'string' ? place.foto.trim() : '';
   const files = remote ? [remote, ...(photoForPlace(place) || [])] : (photoForPlace(place) || []);
   const [idx, setIdx] = useState(0);
@@ -49,7 +50,7 @@ function PlacePhoto({ place, score }) {
   return (
     <div className="ex-photo">
       {failed ? (
-        <div className={`ex-photo-ph cat-${cat}`} role="img" aria-label={`Foto ${place.nama} belum tersedia`}>
+        <div className={`ex-photo-ph cat-${cat}`} role="img" aria-label={t('card.photo', { name: place.nama })}>
           <i className={`bi ${icon}`}></i>
         </div>
       ) : (
@@ -98,6 +99,7 @@ export default function MapSection({
   onSelectPlace,
   children,
 }) {
+  const { t } = useI18n();
   const mapEl = useRef(null);
   const mapRef = useRef(null);
   const layerRef = useRef(null);
@@ -314,26 +316,21 @@ export default function MapSection({
         <div className="ex-mapbox">
           <div id="map" ref={mapEl}></div>
 
-          <div className="ex-mapctrl" role="group" aria-label="Kontrol peta">
+          <div className="ex-mapctrl" role="group" aria-label={t('map.ctrl')}>
             <div className="ex-zoom">
-              <button type="button" aria-label="Perbesar" onClick={() => zoom(1)}><i className="bi bi-plus-lg"></i></button>
-              <button type="button" aria-label="Perkecil" onClick={() => zoom(-1)}><i className="bi bi-dash-lg"></i></button>
+              <button type="button" aria-label={t('map.zoomIn')} onClick={() => zoom(1)}><i className="bi bi-plus-lg"></i></button>
+              <button type="button" aria-label={t('map.zoomOut')} onClick={() => zoom(-1)}><i className="bi bi-dash-lg"></i></button>
             </div>
             <div className="map-mode">
-              {BASEMAP_LABELS.map(([id, label]) => (
-                <button key={id} type="button" className={basemap === id ? 'active' : ''} onClick={() => setBasemap(id)}>{label}</button>
+              {[['street', 'map.street'], ['satellite', 'map.sat']].map(([id, key]) => (
+                <button key={id} type="button" className={basemap === id ? 'active' : ''} onClick={() => setBasemap(id)}>{t(key)}</button>
               ))}
             </div>
           </div>
 
           {!origin ? (
-            <div className="ex-hint">Klik peta, atau pakai lokasi saya</div>
+            <div className="ex-hint">{t('map.hint')}</div>
           ) : null}
-
-          <div className="ex-status">
-            <span className="ex-status-dot"></span>
-            <span><b>{shown.length}</b> tempat</span>
-          </div>
 
           {showSide ? (
             <aside className={`ex-side${sideOpen ? '' : ' is-min'}`}>
@@ -344,7 +341,7 @@ export default function MapSection({
                 onClick={() => setSideOpen((open) => !open)}
               >
                 <i className={`bi ${sideOpen ? 'bi-chevron-right' : 'bi-signpost-2'}`}></i>
-                {sideOpen ? 'Sembunyikan' : (routeStops.length ? `Rute · ${routeStops.length}` : 'Detail')}
+                {sideOpen ? t('map.sideHide') : (routeStops.length ? t('map.sideRoute', { n: routeStops.length }) : t('map.sideDetail'))}
               </button>
               {sideOpen ? (
               <>
@@ -352,19 +349,19 @@ export default function MapSection({
                 <div className={`ex-route${routeCompact ? ' is-compact' : ''}`}>
                   <div className="ex-route-head">
                     <div>
-                      <div className="ex-eyebrow">Rute perjalanan</div>
-                      <h3 className="ex-route-title">{routeStops.length} titik terdekat</h3>
+                      <div className="ex-eyebrow">{t('map.route')}</div>
+                      <h3 className="ex-route-title">{t('map.near', { n: routeStops.length })}</h3>
                       <p className="ex-route-meta">
-                        {routeStops.reduce((sum, p) => sum + (Number(p.km) || 0), 0).toFixed(1)} km dari titik acuan
+                        {t('map.from', { km: routeStops.reduce((sum, p) => sum + (Number(p.km) || 0), 0).toFixed(1) })}
                       </p>
                     </div>
-                    <button type="button" className="ex-icon-btn ex-route-close" aria-label="Tutup rute" onClick={onClearRoute}>
+                    <button type="button" className="ex-icon-btn ex-route-close" aria-label={t('map.closeRoute')} onClick={onClearRoute}>
                       <i className="bi bi-x-lg"></i>
                     </button>
                   </div>
                   {routeCompact ? (
                     <button type="button" className="ex-route-expand" onClick={() => setRouteCompact(false)}>
-                      Lihat daftar rute
+                      {t('map.list')}
                     </button>
                   ) : null}
                   <ol className="ex-route-list">
@@ -372,7 +369,7 @@ export default function MapSection({
                       <li key={p.id != null ? p.id : `${p.nama}-${p.lat}`} className={samePlace(selected, p) ? 'is-active' : ''}>
                         <button type="button" className="ex-route-hit" onClick={() => onSelectPlace && onSelectPlace(p)}>
                           <span className="ex-route-num">{i + 1}</span>
-                          <span className="ex-route-name">{p.nama}</span>
+                          <span className="ex-route-name">{sentenceCase(p.nama)}</span>
                           <span className="ex-route-km">{Number(p.km || 0).toFixed(1)} km</span>
                         </button>
                       </li>
@@ -386,24 +383,24 @@ export default function MapSection({
                   <PlacePhoto key={`${selected.id ?? selected.nama}-${selected.foto || selected.lat}`} place={selected} score={score} />
                   <div className="ex-detail-head">
                     <div className="ex-detail-titles">
-                      <div className="ex-eyebrow">Detail wisata</div>
-                      <h3 className="ex-detail-name">{selected.nama}</h3>
+                      <div className="ex-eyebrow">{t('map.detail')}</div>
+                      <h3 className="ex-detail-name">{sentenceCase(selected.nama)}</h3>
                     </div>
-                    <button type="button" className="ex-icon-btn" aria-label="Tutup detail" onClick={() => onSelectPlace && onSelectPlace(null)}>
+                    <button type="button" className="ex-icon-btn" aria-label={t('map.closeDetail')} onClick={() => onSelectPlace && onSelectPlace(null)}>
                       <i className="bi bi-x-lg"></i>
                     </button>
                   </div>
                   <p className="ex-addr">
                     <i className="bi bi-geo-alt"></i>
-                    <span>{selected.lokasi || selected.kabupaten || 'Pulau Bali'}</span>
+                    <span>{sentenceCase(selected.lokasi || selected.kabupaten || 'Pulau Bali')}</span>
                   </p>
                   <div className="ex-tags">
                     {selected.kategori ? <span className="ex-tag">{selected.kategori}</span> : null}
                     {selected.preferensi ? <span className="ex-tag">{selected.preferensi}</span> : null}
                   </div>
-                  <p className="ex-desc">{selected.deskripsi || placeBlurb(selected)}</p>
+                  <p className="ex-desc">{sentenceCase(selected.deskripsi || placeBlurb(selected))}</p>
                   <div className="ex-review">
-                    <div className="ex-eyebrow">Hasil ulasan</div>
+                    <div className="ex-eyebrow">{t('map.reviews')}</div>
                     {score != null ? (
                       <div className="ex-review-score">
                         <span className="ex-stars" aria-hidden="true">
@@ -415,11 +412,11 @@ export default function MapSection({
                         <span>/ 5</span>
                       </div>
                     ) : null}
-                    {selected.detailLoading ? <p>Memuat detail...</p> : null}
+                    {selected.detailLoading ? <p>{t('map.loading')}</p> : null}
                     {!selected.detailLoading && reviewsOf(selected).length ? (
                       reviewsOf(selected).slice(0, 2).map((u, i) => (
                         <p className="ex-review-quote" key={`${u.nama_pengulas || 'ulasan'}-${i}`}>
-                          {u.komentar}
+                          {sentenceCase(u.komentar)}
                           {u.nama_pengulas || u.waktu ? (
                             <span className="ex-review-by">
                               {' '}— {u.nama_pengulas || 'Pengunjung'}{u.waktu ? `, ${u.waktu}` : ''}
@@ -429,11 +426,11 @@ export default function MapSection({
                       ))
                     ) : null}
                     {!selected.detailLoading && score == null && !reviewsOf(selected).length ? (
-                      <p>Belum ada ulasan untuk tempat ini.</p>
+                      <p>{t('map.noReview')}</p>
                     ) : null}
                   </div>
                   {selected.link || selected.link_maps ? (
-                    <a className="ex-open-btn" href={selected.link || selected.link_maps} target="_blank" rel="noreferrer">Lihat lokasi</a>
+                    <a className="ex-open-btn" href={selected.link || selected.link_maps} target="_blank" rel="noreferrer">{t('map.link')}</a>
                   ) : null}
                 </article>
               ) : null}

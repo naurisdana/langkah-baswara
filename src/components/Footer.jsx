@@ -4,43 +4,45 @@
    Navigasi memakai callback onNavigate(id) dari App.jsx (bukan reload).
    ===================================================================== */
 
+import { useI18n } from '../lib/i18n.jsx';
+
 const SOCIAL = [
   { icon: 'bi-instagram', label: 'Instagram', href: '#' },
   { icon: 'bi-tiktok', label: 'TikTok', href: '#' },
   { icon: 'bi-envelope', label: 'Email', href: 'mailto:hello@langkahbaswara.id' },
 ];
 
-const COLUMNS = [
-  {
-    title: 'Eksplorasi',
-    links: [
-      { label: 'Peta Wisata', page: 'jelajahi' },
-      { label: 'Kategori', page: 'jelajahi' },
-      { label: 'Kabupaten', page: 'jelajahi' },
-      { label: 'Rute Perjalanan', page: 'jelajahi' },
-    ],
-  },
-  {
-    title: 'Informasi',
-    links: [
-      { label: 'Tentang Platform', page: 'tentang' },
-      { label: 'Budaya & Etika', page: 'tentang' },
-      { label: 'Kebijakan Privasi' },
-      { label: 'Syarat Layanan' },
-    ],
-  },
-  {
-    title: 'Kontak & Bantuan',
-    links: [
-      { label: 'Pusat Bantuan' },
-      { label: 'Lapor Destinasi' },
-      { label: 'hello@langkahbaswara.id', href: 'mailto:hello@langkahbaswara.id' },
-      { label: 'Instagram', href: '#' },
-    ],
-  },
-];
-
 export default function Footer({ onNavigate }) {
+  const { t } = useI18n();
+  const columns = [
+    {
+      title: t('ft.c1'),
+      links: [
+        { label: t('ft.c1.a'), page: 'jelajahi' },
+        { label: t('ft.c1.b'), page: 'jelajahi' },
+        { label: t('ft.c1.c'), page: 'jelajahi' },
+        { label: t('ft.c1.d'), page: 'jelajahi' },
+      ],
+    },
+    {
+      title: t('ft.c2'),
+      links: [
+        { label: t('ft.c2.a'), page: 'tentang' },
+        { label: t('ft.c2.b'), page: 'tentang' },
+        { label: t('ft.c2.c') },
+        { label: t('ft.c2.d') },
+      ],
+    },
+    {
+      title: t('ft.c3'),
+      links: [
+        { label: t('ft.c3.a') },
+        { label: t('ft.c3.b') },
+        { label: 'hello@langkahbaswara.id', href: 'mailto:hello@langkahbaswara.id' },
+        { label: 'Instagram', href: '#' },
+      ],
+    },
+  ];
   const go = (e, id) => {
     e.preventDefault();
     if (id) onNavigate(id);
@@ -54,11 +56,11 @@ export default function Footer({ onNavigate }) {
       <div className="container ft-inner">
         <div className="ft-cta">
           <div>
-            <h2 className="ft-cta-title">Siap menjelajah Bali?</h2>
-            <p className="ft-cta-desc">Temukan destinasi favoritmu dan susun rute perjalanan terbaik dalam hitungan detik.</p>
+            <h2 className="ft-cta-title">{t('ft.cta.t')}</h2>
+            <p className="ft-cta-desc">{t('ft.cta.d')}</p>
           </div>
           <button type="button" className="ft-cta-btn" onClick={() => onNavigate('jelajahi')}>
-            Jelajahi Sekarang <i className="bi bi-arrow-right"></i>
+            {t('ft.cta.b')} <i className="bi bi-arrow-right"></i>
           </button>
         </div>
 
@@ -71,7 +73,7 @@ export default function Footer({ onNavigate }) {
               <span className="ft-brand-name">Langkah Baswara</span>
             </a>
             <p className="ft-about">
-              Platform eksplorasi destinasi wisata Bali terpadu dengan panduan budaya, keindahan alam, dan peta interaktif untuk merencanakan perjalanan Anda.
+              {t('ft.about')}
             </p>
             <div className="ft-social">
               {SOCIAL.map((s) => (
@@ -82,7 +84,7 @@ export default function Footer({ onNavigate }) {
             </div>
           </div>
 
-          {COLUMNS.map((col) => (
+          {columns.map((col) => (
             <div key={col.title}>
               <h3 className="ft-heading">{col.title}</h3>
               <ul className="ft-links">
@@ -105,9 +107,9 @@ export default function Footer({ onNavigate }) {
         </div>
 
         <div className="ft-bottom">
-          <span>&copy; {new Date().getFullYear()} Langkah Baswara. Seluruh hak cipta dilindungi undang-undang.</span>
+          <span>&copy; {new Date().getFullYear()} Langkah Baswara. {t('ft.copy')}</span>
           <span className="ft-made">
-            Dibuat dengan <i className="bi bi-heart-fill"></i> di Bali
+            {t('ft.made')} <i className="bi bi-heart-fill"></i> {t('ft.made2')}
           </span>
         </div>
       </div>

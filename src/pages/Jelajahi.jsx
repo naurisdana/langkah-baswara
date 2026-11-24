@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import MapSection from '../components/MapSection.jsx';
 import { BALI_CENTER, destinasiJelajahi, detailJelajahi, ruteJelajahi } from '../lib/api.js';
+import { useI18n } from '../lib/i18n.jsx';
 import {
   EXPLORE_CATS,
   categoryGroup,
@@ -84,6 +85,7 @@ function toStops(payload, origin) {
 }
 
 export default function Jelajahi({ query, focus, onReady }) {
+  const { t } = useI18n();
   const [search, setSearch] = useState(query || '');
   const [cats, setCats] = useState([]);
   const [origin, setOrigin] = useState(null);
@@ -107,6 +109,19 @@ export default function Jelajahi({ query, focus, onReady }) {
   const [listError, setListError] = useState(null);
   const [toolsOpen, setToolsOpen] = useState(true);
   const toldReady = useRef(false);
+  const hadRoute = useRef(false);
+
+  useEffect(() => {
+    const hasRoute = routeStops.length > 0;
+    if (hasRoute && !hadRoute.current) setToolsOpen(false);
+    if (!hasRoute && hadRoute.current) setToolsOpen(true);
+    hadRoute.current = hasRoute;
+  }, [routeStops.length]);
+
+  const selectedId = selected?.id ?? selected?.nama ?? null;
+  useEffect(() => {
+    if (selectedId != null && routeStops.length > 0) setToolsOpen(false);
+  }, [selectedId, routeStops.length]);
 
   useEffect(() => {
     setSearch(query || '');
@@ -138,7 +153,7 @@ export default function Jelajahi({ query, focus, onReady }) {
       if (!r.ok) {
         setPlaces([]);
         setTotal(0);
-        setListError(r.message || 'Destinasi tidak dapat dimuat.');
+        setListError(r.message || t('load.list'));
         return;
       }
       const rows = ((r.data && r.data.data) || []).map(toPlace).filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng));
@@ -177,16 +192,14 @@ export default function Jelajahi({ query, focus, onReady }) {
       if (!r.ok) {
         setRouteStops([]);
         setRouteOn(false);
-        setHint(r.message && r.message !== 'Not Found' ? r.message : 'Tidak ada rute untuk titik dan filter ini.');
+        setHint(r.message && r.message !== 'Not Found' ? r.message : 'k:hint.routeNone');
         return;
       }
       const stops = toStops(r.data, origin);
       if (!stops.length) {
         setRouteStops([]);
         setRouteOn(false);
-        setHint(kategori.length
-          ? 'Tidak ada destinasi yang masuk filter ini.'
-          : 'Tidak ada destinasi untuk titik dan jarak ini.');
+        setHint(kategori.length ? 'k:hint.routeFilter' : 'k:hint.routeEmpty');
         return;
       }
       setRouteStops(stops);
@@ -212,11 +225,11 @@ export default function Jelajahi({ query, focus, onReady }) {
   const useGps = () => {
     if (gpsBusy) return;
     if (!navigator.geolocation) {
-      setHint('Browser ini tidak mendukung lokasi. Klik peta untuk memilih titik.');
+      setHint('k:hint.noGps');
       return;
     }
     setGpsBusy(true);
-    setHint('Mencari lokasimu...');
+    setHint('k:hint.finding');
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setGpsBusy(false);
@@ -225,7 +238,7 @@ export default function Jelajahi({ query, focus, onReady }) {
           setLocMode('pin');
           setOrigin(BALI_CENTER);
           setFlyToken((n) => n + 1);
-          setHint('GPS di luar Pulau Bali. Geser pin ke dalam peta.');
+          setHint('k:hint.outside');
           return;
         }
         setOrigin(ll);
@@ -236,7 +249,7 @@ export default function Jelajahi({ query, focus, onReady }) {
       },
       () => {
         setGpsBusy(false);
-        setHint('Lokasi ditolak. Izinkan GPS, atau klik peta untuk memilih titik.');
+        setHint('k:hint.denied');
       },
       { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 },
     );
@@ -249,7 +262,7 @@ export default function Jelajahi({ query, focus, onReady }) {
       return;
     }
     setLocMode('pin');
-    setHint(origin ? '' : 'Klik sekali di peta untuk menaruh titik awal.');
+    setHint(origin ? '' : 'k:hint.pin');
   };
 
   const placeOrigin = (ll, fromDrag) => {
@@ -287,7 +300,7 @@ export default function Jelajahi({ query, focus, onReady }) {
 
   const startRoute = () => {
     if (!origin) {
-      setHint('Pakai lokasi saya, atau klik peta untuk memilih titik.');
+      setHint('k:hint.need');
       setLocMode('pin');
       return;
     }
@@ -298,8 +311,9 @@ export default function Jelajahi({ query, focus, onReady }) {
   };
 
   const radiusLabel = origin
-    ? `${total} tempat dalam ${radiusKm} km`
-    : 'Belum dipilih';
+    ? t('ex.within', { n: total, km: radiusKm })
+    : t('ex.unset');
+  const hintText = hint.startsWith('k:') ? t(hint.slice(2)) : hint;
 
   return (
     <>
@@ -320,32 +334,40 @@ export default function Jelajahi({ query, focus, onReady }) {
         onSelectPlace={openPlace}
       >
         <aside className={`ex-panel${toolsOpen ? '' : ' is-min'}`}>
-          <button
-            type="button"
-            className="ex-dock"
-            aria-expanded={toolsOpen}
-            onClick={() => setToolsOpen((open) => !open)}
-          >
-            <i className={`bi ${toolsOpen ? 'bi-chevron-left' : 'bi-sliders'}`}></i>
-            {toolsOpen ? 'Sembunyikan' : 'Filter & rute'}
-          </button>
+          <div className="ex-panel-tools">
+            <button
+              type="button"
+              className="ex-dock"
+              aria-expanded={toolsOpen}
+              onClick={() => setToolsOpen((open) => !open)}
+            >
+              <i className={`bi ${toolsOpen ? 'bi-chevron-left' : 'bi-sliders'}`}></i>
+              {toolsOpen ? t('ex.hide') : t('ex.tools')}
+            </button>
+            {!toolsOpen ? (
+              <span className="ex-count">
+                <span className="ex-status-dot"></span>
+                <b>{t('ex.count', { n: total })}</b>
+              </span>
+            ) : null}
+          </div>
           {toolsOpen ? (
           <>
           <div className="ex-card">
             <div className="ex-label">
-              <span>Saring destinasi</span>
-              <button type="button" className="ex-reset" onClick={resetFilters}>Reset Filter</button>
+              <span>{t('ex.filter')}</span>
+              <button type="button" className="ex-reset" onClick={resetFilters}>{t('ex.reset')}</button>
             </div>
             <div className="ex-search">
               <i className="bi bi-search ex-search-icon"></i>
               <input
                 type="text"
                 value={search}
-                placeholder="Cari pura, pantai, museum..."
+                placeholder={t('ex.search')}
                 onChange={(e) => setSearch(e.target.value)}
               />
               {search ? (
-                <button type="button" className="ex-clear" aria-label="Hapus pencarian" onClick={() => setSearch('')}>
+                <button type="button" className="ex-clear" aria-label={t('ex.clear')} onClick={() => setSearch('')}>
                   <i className="bi bi-x-lg"></i>
                 </button>
               ) : null}
@@ -359,16 +381,16 @@ export default function Jelajahi({ query, focus, onReady }) {
                   aria-pressed={cats.includes(c.id)}
                   onClick={() => toggleCat(c.id)}
                 >
-                  {c.label} <em>({counts[c.id] || 0})</em>
+                  {t(`ex.cat.${c.id}`)} <em>({counts[c.id] || 0})</em>
                 </button>
               ))}
             </div>
-            {listLoading ? <p className="ex-route-meta">Memuat destinasi...</p> : null}
+            {listLoading ? <p className="ex-route-meta">{t('ex.loading')}</p> : null}
           </div>
 
           <div className="ex-card">
             <div className="ex-label">
-              <span>Titik awal</span>
+              <span>{t('ex.origin')}</span>
               <span className="ex-label-link">{radiusLabel}</span>
             </div>
             <div className="ex-origin-actions">
@@ -379,37 +401,37 @@ export default function Jelajahi({ query, focus, onReady }) {
                 onClick={usePin}
               >
                 <i className="bi bi-crosshair"></i>
-                {locMode === 'pin' && origin ? 'Selesai memilih' : 'Pilih di peta'}
+                {locMode === 'pin' && origin ? t('ex.picked') : t('ex.pick')}
               </button>
               <button type="button" className="ex-gps" onClick={useGps} disabled={gpsBusy}>
                 <i className="bi bi-geo-alt-fill"></i>
-                {gpsBusy ? 'Mencari lokasi...' : 'Pakai lokasi saya'}
+                {gpsBusy ? t('ex.gpsBusy') : t('ex.gps')}
               </button>
             </div>
             <div className="ex-label">
-              <span>Jarak {radiusKm} km</span>
+              <span>{t('ex.radius', { km: radiusKm })}</span>
             </div>
             <input
               className="ex-range"
               type="range"
               min="1"
               max="50"
-              aria-label={`Jarak ${radiusKm} kilometer`}
+              aria-label={t('ex.radius', { km: radiusKm })}
               value={radiusKm}
               onChange={(e) => { setRadiusKm(Number(e.target.value)); setRadiusOn(true); }}
             />
             <div className="ex-range-scale"><span>1 km</span><span>50 km</span></div>
-            <label className="ex-label" htmlFor="stayDays">Lama liburan</label>
+            <label className="ex-label" htmlFor="stayDays">{t('ex.stay')}</label>
             <select id="stayDays" className="form-select ex-select" value={days} onChange={(e) => setDays(Number(e.target.value))}>
               {DAY_OPTIONS.map((d) => (
-                <option key={d} value={d}>{d} hari</option>
+                <option key={d} value={d}>{t(d === 1 ? 'ex.day' : 'ex.days', { n: d })}</option>
               ))}
             </select>
             <button type="button" className="ex-cta" onClick={startRoute} disabled={routeLoading}>
-              {routeLoading ? 'Menyusun rute...' : 'Buat rute'}
+              {routeLoading ? t('ex.making') : t('ex.make')}
               <span className="ex-cta-arrow"><i className="bi bi-arrow-right"></i></span>
             </button>
-            {hint ? <p className="au-msg" role="status" data-type="info">{hint}</p> : null}
+            {hintText ? <p className="au-msg" role="status" data-type="info">{hintText}</p> : null}
           </div>
           </>
           ) : null}
