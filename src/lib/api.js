@@ -57,6 +57,26 @@ export async function apiRequest(path, { method = 'GET', body, token } = {}) {
   }
 }
 
+/** Permintaan multipart, misalnya PATCH /api/auth/profile (name, foto, password). */
+export async function apiForm(path, { method = 'POST', form, token } = {}) {
+  try {
+    const res = await fetch(API_BASE + path, {
+      method,
+      headers: {
+        Accept: 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: form,
+    });
+    let data = null;
+    try { data = await res.json(); } catch { data = null; }
+    return { ok: res.ok, data, message: res.ok ? null : (messageFrom(data) || 'Tidak dapat terhubung ke server.') };
+  } catch (err) {
+    console.error(err);
+    return { ok: false, data: null, message: 'Tidak dapat terhubung ke server.' };
+  }
+}
+
 /** GET /api/beranda/search?q= — hasil kotak cari di Beranda. */
 export function searchBeranda(q) {
   const params = new URLSearchParams({ q: String(q || '').trim() });

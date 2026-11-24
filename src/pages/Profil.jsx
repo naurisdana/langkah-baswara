@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { apiRequest, photoSrc } from '../lib/api.js';
+import { apiForm, photoSrc } from '../lib/api.js';
 import { useI18n } from '../lib/i18n.jsx';
 import { sentenceCase } from '../lib/text.js';
 
@@ -55,7 +55,13 @@ function readPhoto(file) {
       canvas.height = Math.max(1, Math.round(img.height * scale));
       canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
       URL.revokeObjectURL(url);
-      resolve(canvas.toDataURL('image/jpeg', 0.82));
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          reject(new Error('read'));
+          return;
+        }
+        resolve({ dataUrl: canvas.toDataURL('image/jpeg', 0.82), blob });
+      }, 'image/jpeg', 0.82);
     };
     img.onerror = () => {
       URL.revokeObjectURL(url);
@@ -72,6 +78,8 @@ export default function Profil({ user, saved, onToggleSaved, onLogout, onUpdateU
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(user.name || '');
   const [photo, setPhoto] = useState(user.photo || '');
+  const [photoFile, setPhotoFile] = useState(null);
+  const [oldPassword, setOldPassword] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [showPass, setShowPass] = useState(false);
@@ -90,6 +98,8 @@ export default function Profil({ user, saved, onToggleSaved, onLogout, onUpdateU
   const startEdit = () => {
     setName(user.name || '');
     setPhoto(user.photo || '');
+    setPhotoFile(null);
+    setOldPassword('');
     setPassword('');
     setConfirm('');
     setShowPass(false);
@@ -100,6 +110,8 @@ export default function Profil({ user, saved, onToggleSaved, onLogout, onUpdateU
   const cancelEdit = () => {
     setName(user.name || '');
     setPhoto(user.photo || '');
+    setPhotoFile(null);
+    setOldPassword('');
     setPassword('');
     setConfirm('');
     setEditing(false);
@@ -111,7 +123,9 @@ export default function Profil({ user, saved, onToggleSaved, onLogout, onUpdateU
     event.target.value = '';
     if (!file) return;
     try {
-      setPhoto(await readPhoto(file));
+      const shot = await readPhoto(file);
+      setPhoto(shot.dataUrl);
+      setPhotoFile(shot.blob);
       setNote(null);
     } catch {
       setNote({ type: 'error', text: t('pf.photoFail') });
@@ -125,7 +139,11 @@ export default function Profil({ user, saved, onToggleSaved, onLogout, onUpdateU
       setNote({ type: 'error', text: t('pf.needName') });
       return;
     }
-    if (password || confirm) {
+    if (password || confirm || oldPassword) {
+      if (!oldPassword) {
+        setNote({ type: 'error', text: t('pf.passNeedOld') });
+        return;
+      }
       if (password.length < 8) {
         setNote({ type: 'error', text: t('pf.passShort') });
         return;
@@ -134,24 +152,29 @@ export default function Profil({ user, saved, onToggleSaved, onLogout, onUpdateU
         setNote({ type: 'error', text: t('pf.passMismatch') });
         return;
       }
-      const token = localStorage.getItem('lb_token');
-      if (!token) {
-        setNote({ type: 'error', text: t('pf.passNeedLogin') });
-        return;
-      }
-      setBusy(true);
-      const result = await apiRequest('/api/auth/reset-password', {
-        method: 'POST',
-        token,
-        body: { access_token: token, new_password: password },
-      });
-      setBusy(false);
-      if (!result.ok) {
-        setNote({ type: 'error', text: result.message || t('pf.passFail') });
-        return;
-      }
+    }
+    const token = localStorage.getItem('lb_token');
+    if (!token) {
+      setNote({ type: 'error', text: t('pf.needLogin') });
+      return;
+    }
+    const form = new FormData();
+    form.append('name', nextName);
+    if (photoFile) form.append('foto', photoFile, 'profil.jpg');
+    if (password) {
+      form.append('password_lama', oldPassword);
+      form.append('password_baru', password);
+    }
+    setBusy(true);
+    const result = await apiForm('/api/auth/profile', { method: 'PATCH', token, form });
+    setBusy(false);
+    if (!result.ok) {
+      setNote({ type: 'error', text: result.message || t('pf.passFail') });
+      return;
     }
     onUpdateUser?.({ name: nextName, photo });
+    setPhotoFile(null);
+    setOldPassword('');
     setPassword('');
     setConfirm('');
     setEditing(false);
@@ -181,7 +204,7 @@ export default function Profil({ user, saved, onToggleSaved, onLogout, onUpdateU
             <div className="pf-user-name">{editing ? name.trim() || user.name : user.name}</div>
             <div className="pf-user-mail">{user.email}</div>
             {editing && photo ? (
-              <button type="button" className="pf-link" onClick={() => setPhoto('')}>{t('pf.removePhoto')}</button>
+              <button type="button" className="pf-link" onClick={() => { setPhoto(''); setPhotoFile(null); }}>{t('pf.removePhoto')}</button>
             ) : null}
           </div>
         </div>
@@ -190,6 +213,10 @@ export default function Profil({ user, saved, onToggleSaved, onLogout, onUpdateU
             <div className="pf-field">
               <label htmlFor="pfName">{t('pf.username')}</label>
               <input id="pfName" value={name} autoComplete="nickname" onChange={(event) => setName(event.target.value)} />
+            </div>
+            <div className="pf-field">
+              <label htmlFor="pfPassOld">{t('pf.passwordOld')}</label>
+              <input id="pfPassOld" className="pf-pass" type={showPass ? 'text' : 'password'} autoComplete="current-password" value={oldPassword} onChange={(event) => setOldPassword(event.target.value)} />
             </div>
             <div className="pf-field">
               <label htmlFor="pfPass">{t('pf.password')}</label>
