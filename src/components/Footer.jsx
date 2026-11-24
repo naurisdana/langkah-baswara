@@ -7,8 +7,6 @@
 import { useI18n } from '../lib/i18n.jsx';
 
 const SOCIAL = [
-  { icon: 'bi-instagram', label: 'Instagram', href: '#' },
-  { icon: 'bi-tiktok', label: 'TikTok', href: '#' },
   { icon: 'bi-envelope', label: 'Email', href: 'mailto:hello@langkahbaswara.id' },
 ];
 
@@ -31,15 +29,6 @@ export default function Footer({ onNavigate }) {
         { label: t('ft.c2.b'), page: 'tentang' },
         { label: t('ft.c2.c') },
         { label: t('ft.c2.d') },
-      ],
-    },
-    {
-      title: t('ft.c3'),
-      links: [
-        { label: t('ft.c3.a') },
-        { label: t('ft.c3.b') },
-        { label: 'hello@langkahbaswara.id', href: 'mailto:hello@langkahbaswara.id' },
-        { label: 'Instagram', href: '#' },
       ],
     },
   ];

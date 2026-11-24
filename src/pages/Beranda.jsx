@@ -8,33 +8,203 @@ import { CHIPS, photoForPlace } from '../data/destinations.js';
 import { detailJelajahi, populerBeranda, searchBeranda } from '../lib/api.js';
 import { useI18n } from '../lib/i18n.jsx';
 
+const STEP_CARDS = [
+  { tone: 'green', clip: '#2f6a34', pin: -7 },
+  { tone: 'gold', clip: '#f0c14a', pin: 4 },
+  { tone: 'sky', clip: '#7fd4ea', pin: 8 },
+];
+
+const ROPE = { x0: -40, x1: 1040, y0: 16, y1: 320, viewW: 1000, viewH: 210, px: 200 };
+
+function ropeTop(along) {
+  const viewX = along * ROPE.viewW;
+  const t = (viewX - ROPE.x0) / (ROPE.x1 - ROPE.x0);
+  const y = ROPE.y0 + 2 * (ROPE.y1 - ROPE.y0) * t * (1 - t);
+  return (y / ROPE.viewH) * ROPE.px + 14;
+}
+
+function loopShifts(index, pos) {
+  const turn = Math.round((pos - index) / 3);
+  return [turn - 1, turn, turn + 1];
+}
+
 function Steps() {
   const { t } = useI18n();
-  const steps = [1, 2, 3];
+  const railRef = useRef(null);
+  const dragRef = useRef(null);
+  const suppressRef = useRef(false);
+  const frameRef = useRef(0);
+  const posRef = useRef(1);
+  const spreadRef = useRef(0.32);
+  const [pos, setPos] = useState(1);
+  const [dragging, setDragging] = useState(false);
+  const [spread, setSpread] = useState(0.32);
+
+  const place = (value) => {
+    posRef.current = value;
+    setPos(value);
+  };
+
+  const glideTo = (target) => {
+    cancelAnimationFrame(frameRef.current);
+    const from = posRef.current;
+    const distance = target - from;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || Math.abs(distance) < 0.001) {
+      place(target);
+      return;
+    }
+    const duration = Math.min(720, 420 + Math.abs(distance) * 180);
+    const start = performance.now();
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = Math.sin((t * Math.PI) / 2);
+      place(from + distance * eased);
+      if (t < 1) frameRef.current = requestAnimationFrame(tick);
+    };
+    frameRef.current = requestAnimationFrame(tick);
+  };
+
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail) return undefined;
+    const apply = () => {
+      const next = rail.clientWidth < 720 ? 0.4 : 0.32;
+      spreadRef.current = next;
+      setSpread(next);
+    };
+    apply();
+    const observer = new ResizeObserver(apply);
+    observer.observe(rail);
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frameRef.current);
+    };
+  }, []);
+
+  const onPointerDown = (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    cancelAnimationFrame(frameRef.current);
+    dragRef.current = { id: e.pointerId, x: e.clientX, moved: false, origin: posRef.current };
+  };
+
+  const onPointerMove = (e) => {
+    const drag = dragRef.current;
+    if (!drag || e.pointerId !== drag.id) return;
+    const dx = e.clientX - drag.x;
+    if (!drag.moved) {
+      if (Math.abs(dx) < 6) return;
+      drag.moved = true;
+      suppressRef.current = true;
+      setDragging(true);
+      try { railRef.current?.setPointerCapture(e.pointerId); } catch { /* pointer sintetis */ }
+    }
+    const width = railRef.current?.clientWidth || 1;
+    place(drag.origin - dx / (width * spreadRef.current));
+  };
+
+  const endPointer = (e) => {
+    const drag = dragRef.current;
+    if (!drag || e.pointerId !== drag.id) return;
+    const moved = drag.moved;
+    dragRef.current = null;
+    if (railRef.current?.hasPointerCapture?.(e.pointerId)) {
+      try { railRef.current.releasePointerCapture(e.pointerId); } catch { /* sudah lepas */ }
+    }
+    if (!moved) return;
+    setDragging(false);
+    const delta = posRef.current - drag.origin;
+    let target = Math.round(posRef.current);
+    if (Math.abs(delta) > 0.12 && target === Math.round(drag.origin)) {
+      target = Math.round(drag.origin) + Math.sign(delta);
+    }
+    glideTo(target);
+  };
+
+  const onKeyDown = (e) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    e.preventDefault();
+    glideTo(Math.round(posRef.current) + (e.key === 'ArrowRight' ? 1 : -1));
+  };
+
   return (
-    <div className="steps-landing-section">
-      <div className="container">
-        <div className="steps-header text-center mb-5">
-          <h2 className="steps-title">
-            {t('steps.h1')} <span className="highlight-oval-yellow">{t('steps.h2')}</span><br />{t('steps.h3')}
-          </h2>
-        </div>
-        <div className="steps-container position-relative">
-          <div className="steps-connector-line d-none d-md-block"></div>
-          <div className="row g-4 text-center justify-content-center">
-            {steps.map((n) => (
-              <div className="col-md-4" key={n}>
-                <div className="step-item">
-                  <div className="step-circle-badge">{n}</div>
-                  <h3 className="step-item-title">{t(`steps.${n}.t`)}</h3>
-                  <p className="step-item-desc">{t(`steps.${n}.d`)}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+    <section
+      className="steps-landing-section"
+      aria-roledescription="carousel"
+      aria-label={`${t('steps.h1')} ${t('steps.h2')} ${t('steps.h3')}`}
+      onKeyDown={onKeyDown}
+    >
+      <h2 className="steps-title">
+        <span className="steps-title-line">
+          {t('steps.h1')} <span className="highlight-oval-yellow">{t('steps.h2')}</span>
+        </span>
+        <span className="steps-title-line">{t('steps.h3')}</span>
+      </h2>
+      <div
+        className={`steps-rail${dragging ? ' is-dragging' : ''}`}
+        ref={railRef}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endPointer}
+        onPointerCancel={endPointer}
+      >
+        <svg className="steps-rope" viewBox={`0 0 ${ROPE.viewW} ${ROPE.viewH}`} preserveAspectRatio="none" aria-hidden="true">
+          <path d={`M${ROPE.x0} ${ROPE.y0} Q 500 ${ROPE.y1} ${ROPE.x1} ${ROPE.y0}`} fill="none" stroke="#2a241c" strokeWidth="3.5" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+        </svg>
+        {STEP_CARDS.map((card, i) => loopShifts(i, pos).map((turn) => {
+          const d = i + turn * 3 - pos;
+          if (Math.abs(d) > 2.4) return null;
+          const along = 0.5 + d * spread;
+          const y = ropeTop(along);
+          const ad = Math.abs(d);
+          const focus = Math.max(0, 1 - ad);
+          const rot = Math.max(-7, Math.min(7, d * 7));
+          const scale = 1.14 - Math.min(ad, 1) * 0.3;
+          const edge = 0.52 / spread;
+          const fade = ad <= edge ? 1 : Math.max(0, 1 - (ad - edge) / 0.5);
+          const nearest = ((Math.round(pos) % 3) + 3) % 3;
+          const primary = ad <= Math.min(...loopShifts(i, pos).map((shift) => Math.abs(i + shift * 3 - pos)));
+          return (
+            <button
+              key={`${card.tone}-${turn}`}
+              type="button"
+              className={`steps-card is-${card.tone}${ad < 0.35 ? ' is-focus' : ''}`}
+              data-step={i}
+              data-d={d}
+              style={{
+                left: `${along * 100}%`,
+                top: `${y}px`,
+                transform: `translateX(-50%) rotate(${rot}deg) scale(${scale})`,
+                zIndex: Math.round(30 - ad * 12),
+                opacity: fade,
+                '--focus': focus,
+                '--clip': card.clip,
+                '--pin': `${card.pin}deg`,
+              }}
+              tabIndex={primary ? 0 : -1}
+              aria-hidden={primary ? undefined : true}
+              aria-current={primary && i === nearest ? 'true' : undefined}
+              aria-label={t(`steps.${i + 1}.t`)}
+              onClick={(e) => {
+                if (suppressRef.current) {
+                  suppressRef.current = false;
+                  return;
+                }
+                glideTo(posRef.current + Number(e.currentTarget.dataset.d));
+              }}
+            >
+              <span className="steps-clip" aria-hidden="true" />
+              <span className="steps-card-sheet">
+                <span className="steps-card-face">
+                  <span className="steps-num">{String(i + 1).padStart(2, '0')}</span>
+                  <span className="steps-copy">{t(`steps.${i + 1}.d`)}</span>
+                </span>
+              </span>
+            </button>
+          );
+        }))}
       </div>
-    </div>
+    </section>
   );
 }
 
