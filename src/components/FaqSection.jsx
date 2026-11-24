@@ -14,7 +14,7 @@ export default function FaqSection() {
     <div className="container">
       <div className="faq-landing-section">
         <h2 className="faq-section-title text-center mb-4">
-          <span className="highlight-oval-yellow">{t('faq.h1')}</span> {t('faq.h2')}<br />{t('faq.h3')}
+          <span className="highlight-oval-yellow">{t('faq.h1')}</span> {t('faq.h2')}<br /><span className="lb-soft-gap"> </span>{t('faq.h3')}
         </h2>
 
         <div className="faq-accordion-custom mx-auto">

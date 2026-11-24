@@ -69,7 +69,8 @@ function Steps() {
     const rail = railRef.current;
     if (!rail) return undefined;
     const apply = () => {
-      const next = rail.clientWidth < 720 ? 0.4 : 0.32;
+      const width = rail.clientWidth;
+      const next = width < 576 ? 0.58 : width < 720 ? 0.4 : 0.32;
       spreadRef.current = next;
       setSpread(next);
     };
@@ -378,7 +379,7 @@ export default function Beranda({ user, saved, onToggleSaved, onNeedLogin, onExp
         <div className="popular-landing-section">
           <div className="popular-header text-center mb-4">
             <h2 className="popular-section-title mb-3">
-              <span className="highlight-oval-yellow">{t('pop.find')}</span> {t('pop.rest')}<br />{t('pop.rest2')}
+              <span className="highlight-oval-yellow">{t('pop.find')}</span> {t('pop.rest')}<br /><span className="lb-soft-gap"> </span>{t('pop.rest2')}
             </h2>
             <div className="landing-filter-chips d-flex justify-content-center align-items-center gap-2 flex-wrap">
               {CHIPS.map(([id]) => (

@@ -1054,6 +1054,10 @@ footer.site .ft-links a:hover {
   display: inline-block;
 }
 
+.lb-soft-gap {
+  display: none;
+}
+
 /* 1. HERO SECTION (FULL WIDTH)
    Rasio tinggi section mengikuti komposisi animasi (1920×1203).
    Gambar statis tampil dulu, lalu diganti animasi Lottie. */
@@ -1770,6 +1774,7 @@ footer.site .ft-links a:hover {
   font-size: 0.82rem;
   font-weight: 700;
   white-space: nowrap;
+  overflow: hidden;
 }
 
 .landing-card-visit.is-on {
@@ -1970,9 +1975,20 @@ footer.site .ft-links a:hover {
     align-items: center;
     gap: 0.7rem;
   }
+  .navbar-lb .lang-menu {
+    left: 0;
+    right: auto;
+  }
   .navbar-lb .btn-masuk {
-    width: 100%;
+    width: auto;
+    flex: 1 1 auto;
+    min-width: 0;
     justify-content: center;
+  }
+  .navbar-lb .btn-masuk.is-user > span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .about-hero-img {
     margin-top: 1.5rem;
@@ -2087,6 +2103,36 @@ footer.site .ft-links a:hover {
   .popular-section-title br,
   .faq-section-title br {
     display: none;
+  }
+  .lb-soft-gap {
+    display: inline;
+  }
+  .steps-title {
+    font-size: 1.55rem;
+    padding: 0 1rem;
+  }
+  .steps-rail {
+    height: 460px;
+    margin-top: 2.75rem;
+  }
+  .steps-card {
+    width: min(220px, 62vw);
+  }
+  .steps-card-face {
+    min-height: 0;
+    padding: 0.8rem 0.85rem 0.95rem;
+  }
+  .steps-num {
+    font-size: 2rem;
+    margin-bottom: 0.45rem;
+  }
+  .steps-copy {
+    font-size: 0.84rem;
+    line-height: 1.4;
+  }
+  .faq-question {
+    flex: 1;
+    min-width: 0;
   }
   .landing-card-shot {
     height: 210px;
@@ -2788,12 +2834,12 @@ footer.site .ft-links a:hover {
   .about-hero {
     aspect-ratio: auto;
     min-height: 480px;
-    background-position: 66% bottom;
+    background-position: 28% bottom;
   }
   @supports (width: 1cqw) {
-    .about-hero .lb-anim-stage {
-      left: 66%;
-      transform: translateX(-66%);
+    .about-hero .lb-anim:not(.is-contain) .lb-anim-stage {
+      left: 28%;
+      transform: translateX(-28%);
     }
   }
 
@@ -4638,6 +4684,17 @@ body.ex-noscroll {
   --ex-panel-w: clamp(280px, 24vw, 330px);
   height: calc(100dvh - 6.4rem);
   min-height: 520px;
+}
+
+@media (max-width: 991px) {
+  .explore-shell:not(.is-fullscreen) {
+    height: auto;
+    min-height: 0;
+  }
+
+  .explore-shell.has-detail .ex-status {
+    display: none;
+  }
 }
 
 .ex-dock {
@@ -6790,11 +6847,13 @@ body.au-open {
   }
 
   .au-otp {
-    gap: 0.8rem;
+    gap: 0.45rem;
   }
 
   .au-otp-box {
-    width: 52px;
+    flex: 1 1 0;
+    width: auto;
+    max-width: 52px;
     border-radius: 12px;
   }
 }
