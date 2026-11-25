@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { PAGE_IDS } from './data/pageConfig.js';
-import useWisata from './lib/useWisata.js';
 import Navbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx';
 import AuthModal from './components/AuthModal.jsx';
@@ -33,19 +32,23 @@ export default function App() {
   const [focus, setFocus] = useState(null); // destinasi dari tombol "Buka di Peta"
   const [visit, setVisit] = useState(0);
   const [pageReady, setPageReady] = useState(false);
-  const { places, error, loading } = useWisata();
+  const [sessionOk, setSessionOk] = useState(false);
   const pageRef = useRef(activePage);
 
   useEffect(() => {
     const token = localStorage.getItem('lb_token');
-    if (!token) return undefined;
+    if (!token) {
+      setSessionOk(false);
+      return undefined;
+    }
     let alive = true;
     (async () => {
       const r = await authMe(token);
-      if (!alive) return;
+      if (!alive || localStorage.getItem('lb_token') !== token) return;
       if (r.status === 401 || r.status === 403) {
         clearSession();
         setUser(null);
+        setSessionOk(false);
         return;
       }
       if (!r.ok) return;
@@ -54,13 +57,15 @@ export default function App() {
       const merged = withProfile(next);
       saveSession(merged);
       setUser(merged);
+      setSessionOk(true);
     })();
     return () => { alive = false; };
   }, []);
 
   useEffect(() => {
     const email = user?.email;
-    if (!email) {
+    const token = localStorage.getItem('lb_token');
+    if (!email || !token) {
       setSaved(emptySaved());
       return undefined;
     }
@@ -68,9 +73,8 @@ export default function App() {
     let alive = true;
     const local = loadSaved(email);
     setSaved(local);
+    if (!sessionOk) return () => { alive = false; };
     (async () => {
-      const token = localStorage.getItem('lb_token');
-      if (!token) return;
       const [wish, visit] = await Promise.all([
         fetchSavedList('wishlist', token),
         fetchSavedList('visited', token),
@@ -98,12 +102,17 @@ export default function App() {
       setSaved(next);
     })();
     return () => { alive = false; };
-  }, [user?.email]);
+  }, [user?.email, sessionOk]);
 
   const toggleSaved = useCallback((kind, dest) => {
     const email = user?.email;
+    const token = localStorage.getItem('lb_token');
     const id = Number(dest?.id ?? dest?.key);
-    if (!email || (kind !== 'wishlist' && kind !== 'visited') || !Number.isInteger(id)) return;
+    if (!email || !token) {
+      setAuthOpen(true);
+      return;
+    }
+    if ((kind !== 'wishlist' && kind !== 'visited') || !Number.isInteger(id)) return;
     const current = savedRef.current;
     const list = current[kind] || [];
     const on = list.some((item) => item.key === String(id));
@@ -117,8 +126,6 @@ export default function App() {
     setSaved(next);
     savedGen.current += 1;
     const gen = savedGen.current;
-    const token = localStorage.getItem('lb_token');
-    if (!token) return;
     changeSaved(kind, token, id, on).then((r) => {
       if (r.ok || r.status === 409 || (on && r.status === 404)) return;
       if (savedGen.current !== gen) return;
@@ -168,6 +175,7 @@ export default function App() {
     const token = localStorage.getItem('lb_token');
     if (token) authLogout(token);
     clearSession();
+    setSessionOk(false);
     setUser(null);
     beginVisit('beranda');
     window.scrollTo({ top: 0 });
@@ -191,8 +199,6 @@ export default function App() {
   } else if (activePage === 'jelajahi') {
     page = (
       <Jelajahi
-        places={places}
-        error={error}
         query={query}
         focus={focus}
         onReady={markPageReady}
@@ -216,10 +222,11 @@ export default function App() {
 
   return (
     <>
-      <Loader key={visit} done={!loading && pageReady} />
+      <Loader key={visit} done={pageReady} />
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} onLoggedIn={(u) => {
         const next = withProfile(u);
         saveSession(next);
+        setSessionOk(true);
         setUser(next);
         setAuthOpen(false);
       }} />

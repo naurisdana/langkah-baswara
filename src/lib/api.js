@@ -88,28 +88,42 @@ export async function apiForm(path, { method = 'POST', form, token } = {}) {
   }
 }
 
-/** GET /api/auth/me — identitas pemilik token. */
-export function authMe(token) {
-  return apiRequest('/api/auth/me', { token });
+const noAuth = () => Promise.resolve({ ok: false, status: 0, data: null, message: null });
+
+function givenToken(token) {
+  return typeof token === 'string' && token.trim() ? token.trim() : '';
 }
 
-/** POST /api/auth/logout — cabut token di server. */
+/** GET /api/auth/me — identitas pemilik token. Tidak dipanggil tanpa token. */
+export function authMe(token) {
+  const auth = givenToken(token);
+  if (!auth) return noAuth();
+  return apiRequest('/api/auth/me', { token: auth });
+}
+
+/** POST /api/auth/logout — cabut token di server. Tidak dipanggil tanpa token. */
 export function authLogout(token) {
-  return apiRequest('/api/auth/logout', { method: 'POST', token });
+  const auth = givenToken(token);
+  if (!auth) return noAuth();
+  return apiRequest('/api/auth/logout', { method: 'POST', token: auth });
 }
 
 const SAVED_PATH = { wishlist: 'simpan', visited: 'dikunjungi' };
 
-/** GET daftar favorit atau destinasi yang sudah dikunjungi. */
+/** GET daftar favorit atau destinasi yang sudah dikunjungi. Tidak dipanggil tanpa token. */
 export function fetchSavedList(kind, token) {
-  return apiRequest(`/api/beranda/${SAVED_PATH[kind]}`, { token });
+  const auth = givenToken(token);
+  if (!auth) return noAuth();
+  return apiRequest(`/api/beranda/${SAVED_PATH[kind]}`, { token: auth });
 }
 
-/** POST atau DELETE satu wisata di favorit / dikunjungi. */
+/** POST atau DELETE satu wisata di favorit / dikunjungi. Tidak dipanggil tanpa token. */
 export function changeSaved(kind, token, wisataId, remove) {
+  const auth = givenToken(token);
+  if (!auth) return noAuth();
   const base = `/api/beranda/${SAVED_PATH[kind]}`;
-  if (remove) return apiRequest(`${base}/${wisataId}`, { method: 'DELETE', token });
-  return apiRequest(base, { method: 'POST', token, body: { wisata_id: wisataId } });
+  if (remove) return apiRequest(`${base}/${wisataId}`, { method: 'DELETE', token: auth });
+  return apiRequest(base, { method: 'POST', token: auth, body: { wisata_id: wisataId } });
 }
 
 /** GET /api/beranda/search?q= — hasil kotak cari di Beranda. */
@@ -159,7 +173,7 @@ export function ruteJelajahi({ lat, lng, radiusKm = 15, hari, kategori = [] }) {
   });
 }
 
-// Ubah balasan /api/wisata atau GeoJSON menjadi daftar { nama, kategori, lat, lng }
+// Ubah balasan /api/jelajahi/destinasi atau GeoJSON menjadi daftar { nama, kategori, lat, lng }
 export function normalizeWisata(payload) {
   const rows = Array.isArray(payload)
     ? payload

@@ -3870,7 +3870,7 @@ body.ex-noscroll {
     height: auto;
     display: flex;
     flex-direction: column;
-    gap: 0.9rem;
+    gap: 1.15rem;
     overflow: visible;
     background: transparent;
     box-shadow: none;
@@ -7119,4 +7119,149 @@ body:has(#sec-profil:not(.d-none)) footer.site {
 
 .dest-pop-body .btn-card-explore {
   margin-top: 1.05rem;
+}
+
+/* Jelajahi di layar kecil: peta sendiri di atas, kartu di bawah tanpa saling menimpa.
+   Aturan desktop (min-width: 992px) tidak diubah. */
+@media (max-width: 991px) {
+  .explore-shell:not(.is-fullscreen) {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    gap: 1.15rem;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .explore-shell .ex-mapbox {
+    position: relative;
+    inset: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .explore-shell #map {
+    position: relative;
+    inset: auto;
+    flex: 0 0 auto;
+    height: min(42vh, 340px);
+    min-height: 240px;
+    border-radius: 26px;
+    overflow: hidden;
+    box-shadow: 0 16px 40px rgba(69, 129, 50, 0.16);
+  }
+
+  .explore-shell .ex-mapctrl {
+    top: 12px;
+    bottom: auto;
+    left: 12px;
+    right: auto;
+    max-width: calc(100% - 24px);
+  }
+
+  .explore-shell .ex-hint {
+    top: 64px;
+    max-width: min(260px, calc(100% - 2rem));
+    white-space: normal;
+    text-align: center;
+    line-height: 1.35;
+  }
+
+  .explore-shell .ex-panel {
+    position: static;
+    order: 2;
+    width: 100%;
+    max-height: none;
+    overflow: visible;
+    gap: 1.15rem;
+  }
+
+  .explore-shell .ex-panel.is-min {
+    position: absolute;
+    top: 78px;
+    right: auto;
+    bottom: auto;
+    left: 12px;
+    z-index: 1002;
+    width: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .explore-shell .ex-panel .ex-chips {
+    flex-wrap: wrap;
+    overflow: visible;
+    margin-top: 0.55rem;
+  }
+
+  .explore-shell .ex-origin-actions {
+    flex-direction: column;
+  }
+
+  .explore-shell .ex-gps {
+    flex: none;
+    width: 100%;
+    white-space: normal;
+    line-height: 1.25;
+    text-align: center;
+    padding: 0.55rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .explore-shell .ex-side {
+    position: static;
+    order: 2;
+    width: 100%;
+    max-height: none;
+    overflow: visible;
+    inset: auto;
+  }
+
+  .explore-shell .ex-side.is-min {
+    position: absolute;
+    top: 78px;
+    right: 12px;
+    bottom: auto;
+    left: auto;
+    z-index: 1002;
+    width: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .explore-shell:has(.ex-panel.is-min) .ex-hint,
+  .explore-shell:has(.ex-side.is-min) .ex-hint {
+    top: 128px;
+  }
+
+  .explore-shell:has(.ex-side:not(.is-min)) .ex-panel {
+    display: flex;
+  }
+
+  .explore-shell.has-detail .ex-side,
+  .explore-shell.has-detail .ex-side .ex-detail {
+    overflow: visible;
+    max-height: none;
+  }
+
+  .explore-shell.has-detail .ex-side .ex-detail {
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 575px) {
+  .ex-side .ex-detail .ex-photo {
+    height: 132px;
+    min-height: 132px;
+  }
 }

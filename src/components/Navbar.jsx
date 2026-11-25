@@ -123,7 +123,7 @@ export default function Navbar({ activePage, onSelect, user, onAuthClick }) {
                 </ul>
               ) : null}
             </div>
-            <button className={`btn btn-masuk${user ? ' is-user' : ''}`} type="button" id="navAuthBtn" onClick={onAuthClick}>
+            <button className={`btn btn-masuk${user ? ' is-user' : ''}`} type="button" id="navAuthBtn" onClick={() => { setMenuOpen(false); onAuthClick(); }}>
               {user ? (
                 <>
                   <span className={`nav-avatar${user.photo ? ' has-photo' : ''}`} style={user.photo ? { backgroundImage: `url("${user.photo}")` } : undefined}>{user.photo ? null : first.charAt(0).toUpperCase()}</span>

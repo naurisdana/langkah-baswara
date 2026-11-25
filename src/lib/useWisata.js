@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { apiRequest, normalizeWisata, GEOJSON_URL } from './api.js';
 
-/** Muat data wisata sekali: backend dulu, kalau kosong/gagal pakai public/data/wisata-bali.geojson */
+/** Cadangan daftar peta. Route backend-nya GET /api/jelajahi/destinasi, bukan /api/wisata. */
 export default function useWisata() {
   const [places, setPlaces] = useState([]);
   const [error, setError] = useState(null);
@@ -14,7 +14,7 @@ export default function useWisata() {
       let apiMsg = null;
       try {
         const r = await Promise.race([
-          apiRequest('/api/wisata'),
+          apiRequest('/api/jelajahi/destinasi'),
           new Promise((_, reject) => { setTimeout(() => reject(new Error('timeout')), 8000); }),
         ]);
         if (r.ok) list = normalizeWisata(r.data);

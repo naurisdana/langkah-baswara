@@ -11,30 +11,30 @@ const FEATURES = [
   {
     title: 'Tentukan Titik Awal',
     desc: 'Pakai lokasi kamu atau pilih titik di peta, lalu terapkan untuk melihat destinasi di sekitarmu.',
-    load: loadHow4,
-    w: 533,
-    h: 520,
-  },
-  {
-    title: 'Peta Interaktif',
-    desc: 'Geser peta, ganti tampilan satelit, dan temukan tempat wisata langsung di Pulau Bali.',
     load: loadHow1,
     w: 554,
     h: 420,
   },
   {
-    title: 'Simpan ke Wishlist',
-    desc: 'Tandai dan simpan tempat wisata favoritmu agar mudah dilihat kembali saat menyusun rencana liburan.',
+    title: 'Peta Interaktif',
+    desc: 'Geser peta, ganti tampilan satelit, dan temukan tempat wisata langsung di Pulau Bali.',
     load: loadHow2,
     w: 510,
     h: 349,
   },
   {
-    title: 'Cari & Lihat Detail',
-    desc: 'Cari destinasi, buka kartunya, dan lihat lokasi serta informasi tempat yang ingin kamu kunjungi.',
+    title: 'Simpan ke Wishlist',
+    desc: 'Tandai dan simpan tempat wisata favoritmu agar mudah dilihat kembali saat menyusun rencana liburan.',
     load: loadHow3,
     w: 694,
     h: 499,
+  },
+  {
+    title: 'Cari & Lihat Detail',
+    desc: 'Cari destinasi, buka kartunya, dan lihat lokasi serta informasi tempat yang ingin kamu kunjungi.',
+    load: loadHow4,
+    w: 533,
+    h: 520,
   },
 ];
 
