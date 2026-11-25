@@ -36,45 +36,80 @@ export function messageFrom(body) {
   return typeof m === 'string' ? m : null;
 }
 
+function bearer(token) {
+  if (typeof token === 'string' && token) return token;
+  try {
+    return localStorage.getItem('lb_token') || '';
+  } catch {
+    return '';
+  }
+}
+
 export async function apiRequest(path, { method = 'GET', body, token } = {}) {
+  const auth = bearer(token);
   try {
     const res = await fetch(API_BASE + path, {
       method,
       headers: {
         Accept: 'application/json',
         ...(body ? { 'Content-Type': 'application/json' } : {}),
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(auth ? { Authorization: `Bearer ${auth}` } : {}),
         ...(API_BASE.includes('ngrok') ? { 'ngrok-skip-browser-warning': 'true' } : {}),
       },
       body: body ? JSON.stringify(body) : undefined,
     });
     let data = null;
     try { data = await res.json(); } catch (e) { data = null; }
-    return { ok: res.ok, data, message: res.ok ? null : (messageFrom(data) || 'Tidak dapat terhubung ke server.') };
+    return { ok: res.ok, status: res.status, data, message: res.ok ? null : (messageFrom(data) || 'Tidak dapat terhubung ke server.') };
   } catch (err) {
     console.error(err);
-    return { ok: false, data: null, message: 'Tidak dapat terhubung ke server.' };
+    return { ok: false, status: 0, data: null, message: 'Tidak dapat terhubung ke server.' };
   }
 }
 
 /** Permintaan multipart, misalnya PATCH /api/auth/profile (name, foto, password). */
 export async function apiForm(path, { method = 'POST', form, token } = {}) {
+  const auth = bearer(token);
   try {
     const res = await fetch(API_BASE + path, {
       method,
       headers: {
         Accept: 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(auth ? { Authorization: `Bearer ${auth}` } : {}),
       },
       body: form,
     });
     let data = null;
     try { data = await res.json(); } catch { data = null; }
-    return { ok: res.ok, data, message: res.ok ? null : (messageFrom(data) || 'Tidak dapat terhubung ke server.') };
+    return { ok: res.ok, status: res.status, data, message: res.ok ? null : (messageFrom(data) || 'Tidak dapat terhubung ke server.') };
   } catch (err) {
     console.error(err);
-    return { ok: false, data: null, message: 'Tidak dapat terhubung ke server.' };
+    return { ok: false, status: 0, data: null, message: 'Tidak dapat terhubung ke server.' };
   }
+}
+
+/** GET /api/auth/me — identitas pemilik token. */
+export function authMe(token) {
+  return apiRequest('/api/auth/me', { token });
+}
+
+/** POST /api/auth/logout — cabut token di server. */
+export function authLogout(token) {
+  return apiRequest('/api/auth/logout', { method: 'POST', token });
+}
+
+const SAVED_PATH = { wishlist: 'simpan', visited: 'dikunjungi' };
+
+/** GET daftar favorit atau destinasi yang sudah dikunjungi. */
+export function fetchSavedList(kind, token) {
+  return apiRequest(`/api/beranda/${SAVED_PATH[kind]}`, { token });
+}
+
+/** POST atau DELETE satu wisata di favorit / dikunjungi. */
+export function changeSaved(kind, token, wisataId, remove) {
+  const base = `/api/beranda/${SAVED_PATH[kind]}`;
+  if (remove) return apiRequest(`${base}/${wisataId}`, { method: 'DELETE', token });
+  return apiRequest(base, { method: 'POST', token, body: { wisata_id: wisataId } });
 }
 
 /** GET /api/beranda/search?q= — hasil kotak cari di Beranda. */
